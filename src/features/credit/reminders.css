@@ -1,0 +1,60 @@
+.reminder-summary {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px;
+  background: var(--soft);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  margin-bottom: 16px;
+}
+.reminder-summary > div {
+  display: grid;
+  gap: 6px;
+}
+.reminder-summary small {
+  color: var(--secondary);
+  font-size: 12px;
+}
+.reminder-message {
+  min-height: 300px;
+  line-height: 1.7;
+  font-size: 13px;
+  resize: vertical;
+}
+.reminder-actions {
+  flex-wrap: wrap;
+}
+.reminder-choice {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px;
+  display: grid;
+  gap: 8px;
+  text-align: left;
+  background: var(--surface);
+  margin-bottom: 8px;
+  cursor: pointer;
+  color: var(--text);
+}
+.reminder-choice:hover {
+  border-color: var(--gold);
+}
+.reminder-choice span {
+  font-size: 13px;
+  color: var(--secondary);
+}
+@media (max-width: 600px) {
+  .reminder-summary {
+    padding: 12px;
+    flex-wrap: wrap;
+  }
+  .reminder-message {
+    min-height: 260px;
+  }
+  .reminder-actions > .button {
+    flex: 1;
+    min-width: 130px;
+  }
+}

@@ -1,0 +1,49 @@
+/* Searchable controls normally fill forms. The catalogue toolbar owns their
+   compact width without changing editors or other management filters. */
+.products-toolbar {
+  gap: 8px;
+  align-items: center;
+}
+.products-toolbar > .management-search {
+  flex: 1 1 200px;
+  min-width: 200px;
+}
+.products-toolbar > .searchable-combobox {
+  flex: 0 1 140px;
+  width: 140px;
+  min-width: 128px;
+}
+.products-toolbar > .app-select {
+  flex: 0 1 140px;
+  min-width: 128px;
+}
+.products-toolbar .searchable-combobox-field > .input,
+.products-toolbar > .app-select > .input {
+  width: 100%;
+  min-width: 0;
+  max-width: none;
+}
+.products-toolbar > .button {
+  flex: 0 0 auto;
+}
+@media (max-width: 600px) {
+  .products-toolbar {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: stretch;
+  }
+  .products-toolbar > .management-search,
+  .products-toolbar > .app-select {
+    grid-column: 1 / -1;
+  }
+  .products-toolbar > .management-search,
+  .products-toolbar > .searchable-combobox,
+  .products-toolbar > .app-select {
+    width: 100%;
+    min-width: 0;
+  }
+  .products-toolbar .input,
+  .products-toolbar > .button {
+    min-height: 44px;
+  }
+}

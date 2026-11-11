@@ -1,0 +1,4 @@
+import {defineConfig} from '@playwright/test';
+export default defineConfig({globalSetup:'./tests/fixtures/local-suite-setup.ts',metadata:{authFixture:'api'},testDir:'./tests',testMatch:'cash-reconciliation.spec.ts',workers:1,timeout:90000,expect:{timeout:20000},reporter:'list',outputDir:'.test-postgres/phase5c1-20261015/reconciliation-browser-results',
+ use:{baseURL:'http://127.0.0.1:1438',viewport:{width:1366,height:768},trace:'retain-on-failure',screenshot:'only-on-failure'},
+ webServer:{command:'node node_modules/vite/bin/vite.js --host 127.0.0.1 --port 1438 --strictPort',url:'http://127.0.0.1:1438',reuseExistingServer:false,timeout:120000,env:{VITE_DATA_PROVIDER:'api',VITE_USE_MOCK_AUTH:'false',VITE_BUNDLED_MOBILE:'false',VITE_API_BASE_URL:'/api/v1',TAHA_DEV_API_TARGET:'http://127.0.0.1:39999',TAHA_TEST_NO_HMR:'1'}}});

@@ -1,0 +1,12 @@
+PRAGMA journal_mode=WAL;
+PRAGMA foreign_keys=ON;
+PRAGMA synchronous=FULL;
+CREATE TABLE IF NOT EXISTS cache(scope TEXT NOT NULL, name TEXT NOT NULL, value TEXT NOT NULL CHECK(json_valid(value)), updated_at INTEGER NOT NULL, PRIMARY KEY(scope,name));
+CREATE TABLE IF NOT EXISTS receipts(id TEXT PRIMARY KEY, scope TEXT NOT NULL, invoice TEXT NOT NULL UNIQUE, value TEXT NOT NULL CHECK(json_valid(value)), created_at INTEGER NOT NULL);
+CREATE TABLE IF NOT EXISTS outbox(id TEXT PRIMARY KEY, scope TEXT NOT NULL, type TEXT NOT NULL CHECK(type IN ('CASH_SALE','IMAGE_UPLOAD')), payload TEXT NOT NULL CHECK(json_valid(payload)), idempotency_key TEXT NOT NULL UNIQUE, created_at INTEGER NOT NULL, attempt_count INTEGER NOT NULL DEFAULT 0, last_attempt INTEGER, next_attempt INTEGER NOT NULL DEFAULT 0, status TEXT NOT NULL DEFAULT 'PENDING' CHECK(status IN ('PENDING','SYNCING','SYNCED','CONFLICT','FAILED')), error TEXT);
+CREATE INDEX IF NOT EXISTS outbox_due ON outbox(scope,status,next_attempt,created_at);
+CREATE TABLE IF NOT EXISTS reservations(scope TEXT NOT NULL, product_id TEXT NOT NULL, outbox_id TEXT NOT NULL REFERENCES outbox(id), quantity INTEGER NOT NULL CHECK(quantity>0), PRIMARY KEY(scope,product_id,outbox_id));
+CREATE TABLE IF NOT EXISTS drafts(scope TEXT PRIMARY KEY, value TEXT NOT NULL CHECK(json_valid(value)), updated_at INTEGER NOT NULL);
+CREATE TABLE IF NOT EXISTS metadata(key TEXT PRIMARY KEY, value TEXT NOT NULL);
+CREATE TABLE IF NOT EXISTS pending_images(id TEXT PRIMARY KEY,scope TEXT NOT NULL,path TEXT NOT NULL,size INTEGER NOT NULL CHECK(size>0),cloud_path TEXT,created_at INTEGER NOT NULL);
+PRAGMA user_version=1;

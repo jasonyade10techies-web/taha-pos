@@ -1,0 +1,223 @@
+.searchable-combobox {
+  position: relative;
+  min-width: 0;
+  width: 100%;
+}
+.searchable-combobox-field {
+  position: relative;
+}
+.searchable-combobox-field > .input {
+  width: 100%;
+  padding-right: 58px;
+}
+.searchable-clear,
+.searchable-chevron {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 28px;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+}
+.searchable-clear {
+  right: 28px;
+}
+.searchable-chevron {
+  right: 3px;
+}
+.searchable-popup {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface, #fff);
+  box-shadow: 0 14px 38px #0002;
+  overflow: auto;
+  padding: 6px;
+  animation: selector-enter 0.12s ease-out;
+}
+.searchable-popup > p,
+.searchable-popup [role="status"],
+.searchable-popup [role="alert"] {
+  padding: 10px;
+  color: var(--text-muted, var(--muted));
+}
+.searchable-option,
+.searchable-create {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 9px 10px;
+  text-align: left;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+}
+.searchable-option > span {
+  flex: 1;
+  min-width: 0;
+}
+.searchable-option strong {
+  font-weight: 600;
+  display: block;
+}
+.searchable-option small {
+  font-size: 11px;
+  color: var(--text-muted, var(--muted));
+  display: block;
+}
+.searchable-option.active,
+.searchable-option:hover,
+.searchable-create:hover {
+  background: var(--raised);
+}
+.searchable-option[aria-selected="true"] {
+  background: var(--gold-soft);
+}
+.searchable-option:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.searchable-create {
+  border-top: 1px solid var(--border);
+  color: var(--red);
+  font-weight: 700;
+}
+.searchable-popup button:focus-visible,
+.custom-date-picker button:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+.custom-date-picker {
+  min-width: 0;
+}
+.date-picker-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+  width: 100%;
+  font-weight: 500;
+}
+.date-format-guidance {
+  font-size: 10px;
+  color: var(--text-muted, var(--muted));
+  display: block;
+  margin-top: 3px;
+}
+.calendar-dialog {
+  max-width: 390px !important;
+}
+.calendar-heading {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.calendar-heading > .app-select {
+  flex: 1;
+  min-width: 100px;
+}
+.calendar-heading > .button {
+  padding: 7px;
+}
+.calendar-year {
+  width: 76px !important;
+  min-width: 0;
+}
+.calendar-month-label {
+  font-size: 13px;
+  text-align: center;
+  margin: 10px 0;
+}
+.calendar-grid {
+  display: grid;
+  gap: 3px;
+}
+.calendar-week {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 3px;
+}
+.calendar-week > [role="columnheader"] {
+  font-size: 11px;
+  color: var(--muted);
+  text-align: center;
+  padding: 5px 0;
+}
+.calendar-week [role="gridcell"] > button {
+  width: 100%;
+  aspect-ratio: 1;
+  border: 0;
+  background: transparent;
+  border-radius: 8px;
+  color: var(--text);
+  cursor: pointer;
+}
+.calendar-week button:hover {
+  background: var(--raised);
+}
+.calendar-week button.selected {
+  background: var(--red);
+  color: white;
+}
+.calendar-week button[aria-current="date"] {
+  box-shadow: inset 0 0 0 1px var(--focus-ring);
+}
+.calendar-week button[aria-disabled="true"] {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+.calendar-actions {
+  display: flex;
+  gap: 7px;
+  justify-content: flex-end;
+  margin-top: 14px;
+}
+@keyframes selector-enter {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .searchable-popup {
+    animation: none;
+  }
+}
+@media (max-width: 600px) {
+  .searchable-option,
+  .searchable-create {
+    min-height: 44px;
+  }
+  .calendar-week [role="gridcell"] > button {
+    min-height: 39px;
+  }
+}
+.searchable-popup.closing {
+  animation: selector-exit 0.11s ease-in forwards;
+}
+.calendar-dialog[data-state="closed"] {
+  animation: selector-exit 0.11s ease-in forwards;
+}
+@keyframes selector-exit {
+  to {
+    opacity: 0;
+    transform: translateY(-3px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .searchable-popup.closing,
+  .calendar-dialog[data-state="closed"] {
+    animation: none;
+  }
+}

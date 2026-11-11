@@ -1,0 +1,450 @@
+.customer-account-workspace {
+  display: grid;
+  grid-template-columns: minmax(280px, 3fr) minmax(0, 7fr);
+  gap: 20px;
+  align-items: start;
+}
+.customer-account-sidebar {
+  display: grid;
+  gap: 16px;
+  min-width: 0;
+}
+.customer-account-card {
+  padding: 18px;
+  min-width: 0;
+}
+.customer-account-card h2,
+.customer-history-heading h2 {
+  font-size: 16px;
+  margin: 0 0 12px;
+  font-weight: 800;
+}
+.customer-account-card h3 {
+  font-size: 13px;
+  margin: 16px 0 8px;
+}
+.customer-contact-heading {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.customer-contact-heading h2 {
+  margin: 0 0 3px;
+  overflow-wrap: anywhere;
+}
+.customer-avatar {
+  height: 44px;
+  width: 44px;
+  border-radius: 12px;
+  object-fit: cover;
+  flex: none;
+}
+.customer-avatar-initial {
+  display: grid;
+  place-items: center;
+  background: var(--soft);
+  color: var(--text);
+  font-size: 22px;
+  font-weight: 800;
+}
+.customer-contact-list,
+.customer-credit-breakdown {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+}
+.customer-contact-list div,
+.customer-credit-breakdown div {
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+  font-size: 13px;
+}
+.customer-contact-list dt,
+.customer-credit-breakdown dt {
+  color: var(--secondary);
+}
+.customer-contact-list dd,
+.customer-credit-breakdown dd {
+  margin: 0;
+  text-align: right;
+  overflow-wrap: anywhere;
+  min-width: 0;
+}
+.customer-contact-list dt {
+  flex: none;
+}
+.customer-profile-more {
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+.customer-profile-more summary,
+.activity-note-disclosure summary {
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 700;
+}
+.customer-profile-more[open] summary {
+  margin-bottom: 12px;
+}
+.customer-outstanding {
+  display: grid;
+  gap: 4px;
+  padding: 14px;
+  border-radius: 10px;
+  background: var(--soft);
+  margin-bottom: 14px;
+}
+.customer-outstanding span {
+  font-size: 12px;
+  color: var(--secondary);
+}
+.customer-outstanding strong {
+  font-size: 26px;
+  line-height: 1.4;
+  color: var(--text);
+}
+.customer-next-due {
+  display: grid;
+  gap: 5px;
+  margin-bottom: 18px;
+  font-size: 13px;
+}
+.customer-next-due > span {
+  color: var(--secondary);
+}
+.customer-next-due strong {
+  line-height: 1.5;
+}
+.customer-balance-card .summary-line {
+  align-items: start;
+  gap: 8px;
+  font-size: 13px;
+}
+.customer-balance-card .summary-line small {
+  display: block;
+  color: var(--secondary);
+  font-size: 10px;
+}
+.customer-credit-breakdown {
+  font-size: 12px;
+  margin: 12px 0;
+}
+.customer-credit-breakdown div {
+  font-size: 12px;
+}
+.customer-obligation {
+  display: grid;
+  gap: 6px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+.customer-obligation:last-child {
+  border-bottom: 0;
+}
+.customer-obligation > strong {
+  font-size: 13px;
+}
+.customer-obligation small {
+  color: var(--secondary);
+}
+.customer-reminder {
+  display: grid;
+  gap: 10px;
+}
+.customer-reminder h2 {
+  margin: 0;
+}
+.customer-reminder > p {
+  font-size: 12px;
+  margin: 0;
+}
+.customer-reminder textarea {
+  font-size: 12px;
+  line-height: 1.6;
+  resize: vertical;
+  min-height: 180px;
+}
+.customer-card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.customer-history-panel {
+  padding: 20px;
+  min-width: 0;
+}
+.customer-history-heading {
+  display: flex;
+  gap: 14px;
+  align-items: start;
+  justify-content: space-between;
+  margin-bottom: 18px;
+}
+.customer-history-heading h2 {
+  margin-bottom: 4px;
+}
+.customer-history-heading p {
+  font-size: 12px;
+  color: var(--secondary);
+  margin: 0;
+}
+.customer-history-panel > .tabs {
+  margin-bottom: 0;
+}
+.activity-filters {
+  display: flex;
+  align-items: end;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin: 16px 0;
+}
+.activity-filters > .form-field {
+  min-width: 125px;
+  flex: 1;
+}
+.activity-filters > .form-field:first-child {
+  flex: 1.7;
+  min-width: 180px;
+}
+.activity-filters .input {
+  font-size: 12px;
+}
+.activity-timeline {
+  list-style: none;
+  padding: 0;
+  margin: 16px 0;
+}
+.activity-timeline > li {
+  margin: 0 0 10px;
+}
+.activity-entry {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr);
+  gap: 12px;
+  padding: 14px;
+  text-align: left;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text);
+  cursor: pointer;
+  transition:
+    background 0.15s,
+    border-color 0.15s;
+}
+.activity-entry:hover {
+  background: var(--soft);
+  border-color: var(--secondary);
+}
+.activity-entry:focus-visible {
+  outline: 2px solid var(--primary, #d93036);
+  outline-offset: 3px;
+}
+.activity-icon {
+  height: 34px;
+  width: 34px;
+  display: grid;
+  place-items: center;
+  background: var(--soft);
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  color: var(--secondary);
+}
+.activity-icon.category-notes {
+  color: var(--text);
+}
+.activity-entry-body {
+  min-width: 0;
+}
+.activity-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  gap: 8px;
+  flex-wrap: wrap;
+  font-size: 13px;
+}
+.activity-heading small {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--secondary);
+}
+.activity-description {
+  display: block;
+  font-size: 12px;
+  line-height: 1.6;
+  margin: 6px 0;
+  overflow-wrap: anywhere;
+}
+.activity-metadata {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 12px;
+  font-size: 10px;
+  color: var(--secondary);
+}
+.activity-metadata time {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.activity-pagination {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-top: 12px;
+}
+.activity-pagination small {
+  margin-right: auto;
+  color: var(--secondary);
+}
+.activity-note-disclosure {
+  margin-top: 18px;
+  border-top: 1px solid var(--border);
+  padding-top: 14px;
+}
+.activity-note {
+  padding-top: 12px;
+  display: grid;
+  gap: 10px;
+}
+.activity-note textarea {
+  min-height: 90px;
+}
+.activity-note button {
+  justify-self: end;
+}
+.customer-ledger-help {
+  font-size: 12px;
+  color: var(--secondary);
+  line-height: 1.6;
+  margin: 14px 0;
+}
+.customer-ledger-kind {
+  display: block;
+  color: var(--secondary);
+  font-size: 10px;
+  margin-top: 4px;
+}
+.customer-history-dialog {
+  max-width: 900px;
+}
+.customer-history-dialog h3 {
+  font-size: 14px;
+  font-weight: 800;
+  margin: 20px 0 10px;
+}
+.customer-event-description {
+  white-space: pre-wrap;
+  font-size: 14px;
+  line-height: 1.7;
+  margin: 16px 0;
+}
+.customer-detail-facts {
+  display: flex;
+  gap: 18px;
+  flex-wrap: wrap;
+  margin: 16px 0;
+}
+.customer-detail-facts div {
+  display: grid;
+  gap: 4px;
+  font-size: 13px;
+}
+.customer-detail-facts span {
+  color: var(--secondary);
+  text-transform: capitalize;
+}
+.text-danger {
+  color: var(--danger, #c62828);
+}
+@media (max-width: 1100px) {
+  .customer-account-workspace {
+    grid-template-columns: minmax(260px, 3fr) minmax(0, 7fr);
+    gap: 14px;
+  }
+  .customer-account-card,
+  .customer-history-panel {
+    padding: 14px;
+  }
+  .customer-history-heading {
+    flex-wrap: wrap;
+  }
+  .activity-entry {
+    padding: 11px;
+    gap: 8px;
+  }
+  .customer-contact-list div {
+    display: grid;
+    gap: 4px;
+  }
+  .customer-contact-list dd {
+    text-align: left;
+  }
+}
+@media (max-width: 850px) {
+  .customer-account-workspace {
+    grid-template-columns: 1fr;
+  }
+  .customer-account-sidebar {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+  }
+  .customer-history-panel {
+    grid-column: 1/-1;
+  }
+  .customer-contact-list div {
+    display: flex;
+  }
+  .customer-contact-list dd {
+    text-align: right;
+  }
+}
+@media (max-width: 550px) {
+  .customer-account-sidebar {
+    grid-template-columns: 1fr;
+  }
+  .customer-history-heading {
+    display: grid;
+  }
+  .activity-filters {
+    gap: 8px;
+  }
+  .activity-filters > .form-field {
+    min-width: 120px;
+  }
+  .activity-filters > .form-field:first-child {
+    flex-basis: 100%;
+  }
+  .activity-entry {
+    grid-template-columns: 28px minmax(0, 1fr);
+  }
+  .activity-icon {
+    width: 28px;
+    height: 30px;
+  }
+  .activity-heading {
+    display: grid;
+    gap: 5px;
+  }
+  .customer-history-panel {
+    padding: 12px;
+  }
+  .activity-metadata {
+    font-size: 10px;
+  }
+  .activity-pagination {
+    flex-wrap: wrap;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .activity-entry {
+    transition: none;
+  }
+}

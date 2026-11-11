@@ -1,0 +1,49 @@
+.date-time-input {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+.date-time-input > .button {
+  width: 100%;
+  justify-content: flex-start;
+  padding-right: 32px;
+  min-height: 44px;
+  text-align: left;
+}
+.date-time-input > .button > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.date-time-clear {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: grid;
+  place-items: center;
+  padding: 4px;
+  border: 0;
+  background: var(--surface);
+  color: var(--secondary);
+  border-radius: 4px;
+  cursor: pointer;
+}
+.shop-time-select {
+  display: flex;
+  align-items: end;
+  gap: 12px;
+  margin: 16px 0;
+}
+.shop-time-select label {
+  display: grid;
+  gap: 8px;
+  flex: 1;
+  font-size: 13px;
+  font-weight: 600;
+}
+.shop-time-select > span {
+  padding-bottom: 12px;
+  font-weight: 700;
+}

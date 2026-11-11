@@ -1,0 +1,13 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": null,
+  "buildCommand": "npm run build",
+  "functions": {
+    "api/index.js": { "maxDuration": 60, "includeFiles": "dist/**" }
+  },
+  "rewrites": [{ "source": "/(.*)", "destination": "/api/index" }],
+  "headers": [{ "source": "/(.*)", "headers": [
+    { "key": "Cache-Control", "value": "private, no-store, max-age=0" },
+    { "key": "X-Robots-Tag", "value": "noindex, nofollow, noarchive" }
+  ] }]
+}

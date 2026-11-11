@@ -1,0 +1,2 @@
+import {useBridgeDiagnostics} from "../../hooks/use-bridge-diagnostics";
+export function BridgeDiagnostics(){const entries=useBridgeDiagnostics();return <section className="panel p-6"><h2>Device Diagnostics</h2><p className="text-muted">Connection details only. No passwords or session tokens.</p><dl className="shop-diagnostics">{Object.entries(entries).map(([key,value])=><div key={key}><dt>{key}</dt><dd>{value}</dd></div>)}</dl></section>;}

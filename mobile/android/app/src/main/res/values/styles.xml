@@ -1,0 +1,18 @@
+<resources>
+    <style name="AppThemeBase" parent="android:style/Theme.Material.Light.NoActionBar">
+        <item name="android:fontFamily">sans</item><item name="android:colorAccent">#F2BC2D</item>
+        <item name="android:windowLightStatusBar">true</item><item name="android:statusBarColor">#F3F3F3</item>
+        <item name="android:navigationBarColor">#202020</item>
+        <item name="android:windowActionModeOverlay">true</item>
+    </style>
+    <style name="AppTheme" parent="AppThemeBase"/>
+    <style name="ScannerThemeBase" parent="android:style/Theme.Material.NoActionBar">
+        <item name="android:fontFamily">sans</item>
+        <item name="android:colorAccent">#F2BC2D</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:statusBarColor">#181818</item>
+        <item name="android:navigationBarColor">#181818</item>
+        <item name="android:windowBackground">#181818</item>
+    </style>
+    <style name="ScannerTheme" parent="ScannerThemeBase"/>
+</resources>

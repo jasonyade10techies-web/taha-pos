@@ -1,0 +1,5 @@
+{
+  "identifier": "splash",
+  "windows": ["splash"],
+  "permissions": ["core:event:allow-listen", "core:event:allow-unlisten"]
+}

@@ -1,0 +1,64 @@
+{
+  "name": "taha-pos-api",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "tsx watch src/main.ts",
+    "build": "node scripts/build-managed.mjs",
+    "start": "node scripts/managed-start.mjs",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint": "eslint src scripts test",
+    "test": "tsx --test --test-concurrency=1 test/*.test.ts",
+    "migrate": "tsx scripts/migrate.ts",
+    "provision": "tsx scripts/provision.ts",
+    "test:serve": "tsx scripts/serve-test.ts",
+    "start:prod": "node scripts/managed-start.mjs",
+    "migrate:prod": "node dist-tools/scripts/migrate.js"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.1147.0",
+    "@nestjs/common": "^11.1.0",
+    "@nestjs/core": "^11.1.0",
+    "@nestjs/platform-express": "^11.2.9",
+    "@nestjs/platform-socket.io": "^11.1.0",
+    "@nestjs/swagger": "^11.2.0",
+    "@nestjs/websockets": "^11.1.0",
+    "argon2": "^0.44.0",
+    "cookie-parser": "^1.4.7",
+    "dotenv": "^17.2.0",
+    "helmet": "^8.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "multer": "^2.5.0",
+    "pg": "^8.16.0",
+    "reflect-metadata": "^0.2.2",
+    "rxjs": "^7.8.2",
+    "sanitize-html": "^2.18.1",
+    "sharp": "^0.35.5",
+    "socket.io": "^4.8.1",
+    "web-push": "^3.6.7"
+  },
+  "overrides": {
+    "@nestjs/swagger": {
+      "js-yaml": "5.4.2"
+    }
+  },
+  "devDependencies": {
+    "@types/cookie-parser": "^1.4.9",
+    "@types/express": "^5.0.0",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/multer": "^2.0.0",
+    "@types/node": "^22.18.0",
+    "@types/pg": "^8.15.0",
+    "@types/sanitize-html": "^2.16.2",
+    "@types/web-push": "^3.6.4",
+    "eslint": "^9.39.5",
+    "globals": "^16.5.0",
+    "socket.io-client": "^4.8.1",
+    "tsx": "^4.20.0",
+    "typescript": "~5.9.3",
+    "typescript-eslint": "^8.71.0"
+  },
+  "engines": {
+    "node": ">=22 <25"
+  }
+}

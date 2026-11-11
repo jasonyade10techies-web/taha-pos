@@ -1,0 +1,18 @@
+import {spawn} from "node:child_process";
+import {networkInterfaces} from "node:os";
+import {fileURLToPath} from "node:url";
+import path from "node:path";
+const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),"..");
+const candidates=Object.values(networkInterfaces()).flat().filter(item=>item?.family==="IPv4"&&!item.internal&&/^192\.168\.|^10\.|^172\.(1[6-9]|2\d|3[01])\./.test(item.address));
+const lan=process.env.TAHA_LAN_IP || candidates.find(item=>item.address.startsWith("192.168."))?.address || candidates[0]?.address;
+if(!lan)throw new Error("Connect the Windows PC to your Wi-Fi/LAN, or set TAHA_LAN_IP.");
+const origin=`http://${lan}:1423`;
+console.log(`Counter browser preview (not Android Shop Address): ${origin}`);
+console.log(`Android Shop backend address: http://${lan}:3001`);
+console.log(`Phone Chrome health check: http://${lan}:3001/api/v1/health`);
+console.log("Test mode only. Use the same trusted Wi-Fi. Database and JWT configuration are read from server/.env or the current environment.");
+const api=spawn(process.execPath,["node_modules/tsx/dist/cli.mjs","src/main.ts"],{cwd:path.join(root,"server"),stdio:"inherit",env:{...process.env,NODE_ENV:"development",PORT:"3001",MOBILE_APP_ORIGIN:"http://localhost",FRONTEND_ORIGIN:`${origin},http://localhost:1423,http://127.0.0.1:1423,http://localhost:1420,http://127.0.0.1:1420,http://localhost:4174,http://127.0.0.1:4174,http://localhost:4175,http://127.0.0.1:4175`,PUBLIC_API_URL:`http://${lan}:3001`}});
+const frontend=spawn(process.execPath,["node_modules/vite/bin/vite.js","--config","scripts/vite-mobile.config.ts","--host","0.0.0.0","--port","1423","--strictPort"],{cwd:root,stdio:"inherit",env:{...process.env,VITE_DATA_PROVIDER:process.env.VITE_DATA_PROVIDER||"local",VITE_USE_MOCK_AUTH:process.env.VITE_USE_MOCK_AUTH||"true",VITE_API_BASE_URL:"/api/v1",VITE_API_URL:"/api/v1",TAHA_DEV_API_TARGET:"http://127.0.0.1:3001"}});
+const stop=()=>{api.kill();frontend.kill();};
+process.on("SIGINT",stop);process.on("SIGTERM",stop);
+api.on("exit",code=>{frontend.kill();process.exitCode=code??1;});frontend.on("exit",code=>{api.kill();process.exitCode=code??1;});

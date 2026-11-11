@@ -1,0 +1,17 @@
+<resources>
+    <string name="connect_to_shop">Connect to shop</string>
+    <string name="scanner_qr_title">Scan</string>
+    <string name="scanner_qr_subtitle">Products, locations, receipts and Taha QR codes</string>
+    <string name="scanner_barcode_title">Scan Barcode</string>
+    <string name="scanner_barcode_subtitle">Read a product barcode</string>
+    <string name="scanner_qr_hint">Align the QR code inside the frame</string>
+    <string name="scanner_barcode_hint">Align the barcode inside the frame</string>
+    <string name="scanner_automatic">Scanning starts automatically</string>
+    <string name="scanner_qr_mode">QR</string>
+    <string name="scanner_barcode_mode">Barcode</string>
+    <string name="scanner_back">Back</string>
+    <string name="scanner_flash_on">Turn flash on</string>
+    <string name="scanner_flash_off">Turn flash off</string>
+    <string name="scanner_flash_unavailable">Flash is unavailable on this device</string>
+<string name="scanner_auto_mode">Auto</string></resources>
+

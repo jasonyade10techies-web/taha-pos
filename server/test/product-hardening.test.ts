@@ -1,0 +1,8 @@
+import assert from 'node:assert/strict';
+import {test} from 'node:test';
+import {sanitizeDescription,validateDictionary} from '../src/business/product-content';
+import {searchProducts} from '../src/business/product-search';
+test('descriptions retain formatting and discard scripts, handlers, images and unsafe links',()=>{const clean=sanitizeDescription('<p><strong>Original</strong><em>quality</em><u>tested</u></p><script>bad()</script><img src=x onerror=bad()><a href="javascript:bad()">open</a>');assert.match(clean,/<strong>Original<\/strong>/);assert(!/script|onerror|img|javascript:/i.test(clean));assert.throws(()=>sanitizeDescription('x'.repeat(30001)));});
+test('search dictionary accepts bounded aliases and rejects malformed entries',()=>{validateDictionary([{canonical:'battery',aliases:['battri']}]);assert.throws(()=>validateDictionary([{canonical:'',aliases:[]}]))});
+const catalog=[{name:'Samsung Galaxy A15 Charging Board',compatibleModel:'Samsung A15',brand:'Samsung',internalCode:'TM-P-000001',aliases:['charging patta']},{name:'iPhone 13 Screen OLED',compatibleModel:'iPhone 13',brand:'Apple',internalCode:'TM-P-000002',aliases:[]},{name:'iPhone 13 Battery',compatibleModel:'iPhone 13',brand:'Apple',internalCode:'TM-P-000003',aliases:[]},{name:'Type-C Charging Port',compatibleModel:'Universal',brand:'Taha',internalCode:'TM-P-000004',aliases:[]}];
+for(const [query,code] of [['A15','000001'],['A15 charging','000001'],['charging patta','000001'],['samsng a15','000001'],['iphone13 sr','000002'],['battri','000003'],['type c board','000004']])test(`search recognizes ${query}`,()=>assert(searchProducts(catalog,query).some(product=>product.internalCode.endsWith(code))));

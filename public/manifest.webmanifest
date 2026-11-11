@@ -1,0 +1,23 @@
+{
+  "name": "Taha Mobiles Staff Companion",
+  "short_name": "Taha POS",
+  "start_url": "/mobile-camera",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#F6F7F9",
+  "theme_color": "#FFC107",
+  "icons": [
+    {
+      "src": "/companion-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/companion-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

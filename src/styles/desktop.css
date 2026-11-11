@@ -1,0 +1,42 @@
+.sync-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--text-secondary, #626262);
+  padding: 8px;
+  border: 1px solid var(--border, #e2e2e2);
+  border-radius: 8px;
+}
+.sync-status.online {
+  color: var(--success);
+}
+.sync-status.offline,
+.sync-status.pending-changes {
+  color: var(--warning);
+}
+.sync-status.sync-error {
+  color: var(--error);
+}
+.sync-summary {
+  display: grid;
+  grid-template-columns: 150px 1fr;
+  gap: 12px;
+  margin: 24px 0;
+}
+.sync-summary dt {
+  color: var(--text-secondary, #626262);
+}
+.sync-summary dd {
+  margin: 0;
+  font-weight: 600;
+}
+@media (max-width: 900px) {
+  .sync-status span {
+    display: none;
+  }
+}
+
+/* UUID-based offline invoices remain readable on paper and the second display. */
+.paper-invoice-number,.display-invoice-number,.sale-complete-banner strong{overflow-wrap:anywhere;word-break:normal;min-width:0;}
+.paper-header>div:first-child{min-width:0;}

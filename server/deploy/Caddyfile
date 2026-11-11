@@ -1,0 +1,44 @@
+{
+ email {$ACME_EMAIL}
+}
+{$APP_DOMAIN} {
+ encode zstd gzip
+ header {
+  Referrer-Policy no-referrer
+  X-Content-Type-Options nosniff
+  -Server
+ }
+ # Same-origin web auth keeps Secure/HttpOnly refresh cookies scoped correctly.
+ @api path /api/* /socket.io/*
+ handle @api {
+  request_body {
+   max_size 20MB
+  }
+  reverse_proxy api:3000 {
+   transport http {
+    response_header_timeout 60s
+   }
+  }
+ }
+ handle {
+  root * /srv/app
+  try_files {path} /index.html
+  file_server
+ }
+}
+{$API_DOMAIN} {
+ encode zstd gzip
+ header {
+  Referrer-Policy no-referrer
+  X-Content-Type-Options nosniff
+  -Server
+ }
+ request_body {
+   max_size 20MB
+  }
+ reverse_proxy api:3000 {
+  transport http {
+    response_header_timeout 60s
+   }
+ }
+}

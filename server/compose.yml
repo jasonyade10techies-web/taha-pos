@@ -1,0 +1,60 @@
+services:
+  postgres:
+    image: postgres:17-bookworm
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: taha_pos
+      POSTGRES_USER: taha_migrator
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U taha_migrator -d taha_pos"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    # Database is private to the Docker network; do not expose port 5432 publicly.
+  migrate:
+    build:
+      context: .
+      dockerfile: Dockerfile.migrate
+    environment:
+      MIGRATION_DATABASE_URL: postgresql://taha_migrator:${POSTGRES_PASSWORD}@postgres:5432/taha_pos
+      DATABASE_URL: postgresql://taha_api:${API_DATABASE_PASSWORD:?Set API_DATABASE_PASSWORD}@postgres:5432/taha_pos
+    depends_on:
+      postgres:
+        condition: service_healthy
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      DATABASE_URL: postgresql://taha_api:${API_DATABASE_PASSWORD}@postgres:5432/taha_pos
+      JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET}
+      FRONTEND_ORIGIN: ${FRONTEND_ORIGIN:?Set FRONTEND_ORIGIN}
+      PUBLIC_API_URL: ${PUBLIC_API_URL:?Set PUBLIC_API_URL}
+      MOBILE_APP_ORIGIN: ${MOBILE_APP_ORIGIN:-http://localhost}
+      COOKIE_SECURE: "true"
+      VAPID_PUBLIC_KEY: ${VAPID_PUBLIC_KEY:-}
+      VAPID_PRIVATE_KEY: ${VAPID_PRIVATE_KEY:-}
+      VAPID_SUBJECT: ${VAPID_SUBJECT:-}
+      STORAGE_ROOT: /workspace/server/data/media
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/api/v1/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 20s
+      timeout: 5s
+      start_period: 30s
+      retries: 3
+    volumes:
+      - media_data:/workspace/server/data/media
+    ports:
+      - "127.0.0.1:3000:3000"
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+volumes:
+  postgres_data:
+  media_data:

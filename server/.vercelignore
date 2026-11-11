@@ -1,0 +1,14 @@
+.env
+.env.*
+!.env.vercel.example
+data/
+test/
+node_modules/
+*.log
+Dockerfile
+docker-compose*
+docs/
+scripts/serve-test.ts
+scripts/check-mobile-upload.ts
+scripts/local-acceptance-api.ts
+scripts/prepare-local-acceptance.ts

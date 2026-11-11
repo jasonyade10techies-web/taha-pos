@@ -1,0 +1,10 @@
+{
+  "identifier": "customer-display",
+  "windows": ["customer-display"],
+  "permissions": [
+    "core:event:allow-listen",
+    "core:event:allow-unlisten",
+    "core:event:allow-emit-to",
+    "core:window:allow-set-fullscreen"
+  ]
+}
