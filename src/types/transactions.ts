@@ -23,6 +23,7 @@ export interface DashboardTransactions {
   chart: DashboardData["chart"]; activity: DashboardData["activity"]; credit: DashboardData["credit"];
 }
 export interface ReturnOptions {
+  expectedManualRefund?: number; expectedCreditReduction?: number;
     refundLabor?:boolean;
   locationId?: string; receiptConfirmed?: boolean; manualRefundConfirmed?: boolean;
   refundMethodId?: string; approvalToken?: string; idempotencyKey?: string;

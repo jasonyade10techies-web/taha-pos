@@ -1,7 +1,7 @@
 import {useEffect,useId,useLayoutEffect,useRef,useState} from 'react';
 import {Check,Package,X} from 'lucide-react';
 import type {PosProduct} from '../../types/product';
-import {searchProducts} from '../../lib/product-search';
+import {searchProducts,type SearchTerm} from '../../lib/product-search';
 import {activeProductQuery,composerLength,composerText,deletionRange,emptyServiceDocument,replaceComposerRange,selectMention,type ServiceDocument,type ComposerSelection} from '../../lib/service-composer';
 import {MediaImage} from '../media/media-image';
 import {currency} from '../../lib/utils';
@@ -21,13 +21,13 @@ function restore(root:HTMLElement,caret:number){
  const range=document.createRange();let left=caret,placed=false;
  const walk=(node:Node)=>{if(placed)return;if(atomic(node)){if(left<=1){if(left===0)range.setStartBefore(node);else range.setStartAfter(node);placed=true;}else left--;return;}if(node.nodeType===Node.TEXT_NODE){if(left<=(node.textContent?.replace(/\u200B/g,'').length??0)){range.setStart(node,node.textContent==='\u200B'?1:left);placed=true;}else left-=size(node);return;}Array.from(node.childNodes).forEach(walk);};walk(root);if(!placed){range.selectNodeContents(root);range.collapse(false);}else range.collapse(true);const s=window.getSelection();s?.removeAllRanges();s?.addRange(range);
 }
-export function ServiceMentionComposer({value,onChange,products,canLink=true,onSelectProduct,onRemoveProduct,onInspect}:{value:ServiceDocument;onChange:(doc:ServiceDocument)=>void;products:PosProduct[];canLink?:boolean;onSelectProduct:(p:PosProduct)=>void;onRemoveProduct:()=>void;onInspect?:(p:PosProduct)=>void}){
+export function ServiceMentionComposer({value,onChange,products,dictionary,canLink=true,onSelectProduct,onRemoveProduct,onInspect}:{value:ServiceDocument;onChange:(doc:ServiceDocument)=>void;products:PosProduct[];dictionary?:SearchTerm[];canLink?:boolean;onSelectProduct:(p:PosProduct)=>void;onRemoveProduct:()=>void;onInspect?:(p:PosProduct)=>void}){
  const composing=useRef(false);
  const editor=useRef<HTMLDivElement>(null),pending=useRef<number|null>(null),saved=useRef<ComposerSelection>({start:0,end:0}),history=useRef<ServiceDocument[]>([]),future=useRef<ServiceDocument[]>([]);
  const [caret,setCaret]=useState(composerLength(value)),[dismissed,setDismissed]=useState(false),[active,setActive]=useState(0),[anchor,setAnchor]=useState({left:0,top:46});
  const id=useId(),query=canLink&&!dismissed?activeProductQuery(value,caret):null;
  const eligible=products.filter(p=>!['services','service','phones','used phones'].includes(p.category.toLowerCase()));
- const candidates=query?searchProducts(eligible.map(p=>({...p,name:[p.name,p.qualityGrade,p.color].filter(Boolean).join(' · ')})),query.query.replace(/\bpanal\b|\bpanl\b/gi,'panel')).slice(0,5).map(p=>eligible.find(v=>v.id===p.id)!):[];
+ const candidates=query?searchProducts(eligible.map(p=>({...p,name:[p.name,p.qualityGrade,p.color].filter(Boolean).join(' · ')})),query.query.replace(/\bpanal\b|\bpanl\b/gi,'panel'),dictionary).slice(0,5).map(p=>eligible.find(v=>v.id===p.id)!):[];
  const selected=value.mention?products.find(p=>p.id===value.mention?.productId):undefined;
  useLayoutEffect(()=>{if(pending.current!==null&&editor.current){editor.current.focus();restore(editor.current,pending.current);pending.current=null;}},[value]);
  const capture=()=>{const root=editor.current;if(!root)return;const next=selectionOf(root);if(!next)return;saved.current=next;setCaret(next.end);const s=window.getSelection();if(s?.rangeCount){const rect=s.getRangeAt(0).getBoundingClientRect(),box=root.getBoundingClientRect();if(rect.height)setAnchor({left:Math.max(0,Math.min(rect.left-box.left,box.width-285)),top:Math.max(46,rect.bottom-box.top+8)});}};

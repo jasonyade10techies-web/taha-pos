@@ -3,8 +3,10 @@ import {openSync,closeSync,mkdirSync,writeFileSync,readFileSync,existsSync} from
 import path from 'node:path';
 import {portListening} from './local-service-ports.mjs';
 
-export function isolatedLaunchPlan(root,runId){
- const logs=path.join(root,'.test-postgres','r1-20261111','local-acceptance');
+export function isolatedLaunchPlan(root,runId,evidenceDirectory){
+ const logs=path.resolve(root,evidenceDirectory??'.test-postgres/r1-20261111/local-acceptance');
+ const privateRoot=path.resolve(root,'.test-postgres')+path.sep;
+ if(!logs.toLowerCase().startsWith(privateRoot.toLowerCase()))throw Error('Isolated evidence must stay inside the project test directory.');
  const postgres={port:55459,role:'taha_phase5c',adminUrl:'postgresql://taha_phase5c@127.0.0.1:55459/postgres',dataDirectory:path.join(root,'.test-postgres','phase5c-20261014','pgdata'),binDirectory:path.join(root,'.test-postgres','pgsql','bin')};
  return {root,runId,logs,postgres,manifest:path.join(logs,'fixture-'+runId+'.json'),
   api:{name:'api',port:3306,cwd:path.join(root,'server'),args:['--import','tsx','scripts/serve-test.ts'],env:{TAHA_TEST_POSTGRES_URL:postgres.adminUrl,TAHA_TEST_API_PORT:'3306',TAHA_TEST_FRONTEND_ORIGINS:'http://127.0.0.1:1423,http://localhost:1423',TAHA_TEST_FIXTURE_RUN_ID:runId,TAHA_TEST_FIXTURE_MANIFEST:path.join(logs,'fixture-'+runId+'.json'),STORAGE_DRIVER:'local',TAHA_RUNTIME:'local',VERCEL:'0',TAHA_LAN_TLS_CERT:'',TAHA_LAN_TLS_KEY:''}},

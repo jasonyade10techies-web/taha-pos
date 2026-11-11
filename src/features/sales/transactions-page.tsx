@@ -1,3 +1,5 @@
+import {returnPreview} from '../../lib/return-preview';
+import {AppCheckbox} from '../../components/ui/app-checkbox';
 import {DatePicker} from "../../components/ui/date-picker";
 import {useShopConfiguration} from "../../hooks/use-shop-configuration";
 import {paymentSummary} from "../../lib/payment-summary";
@@ -359,6 +361,7 @@ export function ReturnsPage() {
   const q = useRepository("returns-"+invoice, async () => ({
     returns: await r.sales.returns(invoice||undefined),
     settings: await r.settings.get(),
+    methods: await r.payments.list(),
     employees: localDemoEnabled ? await r.employees.list() : (await transactionApprovalService.list("returns.approve")).map(e=>({...e,role:"manager",permissions:["returns.approve"]})),
     availableLocations:await r.inventory.conditionLocations?.('Available')??[],
     damagedLocations:await r.inventory.conditionLocations?.('Damaged')??[],
@@ -367,6 +370,15 @@ export function ReturnsPage() {
   const selected=useRepository('return-selected-'+invoice,async()=>invoice?(r.sales.lookup?(await r.sales.lookup({id:invoice,limit:1})).rows[0]:await r.sales.get(invoice)):undefined,!!invoice&&!selectedSale);
   const a = useAction();
   const sale=selectedSale??selected.data;
+  const [returnState,setReturnState]=useState<{saleId:string;values:Record<string,unknown>;confirmed:boolean}>({saleId:'',values:{},confirmed:false});
+  const eligible=sale?.lines.filter(line=>line.quantity>(sale.returned[line.productId]??0))??[];
+  const originalMethods=[...new Set((sale?.payments??[]).filter(p=>p.methodKind!=='Credit'&&p.status!=='Rejected'&&p.status!=='Pending'&&(!p.kind||p.kind==='sale')).map(p=>p.methodId))];
+  const initialReturn={productId:eligible.length===1?eligible[0].productId:'',quantity:1,locationId:eligible[0]?.locationId??sale?.lines[0]?.locationId??'',destination:q.data?.settings.restoreReturns?'Sellable Stock':'Do Not Restore Stock',refundMethodId:originalMethods.length===1?originalMethods[0]:''};
+  const draft:Record<string,unknown>={...initialReturn,...(returnState.saleId===sale?.id?returnState.values:{})};
+  const preview=sale?returnPreview(sale,q.data?.returns??[],String(draft.productId),Number(draft.quantity),Boolean(draft.refundLabor)):null;
+  const manualConfirmed=returnState.saleId===sale?.id&&returnState.confirmed;
+  const refundMethods=(q.data?.methods??[]).filter(method=>method.enabled&&method.kind!=='Credit');
+  const refundMethod=refundMethods.find(method=>method.id===draft.refundMethodId);
   const fields: FormField[] = [
     {
       key: "productId",
@@ -397,7 +409,8 @@ export function ReturnsPage() {
     },
     {key:'locationId',label:'Sellable destination box',type:'select',visibleWhen:v=>v.destination==='Sellable Stock',options:q.data?.availableLocations.map(l=>({value:l.locationId,label:l.path}))},
     {key:'damagedLocationId',label:'Damaged / Quarantine box',type:'select',required:true,visibleWhen:v=>v.destination==='Damaged',options:q.data?.damagedLocations.map(l=>({value:l.locationId,label:l.path})),help:'Damaged stock stays unavailable for sale. Create a quarantine box in Locations if none exists.'},
-    ...(!localDemoEnabled ? [{key:'receiptConfirmed',label:'Original receipt checked',type:'checkbox' as const},{key:'manualRefundConfirmed',label:'Manual refund paid (no automatic gateway refund)',type:'checkbox' as const}]:[]),
+    ...(!localDemoEnabled ? [{key:'receiptConfirmed',label:'Original receipt checked',type:'checkbox' as const}]:[]),
+    ...(preview&&preview.manualRefund>0?[{key:'refundMethodId',label:'Manual refund method',type:'select' as const,required:true,options:refundMethods.map(method=>({value:method.id,label:method.name}))}]:[]),
     ...(canApprove&&sale?.lines.some(line=>line.compound)?[{key:'refundLabor',label:'Also refund service / labor (authorized exception)',type:'checkbox' as const,visibleWhen:(v:Record<string,unknown>)=>!!sale?.lines.find(line=>line.productId===v.productId)?.compound,help:'By default, only the linked product portion is refunded. Enable only when you authorize refunding the labor too.'}]:[]),
     ...(q.data?.settings.returnApproval && (localDemoEnabled || !canApprove)
       ? [
@@ -432,21 +445,17 @@ export function ReturnsPage() {
         {sale?.lines.some(line=>line.compound)&&<p className="auth-notice">Combined service returns refund the product portion by default. Labor is retained unless an authorized refund exception is selected.</p>}
         {sale && q.data && !["Voided","Returned"].includes(sale.status) && (
           <RecordForm
-            key={sale.id}
+            key={sale.id+':'+JSON.stringify(sale.returned)}
             fields={fields}
-            initial={{
-              locationId:sale.lines[0]?.locationId,
-              quantity: 1,
-              destination: q.data?.settings.restoreReturns
-                ? "Sellable Stock"
-                : "Do Not Restore Stock",
-            }}
+            initial={initialReturn}
+            onValuesChange={values=>setReturnState({saleId:sale.id,values,confirmed:false})}
+            disabled={!preview||preview.manualRefund>0&&(!refundMethod||!localDemoEnabled&&!manualConfirmed)}
             busy={a.busy}
             submit="Process Return"
             onSubmit={(v) =>
               void a.run(
                 async () => {
-                  const payload={saleId:invoice,productId:text(v.productId),quantity:num(v.quantity),reason:text(v.reason),destination:text(v.destination),locationId:text(v.destination==='Damaged'?v.damagedLocationId:v.locationId),receiptConfirmed:Boolean(v.receiptConfirmed),manualRefundConfirmed:Boolean(v.manualRefundConfirmed),...(sale.lines.find(line=>line.productId===v.productId)?.compound?{refundLabor:canApprove&&Boolean(v.refundLabor)}:{}),idempotencyKey:returnRequestId};
+                  const payload={saleId:invoice,productId:text(v.productId),quantity:num(v.quantity),reason:text(v.reason),destination:text(v.destination),locationId:text(v.destination==='Damaged'?v.damagedLocationId:v.locationId),receiptConfirmed:Boolean(v.receiptConfirmed),manualRefundConfirmed:manualConfirmed,refundMethodId:text(v.refundMethodId),expectedManualRefund:preview?.manualRefund,expectedCreditReduction:preview?.creditReduction,...(sale.lines.find(line=>line.productId===v.productId)?.compound?{refundLabor:canApprove&&Boolean(v.refundLabor)}:{}),idempotencyKey:returnRequestId};
                   const approvalToken=!localDemoEnabled && q.data?.settings.returnApproval && !canApprove ? (await transactionApprovalService.approve(text(v.approval),text(v.pin),"return",payload)).token : undefined;
                   return r.sales.returnItem(
                     invoice,
@@ -468,7 +477,16 @@ export function ReturnsPage() {
                 ()=>{setReturnRequestId(crypto.randomUUID());setSelectedSale(null);},
               )
             }
-          />
+          >
+            {preview?<section className="auth-notice" aria-label="Return financial summary">
+              <strong>Return value: {currency(preview.amount)}</strong>
+              <p>Invoice outstanding: {currency(preview.before)} → {currency(preview.after)}</p>
+              <p>Credit reduced: {currency(preview.creditReduction)} · Manual payout: {currency(preview.manualRefund)}{refundMethod?' via '+refundMethod.name:''}</p>
+              <p>{preview.manualRefund===0?'No money is paid out. This return reduces the original invoice debt.':'Pay the stated amount using the selected method, then confirm below. This records your manual payout; no external payment is sent.'}</p>
+              <small>Other invoices are not automatically offset. Amounts are checked again on confirmation. If you already paid the customer, review the recorded history before retrying.</small>
+              {!localDemoEnabled&&preview.manualRefund>0&&<label className="checkbox-field"><AppCheckbox aria-label="Manual refund paid (no automatic gateway refund)" checked={manualConfirmed} onChange={e=>setReturnState({saleId:sale.id,values:draft,confirmed:e.target.checked})}/>Manual refund paid (no automatic gateway refund)</label>}
+            </section>:<p role="status">Select a returnable item and quantity to review its financial adjustment.</p>}
+          </RecordForm>
         )}
         </QueryState>
       </section>
@@ -489,7 +507,9 @@ export function ReturnsPage() {
           { label: "Quantity", render: (t) => t.quantity },
           { label: "Reason", render: (t) => t.reason },
           { label: "Disposition", render: (t) => t.destination },
-          { label: "Refund", render: (t) => currency(t.amount) },
+          { label: "Return value", render: (t) => currency(t.amount) },
+          {label:"Credit reduced",render:t=>currency(t.creditReduction??0)},
+          {label:"Manual payout",render:t=>currency(t.manualRefund??0)},
         ]}
       />
       </div>

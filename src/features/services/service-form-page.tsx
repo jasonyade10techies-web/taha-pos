@@ -7,6 +7,8 @@ import {
   QueryState,
 } from "../../components/ui/workspace";
 import { text, num } from "../shared/format";
+import {useState} from 'react';
+import {Button} from '../../components/ui/button';
 export function ServiceFormPage() {
   const { id } = useParams();
   const q = useRepository("service-form-" + id, () =>
@@ -15,6 +17,7 @@ export function ServiceFormPage() {
   const a = useAction();
   const navigate = useNavigate();
   const s = q.data;
+  const [unlink,setUnlink]=useState(false);
   return (
     <>
       <PageHeader
@@ -32,6 +35,7 @@ export function ServiceFormPage() {
         retry={() => void q.refetch()}
       >
         <section className="panel form-section">
+          {s?.linkedProductId&&<div className="auth-notice"><strong>{unlink?'Material will be unlinked when you save.':'This template has linked material.'}</strong><p>Existing invoices, stock movements and recorded labor allocations remain unchanged.</p><Button size="small" onClick={()=>setUnlink(value=>!value)}>{unlink?'Keep linked material':'Unlink material'}</Button></div>}
           <RecordForm
             key={id ?? "new"}
             fields={[
@@ -85,6 +89,7 @@ export function ServiceFormPage() {
                     minimumSellingPrice: num(v.minimumSellingPrice),
                     active: Boolean(v.active),
                     notes: text(v.notes),
+                    ...(unlink?{linkedProductId:null}:{}),
                   }),
                 "Service saved",
                 () => navigate("/services"),

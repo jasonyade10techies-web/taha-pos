@@ -11,6 +11,8 @@ import {
 } from "../../lib/reminders";
 import { currency } from "../../lib/utils";
 import { nativeDesktop } from "../../lib/desktop/runtime";
+import {useCopyText} from "../../components/ui/copy-text";
+import {prepareExternalWindow,openWhatsappDestination} from "../../lib/external-actions";
 import { Button } from "../../components/ui/button";
 import { AppSelect } from "../../components/ui/app-select";
 import { obligationTiming } from "./customer-account";
@@ -25,6 +27,7 @@ export function CustomerReminder({
   editHref?: string;
   now: number;
 }) {
+  const clipboard=useCopyText();
   const [choice, setChoice] = useState(""),
     [draft, setDraft] = useState<{
       id: string;
@@ -129,7 +132,7 @@ export function CustomerReminder({
           )}
           {!active.reminderEnabled && (
             <p className="text-muted">
-              Manual reminders are disabled for this account.{" "}
+              Manual reminders are disabled for this account or shop.{" "}
               {editHref && <Link to={editHref}>Edit Account</Link>}
             </p>
           )}
@@ -140,7 +143,7 @@ export function CustomerReminder({
               onClick={() =>
                 void a.run(async () => {
                   const item = await latest();
-                  await navigator.clipboard.writeText(message);
+                  if(!await clipboard.copy(message))throw new Error('Automatic copy is unavailable. Copy the selected text shown.');
                   await record("prepared", item);
                 }, "Message copied. Nothing was sent.")
               }
@@ -157,10 +160,7 @@ export function CustomerReminder({
                 !active.reminderEnabled
               }
               onClick={() => {
-                const popup = nativeDesktop
-                  ? null
-                  : window.open("about:blank", "_blank");
-                if (popup) popup.opener = null;
+                const popup = prepareExternalWindow();
                 void a.run(async () => {
                   try {
                     const item = await latest();
@@ -170,12 +170,8 @@ export function CustomerReminder({
                         "The browser blocked WhatsApp. Allow a new window or copy the message.",
                       );
                     await record("prepared", item);
+                    await openWhatsappDestination(target,popup);
                     await record("whatsapp-opened", item);
-                    if (nativeDesktop) {
-                      const { openUrl } =
-                        await import("@tauri-apps/plugin-opener");
-                      await openUrl(target);
-                    } else popup!.location.replace(target);
                   } catch (error) {
                     popup?.close();
                     throw error;
@@ -203,6 +199,7 @@ export function CustomerReminder({
           create reminders.
         </p>
       )}
+      {clipboard.fallback}
     </section>
   );
 }

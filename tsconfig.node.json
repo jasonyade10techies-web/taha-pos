@@ -5,5 +5,5 @@
     "verbatimModuleSyntax": true, "isolatedModules": true, "noEmit": true, "strict": true,
     "types": ["node","vite/client"]
   },
-  "include": ["vite.config.ts", "playwright.config.ts", "playwright.local.config.ts", "playwright.r1-api.config.ts", "tests"]
+  "include": ["vite.config.ts", "playwright.config.ts", "playwright.local.config.ts", "playwright.r1-api.config.ts", "playwright.r2a-api.config.ts", "tests"]
 }

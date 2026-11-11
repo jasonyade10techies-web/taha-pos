@@ -112,6 +112,7 @@ export interface AuditRow {
   created_at: string;
 }
 export interface PosProductRow {
+  damaged_quantity?: number;
   primary_image_url?: string | null;
   id: string;
   internal_code: string;

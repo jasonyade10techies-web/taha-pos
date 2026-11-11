@@ -5,7 +5,7 @@ import {defineConfig} from '@playwright/test';
 export default defineConfig({
   testDir:'./tests',
   globalSetup:'./tests/fixtures/local-suite-setup.ts',
-  testIgnore:/(?:r1-api-acceptance|api-backend|authorization|supabase(?:-transactions)?|phase4d|device-bridge-integration|instant-camera|shop-connection|cash-reconciliation|phase5d-(?:api|mobile)-acceptance|phase5d1-(?:api-acceptance|mobile-sales)|phase6a-(?:frontend|browser-api))\.spec\.ts/,
+  testIgnore:/(?:r2a-counter|r1-api-acceptance|api-backend|authorization|supabase(?:-transactions)?|phase4d|device-bridge-integration|instant-camera|shop-connection|cash-reconciliation|phase5d-(?:api|mobile)-acceptance|phase5d1-(?:api-acceptance|mobile-sales)|phase6a-(?:frontend|browser-api))\.spec\.ts/,
   outputDir:'.test-postgres/phase5c1-20261015/local-browser-results',
   workers:1,timeout:90000,expect:{timeout:20000},reporter:'list',
   use:{baseURL:'http://127.0.0.1:1437',viewport:{width:1366,height:768},screenshot:'only-on-failure',trace:'retain-on-failure'},

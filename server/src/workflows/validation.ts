@@ -40,9 +40,9 @@ export function serviceInput(input: unknown) {
   const minimum = money(v.minimumSellingPrice, 'Minimum selling price');
   if (minimum > price) fail('Minimum selling price cannot exceed the listed price.');
   const linkedProductId = workflowId(v.linkedProductId, true);
-  if (v.pricingRule !== undefined && v.pricingRule !== 'current-product-plus-labor') fail('Use current product price plus default labor.');
-  if (!linkedProductId && (v.defaultLaborCharge !== undefined || v.pricingRule !== undefined)) fail('Select a linked product for this pricing rule.');
-  return { id: workflowId(v.id, true), name: text(v.name, 'Service name', 200, true), category: text(v.category, 'Category', 120, true), sellingPrice: price, minimumSellingPrice: minimum, active: boolean(v.active, true), notes: text(v.notes, 'Notes', 4000), ...(linkedProductId ? {linkedProductId, defaultLaborCharge:money(v.defaultLaborCharge,'Default labor charge',0),pricingRule:'current-product-plus-labor'} : {}), ...(v.description === undefined ? {} : {description:text(v.description,'Description',4000)}) };
+  if (v.pricingRule != null && v.pricingRule !== 'current-product-plus-labor') fail('Use current product price plus default labor.');
+  if (!linkedProductId && (v.defaultLaborCharge != null || v.pricingRule != null)) fail('Select a linked product for this pricing rule.');
+  return { id: workflowId(v.id, true), name: text(v.name, 'Service name', 200, true), category: text(v.category, 'Category', 120, true), sellingPrice: price, minimumSellingPrice: minimum, active: boolean(v.active, true), notes: text(v.notes, 'Notes', 4000), ...(linkedProductId ? {linkedProductId, defaultLaborCharge:money(v.defaultLaborCharge,'Default labor charge',0),pricingRule:'current-product-plus-labor'} : Object.hasOwn(v,'linkedProductId') ? {linkedProductId:null} : {}), ...(v.description === undefined ? {} : {description:text(v.description,'Description',4000)}) };
 }
 export function repairInput(input: unknown) {
   const v = record(input);

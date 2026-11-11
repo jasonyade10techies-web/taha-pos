@@ -18,6 +18,8 @@ import {
 import { shopTimestamp } from "../../lib/shop-time";
 import { currency } from "../../lib/utils";
 import { nativeDesktop } from "../../lib/desktop/runtime";
+import {useCopyText} from "../../components/ui/copy-text";
+import {prepareExternalWindow,openWhatsappDestination} from "../../lib/external-actions";
 import type { ReminderObligation, ReminderInput } from "../../types/reminders";
 import "./reminders.css";
 export function ReminderButton({
@@ -31,6 +33,7 @@ export function ReminderButton({
   kind?: "credit" | "test";
   label?: string;
 }) {
+  const clipboard=useCopyText();
   const [open, setOpen] = useState(false),
     [items, setItems] = useState<ReminderObligation[]>([]),
     [active, setActive] = useState<ReminderObligation | null>(null),
@@ -101,19 +104,15 @@ export function ReminderButton({
       }, "");
       return;
     }
-    const popup = nativeDesktop ? null : window.open("about:blank", "_blank");
-    if (popup) popup.opener = null;
+    const popup = prepareExternalWindow();
     void a.run(async () => {
       try {
         if (!nativeDesktop && !popup)
           throw new Error(
             "Your browser blocked the window. Allow it or copy the message.",
           );
+        await openWhatsappDestination(target,popup);
         await record("whatsapp-opened");
-        if (nativeDesktop) {
-          const { openUrl } = await import("@tauri-apps/plugin-opener");
-          await openUrl(target);
-        } else popup!.location.replace(target);
       } catch (error) {
         popup?.close();
         throw error;
@@ -203,7 +202,7 @@ export function ReminderButton({
                 disabled={a.busy || !message.trim()}
                 onClick={() =>
                   void a.run(
-                    () => navigator.clipboard.writeText(message),
+                    async () => {if(!await clipboard.copy(message))throw new Error('Automatic copy is unavailable. Copy the selected text shown.');},
                     "Message copied. Nothing was sent.",
                   )
                 }
@@ -258,6 +257,7 @@ export function ReminderButton({
           )
         }
       />
+      {clipboard.fallback}
     </>
   );
 }

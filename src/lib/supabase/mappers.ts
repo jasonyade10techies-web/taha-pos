@@ -47,6 +47,7 @@ export function posModel(p: PosProductRow, image = ""): PosProduct {
     qualityGrade: p.quality_grade,
     color: p.color_variant,
     quantity: Number(p.quantity),
+    damagedQuantity: Number(p.damaged_quantity??0),
     sellingPrice: Number(p.selling_price),
     minimumSellingPrice: Number(p.minimum_selling_price),
     aliases: p.aliases,

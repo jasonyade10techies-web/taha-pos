@@ -2,6 +2,7 @@ import type { ReminderObligation } from "../types/reminders";
 import { shopDay, shopTimestamp } from "./shop-time";
 import { currency } from "./utils";
 export function normalizeWhatsapp(value: string) {
+  if(!/^(?:\+|00)?[\d\s().-]+$/.test(value.trim()))return '';
   let digits = value.replace(/\D/g, "").replace(/^00/, "");
   if (/^03\d{9}$/.test(digits)) digits = "92" + digits.slice(1);
   else if (/^3\d{9}$/.test(digits)) digits = "92" + digits;

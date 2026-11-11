@@ -8,7 +8,7 @@ import {randomUUID} from 'node:crypto';
 import {isolatedLaunchPlan,isolatedRuntime,startIsolatedAcceptance} from './isolated-local-acceptance.mjs';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 if(process.argv.includes('--isolated')){
- try{const plan=isolatedLaunchPlan(root,randomUUID());console.log(JSON.stringify(await startIsolatedAcceptance(plan,isolatedRuntime(plan)),null,2));console.log('Verified isolated services are ready. Fixture credentials: owner@taha.test / Secure test password 2026!');}
+ try{const flag=process.argv.indexOf('--evidence-dir');if(flag>=0&&!process.argv[flag+1])throw Error('Provide an isolated evidence directory.');const plan=isolatedLaunchPlan(root,randomUUID(),flag>=0?process.argv[flag+1]:undefined);console.log(JSON.stringify(await startIsolatedAcceptance(plan,isolatedRuntime(plan)),null,2));console.log('Verified isolated services are ready. Fixture credentials: owner@taha.test / Secure test password 2026!');}
  catch(error){console.error(error instanceof Error?error.message:String(error));process.exitCode=1;}
 }else{
 const logs=path.join(root,'.test-postgres','local-acceptance');mkdirSync(logs,{recursive:true});

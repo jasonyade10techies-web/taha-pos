@@ -1,23 +1,40 @@
 # Taha POS remaining work checklist
 
-Evidence date: **11 November 2026**. Root: `D:\Inventory system POS`. This is a plan produced by an audit, not implementation authorization. See `TAHA_POS_COMPLETE_HANDOFF_2026-11-11.md` for architecture, test boundaries and history.
+Evidence date: **11 November 2026**. Root: `D:\Inventory system POS`. This checklist records the original audit and subsequent authorized R1/R2A implementation. Historical results are labelled; only the current completion section controls the next work. See `TAHA_POS_COMPLETE_HANDOFF_2026-11-11.md` for architecture, test boundaries and history.
+
+## Phase R2A completed — current status
+
+R2A is implemented on `r2a-counter-corrections`, descending from preserved R1 commit `fed76251bb7c5f3de89d58ee76a248a23db2402a`. See `TAHA_POS_PHASE_R2A_COUNTER_CORRECTIONS_REPORT.md` and `TAHA_POS_PHASE_R2A_TEST_RESULTS.md`. The final local commit and independently verified private bundle are recorded in ignored `.test-postgres/r2a-20261111/git-checkpoint.json` and the owner response. No push, deployment, APK/installer build or saved-database migration occurred.
+
+- [x] Restored the archived PostgreSQL cluster into a private disposable copy, verified all 60,378 file hashes, 64 migrations, 195 FK relationships and financial checks, then stopped the copy. Saved port 55439 was not started.
+- [x] Short prefixes, aliases, SKU/barcode identity and service search; keyboard/HID-style Enter and touch-compatible counter actions.
+- [x] Blank custom service charge remains unset; explicit zero remains visible and rejected by the existing positive-charge policy; reviewed material/labor allocation is preserved.
+- [x] Separate damaged/quarantine POS quantity and authorized inspection, without changing available stock.
+- [x] Sole eligible return selection; bounded partial returns, paid/manual and credit-only return explanations, method choice, stale-reviewed-amount rejection and retry safety.
+- [x] Invoice/receipt/link/customer/reminder clipboard with selectable fallback; explicit WhatsApp browser destination with blocked-popup feedback. Actual native opening or delivery remains unverified.
+- [x] Explicit-null template unlink, repeated unlink, immutable old invoice and new sale with no old material deduction.
+- [x] Fresh backend **224/224**, real-API browser **10 unique cases** (nine-case run plus one credit-only return), persisted SQL assertions for ten groups, launcher **9/9**, SQLite **7/7**, typecheck/lint/build gates.
+- [x] Existing broad local browser run: **186 pass / 1 fail / 1 intentional skip**, followed by the affected legacy WhatsApp case passing with original phone/message assertions retained. **187 unique cases pass**, not a claim that the full-run exit was green. PDF coverage passed.
+- [x] Real API/auth fixture available at frontend `http://127.0.0.1:1423/dashboard`, API health `http://127.0.0.1:3306/api/v1/health`, disposable PostgreSQL 55459. No LAN/mobile availability claim.
+
+**Next:** R2B synchronization/readiness corrections and Hostinger staging packaging, without deploying until separately authorized. Production remains blocked by the rows in section B and the unchanged Android/native/accounting gaps below. Native apps/hardware/actual WhatsApp sending are not certified by browser tests.
 
 ## Phase R1 implementation update
 
 The owner subsequently authorized recovery. The all-NUL MediaService is now **reconstructed and buildable**, with original forensic bytes and verified private backups retained. The full backend suite passes **203/203**, with zero skipped/failed. Targeted runtime advisories were patched; frontend and backend `npm audit --omit=dev` both report zero findings. An explicit identity-verified `--isolated` launcher starts real API/auth on 3306 and frontend 1423 against disposable PostgreSQL 55459 without consulting saved 55439 data. The browser suite has 187 unique passing cases across the full run and unchanged PDF rerun, plus one intentional API-only skip; the full run's single failure was missing `pypdf` in the default Python. Three fresh real-API browser journeys, eight launcher tests and seven SQLite source/SQL checks also pass. See `TAHA_POS_PHASE_R1_RECOVERY_REPORT.md` for source-control status and exact evidence. No physical/native acceptance or deployment is implied.
 
-The older table entries below describe the audit starting point; resolved R1 recovery/dependency rows are no longer blockers. Remaining functional corrections were deliberately not folded into backend recovery.
+The older table entries below describe the audit starting point; resolved R1 recovery/dependency rows are no longer blockers. Those corrections were deliberately excluded from R1 and the first eight have now been implemented and tested in R2A.
 
-| Next correction | R1 classification | Priority / required evidence |
+| Correction | Current classification (R2A overrides historical R1) | Evidence / remaining acceptance |
 |---|---|---|
-|1.Short-prefix @Product search|**Confirmed broken**|P2;1/2/3character/dictionary regression across consumers.|
-|2.Blank service-price semantics|**Confirmed broken** presentation;zero submission guard works|P2;blank remains unset without false floor/breakdown; preserve financial constraints.|
-|3.Damaged count on New Sale cards|**Confirmed broken** / absent projection|P2;safe available/damaged DTO and actionable card without selling quarantine.|
-|4.Only returnable item auto-selection|**Confirmed broken** / absent default|P2;one vs multiple/zero eligible lines.|
-|5.Manual refund/credit adjustment explanation|**Confirmed broken** presentation, SQL safeguards working|P1/P2;derive actual payout/method/credit reduction and show before confirmation.|
-|6.Copy Message fallback|**Confirmed broken** in unavailable/denied clipboard environments|P2;manual copy fallback and real runtime checks.|
-|7.WhatsApp opening|**Implemented but unverified** on actual receiver; virtual receipt fallback missing|P2;browser/native blocked-popup and manual send acceptance.|
-|8.Saved template unlink|**Confirmed broken** API validator null handling|P2;explicit null removes, omission preserves, immutable old sales unaffected.|
+|1.Short-prefix @Product search|**Working — tested in R2A**|Frontend/backend parity and actual one/two/three-character, alias/model/SKU/barcode/keyboard browser tests.|
+|2.Blank service-price semantics|**Working — tested in R2A**|Blank vs explicit zero vs reviewed charge; no false blank breakdown; financial constraints preserved.|
+|3.Damaged count on New Sale cards|**Working — tested in R2A**|Safe projection/card, separate unavailable quantity, touch/history and stored condition ledger.|
+|4.Only returnable item auto-selection|**Working — tested in R2A**|Single line defaults, zero/multiple rules preserved; partial/credit-only UI and SQL guards.|
+|5.Manual refund/credit explanation|**Working — tested in R2A**|Before/after debt, method/payout, credit-only no payout, stale preview rollback and retries.|
+|6.Copy Message fallback|**Working — browser verified R2A**|Actual clipboard plus manual selectable fallback; native OS acceptance still required.|
+|7.WhatsApp opening|**Working — browser verified R2A; native unverified**|Actual intercepted popup/normalized destination/message, blocked feedback; no send/delivery claim.|
+|8.Saved template unlink|**Working — tested in R2A**|Explicit null vs omission, repeated unlink, unchanged old sales, new unlinked sale with no material deduction.|
 |9.Repairs/shifts cloud revision|**Confirmed broken** missing durable invalidation|P1;permission-scoped revisions/two-session tests.|
 |10.Cloud readiness/object probe|**Confirmed broken** as comprehensive acceptance gate|P1;current schema/grants plus private object write/read/delete; no secret output.|
 |11.Android corrupt-photo queue|**Confirmed broken**, synthetic3→0despite2valid retained|P1;per-record isolation/atomic retention and corruption recovery.|
@@ -50,14 +67,14 @@ Priorities: **P0** blocks use/data integrity/security; **P1** before production;
 | Priority / complexity | Problem and current status | Required scope / source | Dependencies | Verification / completion criterion |
 |---|---|---|---|---|
 | Resolved in R1 | MediaService corruption blocked the complete API | Reconstructed against the October source, later fragments, current contracts and tests; forensic original retained | Private verified backups retained | Backend typecheck/lint/build and all 203 backend tests pass; private-media/direct-upload/race coverage retained. See R1 recovery report. |
-| Local demonstration available; hosted demonstration pending | Reproducible isolated real-API localhost now works | `node scripts/start-local-acceptance.mjs --isolated`; frontend 1423, API 3306, isolated PostgreSQL 55459 | Keep fixture services running; saved database remains stopped | Three real-API browser journeys and persisted stock/credit/media assertions pass. This loopback fixture does not provide a LAN-phone or public-cloud demonstration. |
-| P2 / Medium | First-character service/product suggestions fail | `src/lib/product-search.ts`, service composer and all dictionary consumers | Stable baseline | Test 1/2/3-character prefixes, fuzzy/aliases/Roman Urdu, partial code, keyboard selection and ambiguous cases on desktop/mobile. |
-| P2 / Small | Empty desktop service charge coerces to 0 for messaging | `custom-service-dialog.tsx`, breakdown and mobile parity | Search/composer tests | Empty stays unknown/blank; no zero breakdown/floor warning until valid entry; submission policy remains explicit. Existing disabled Add is preserved. |
-| P2 / Small–Medium | POS missing damaged stock visibility | Safe POS DTO/repository/API projection and `product-card.tsx` | Condition/movement source; no costs in public POS projection | Available and damaged distinct; damaged is not sellable; card/action reflect actual stock. |
-| P2 / Small | Sole returnable product not auto-selected | `features/sales/transactions-page.tsx` | Selected receipt/current settings | Exactly one eligible item defaults correctly; several require explicit choice; quantities remain bounded. |
-| P1–P2 / Medium | Manual refund screen lacks amount/method/credit explanation | Returns preview/confirmation UI and existing SQL return result contracts | Financial regression baseline | Preview derives product/labor/tax/credit reduction/actual cash payout; only require relevant manual payout confirmation; retries never double refund/restore. |
-| P2 / Small | Saved linked template cannot be unlinked through API | `server/src/workflows/validation.ts:serviceInput`, save_repair_service | Current migrations | Explicit null removes linkage; omitted preserves old link; permissions, existing sales snapshots and defaults unchanged. |
-| P2 / Small–Medium | Clipboard and virtual-receipt external opener unreliable | Reminder/virtual receipt components, native opener adapters | Actual intended HTTPS/LAN/native context | Clipboard denial/unavailable yields manual copy; no false success; popup blocked feedback; manual WhatsApp launch on real device; no delivery claim. |
+| Local demonstration available; hosted demonstration pending | Reproducible isolated real-API localhost now works | `node scripts/start-local-acceptance.mjs --isolated`; frontend 1423, API 3306, isolated PostgreSQL 55459 | Keep fixture services running; saved database remains stopped | R2A now covers ten unique real-API browser cases and persisted stock/credit/media assertions. This loopback fixture does not provide a LAN-phone or public-cloud demonstration. |
+| Resolved in R2A | Search correction | Existing implementation corrected; exact paths in R2A report | R2A baseline retained | Fresh focused/API/browser/SQL verification passes. Native and physical acceptance remain separate. |
+| Resolved in R2A | Blank custom charge correction | Existing implementation corrected; exact paths in R2A report | R2A baseline retained | Fresh focused/API/browser/SQL verification passes. Native and physical acceptance remain separate. |
+| Resolved in R2A | Safe damaged projection/card | Existing implementation corrected; exact paths in R2A report | R2A baseline retained | Fresh focused/API/browser/SQL verification passes. Native and physical acceptance remain separate. |
+| Resolved in R2A | Single eligible return selection | Existing implementation corrected; exact paths in R2A report | R2A baseline retained | Fresh focused/API/browser/SQL verification passes. Native and physical acceptance remain separate. |
+| Resolved in R2A | Return financial review | Existing implementation corrected; exact paths in R2A report | R2A baseline retained | Fresh focused/API/browser/SQL verification passes. Native and physical acceptance remain separate. |
+| Resolved in R2A | Explicit-null template unlink | Existing implementation corrected; exact paths in R2A report | R2A baseline retained | Fresh focused/API/browser/SQL verification passes. Native and physical acceptance remain separate. |
+| Resolved in R2A | Clipboard/browser external actions | Existing implementation corrected; exact paths in R2A report | R2A baseline retained | Fresh focused/API/browser/SQL verification passes. Native and physical acceptance remain separate. |
 | P1 / Medium if camera demo | Corrupt pending-photo metadata hides valid queued photos | `mobile/android/.../PendingPhotos.java`, recovery UI | Existing synthetic corruption evidence | One corrupt record isolated; other valid images remain visible/uploadable/exportable; explicit damaged-record recovery/discard, no silent wipe. |
 | P1 / Medium if remote demo | No public self-contained demo URL | Isolated compatible staging only after target verification | Hostinger plan/domain/PostgreSQL/private storage; recovered builds | HTTPS login from independent browsers, shared stock/sales/receipts/images with PC off, no real customer fixtures/default production passwords. |
 
@@ -97,10 +114,10 @@ Repair deposits/parts job settlement and full expense accounting are incomplete.
 
 ## Manageable sequence
 
-1. Recover backend source and establish full passing/source-recovery baseline. No hosting deployment in this slice.
-2. Fix owner-visible search/charge/condition/returns/reminder/template defects with exact regressions.
+1. **Completed R1:** recover backend source and establish the protected baseline.
+2. **Completed R2A:** owner-visible search/charge/condition/returns/reminder/template defects and archived-database restore rehearsal.
 3. Verify purchased Hostinger capabilities and prepare one isolated staging path; deploy only under a later explicit implementation request.
 4. In parallel after recovery: Windows toolchain/build acceptance and Android photo/release work.
 5. Hosted shared-data/private-media/restore acceptance, physical apps/hardware, then controlled pilot.
 
-Owner inputs that cannot be inferred from code: exact Hostinger plan, approved domain, PostgreSQL/object storage/backup choice, physical printer and device access, later Windows prerequisite installation authorization. No secrets should be pasted into the planning chat.
+Owner inputs still needed: approved domain, external PostgreSQL/object storage/backup choice, physical printer and device access, later Windows prerequisite installation authorization. The browser Unlimited plan was selected; its usable Node limits and connector/account alignment still require verification. No secrets should be pasted into the planning chat.

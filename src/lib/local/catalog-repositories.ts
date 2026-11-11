@@ -69,6 +69,7 @@ export class LocalProductRepository implements ProductRepository {
       .toArray();
     products.sort((a, b) => a.internalCode.localeCompare(b.internalCode));
     const balances = await demoDb.balances.toArray();
+    const damageEvents = await demoDb.conditionMovements.toArray();
     const result: PosProduct[] = await Promise.all(
       products.map(async (p) => {
         const stock = balances.filter((b) => b.productId === p.id);
@@ -85,6 +86,7 @@ export class LocalProductRepository implements ProductRepository {
           qualityGrade: p.qualityGrade,
           color: p.color,
           quantity: stock.reduce((sum, b) => sum + b.quantity, 0),
+          damagedQuantity: damageEvents.filter(event=>event.productId===p.id).reduce((sum,event)=>sum+event.quantity,0),
           sellingPrice: p.sellingPrice,
           minimumSellingPrice: p.minimumSellingPrice,
           location: await locationParts(primary?.locationId ?? p.locationId),
@@ -461,7 +463,9 @@ export const localServices: ServiceRepository = {
   async get(id){const service=await demoDb.services.get(id);return service?currentServiceTemplate(service):undefined;},
   async save(value) {
     const prior=await demoDb.services.get(value.id);
+    const unlink=Object.prototype.hasOwnProperty.call(value,'linkedProductId')&&value.linkedProductId===null;
     value={...prior,...value};
+    if(unlink)value={...value,defaultLaborCharge:undefined,pricingRule:undefined};
     authorize(prior ? 'repair.services.manage' : allowed('repair.services.manage') ? 'repair.services.manage' : 'services.save_catalog');
     requireValue(value.name.trim(),'Service name is required.');
     amount(value.sellingPrice); amount(value.minimumSellingPrice);

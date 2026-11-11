@@ -3,6 +3,11 @@ import assert from 'node:assert/strict';
 import {isolatedLaunchPlan,startIsolatedAcceptance,validateFixtureProof,validatePostgresIdentity} from './isolated-local-acceptance.mjs';
 
 const plan=isolatedLaunchPlan('D:/Inventory system POS','test-session');
+test('phase-specific isolated evidence stays under the private test directory',()=>{
+ const separate=isolatedLaunchPlan('D:/Inventory system POS','r2a','.test-postgres/r2a-20261111/local-acceptance');
+ assert.match(separate.manifest,/r2a-20261111/);assert.equal(separate.api.env.TAHA_TEST_FIXTURE_MANIFEST,separate.manifest);
+ assert.throws(()=>isolatedLaunchPlan('D:/Inventory system POS','outside','../public'),/inside the project test directory/);
+});
 const fixture={runId:'test-session',pid:123,host:'127.0.0.1',port:3306,postgresHost:'127.0.0.1',postgresPort:55459,adminRole:'taha_phase5c',database:'taha_api_browser_123',ready:true};
 const health={application:'taha-pos',status:'ok',database:'connected'};
 function runtime(overrides={}){const calls=[];return {calls,portListening:async port=>{calls.push(['probe',port]);return false;},ensurePostgres:async()=>{calls.push(['postgres']);},launch:async service=>{calls.push(['launch',service.name]);return service.name==='api'?123:456;},waitForApi:async()=>{calls.push(['api-ready']);return{fixture,health};},waitForFrontend:async()=>{calls.push(['frontend-ready']);},writeStatus:async status=>{calls.push(['status',status.ready]);},stopOwned:async pid=>{calls.push(['stop',pid]);},...overrides};}

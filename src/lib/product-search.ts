@@ -67,59 +67,50 @@ function distance(a: string, b: string) {
   }
   return row[b.length];
 }
-export function searchProducts<
-  T extends Pick<
-    PosProduct,
-    "name" | "compatibleModel" | "brand" | "internalCode" | "aliases"
-  >,
->(
-  products: T[],
-  query: string,
-  dictionary: SearchTerm[] = defaultSearchDictionary,
+export function searchProducts<T extends Pick<PosProduct, "name" | "compatibleModel" | "brand" | "internalCode" | "aliases">>(
+  products: T[], query: string, dictionary: SearchTerm[] = defaultSearchDictionary,
 ): T[] {
   const normalized = normalizeSearch(query);
   if (!normalized) return products;
-  if (/^(\d{4,}|tm )/.test(normalized))
-    return products.filter((product) =>
-      [product.internalCode, ...product.aliases].some(
-        (alias) => normalizeSearch(alias) === normalized,
-      ),
-    );
-  const terms = expandSearch(query, dictionary).split(" ");
-  return products
-    .map((product, index) => {
-      const haystack = expandSearch(
-          [
-            product.name,
-            product.compatibleModel,
-            product.brand,
-            ...product.aliases,
-          ].join(" "),
-          dictionary,
-        ),
-        words = haystack.split(" ");
-      let score = 0;
-      for (const term of terms) {
-        const best = Math.min(
-          ...words.map((word) =>
-            word === term
-              ? 0
-              : term.length >= 3 && word.startsWith(term)
-                ? 0.2
-                : /^\d+$/.test(term) || term.length < 3
-                  ? 99
-                  : distance(term, word),
-          ),
-        );
-        if (best > Math.min(2, Math.floor(term.length * 0.3)))
-          return { product, index, score: 999 };
-        score += best;
+  const identity = normalized.replaceAll(" ", "");
+  const numericIdentity = /^\d{4,}$/.test(identity);
+  if (numericIdentity || /^tm(?: |$)/.test(normalized)) {
+    return products.map((product, index) => {
+      const keys = [product.internalCode, ...product.aliases].map(key => normalizeSearch(key).replaceAll(" ", ""));
+      const exact = keys.includes(identity);
+      return {product, index, rank: exact ? 0 : !numericIdentity && keys.some(key => key.startsWith(identity)) ? 1 : 2};
+    }).filter(row => row.rank < 2).sort((a,b) => a.rank-b.rank || a.index-b.index).map(row => row.product);
+  }
+  // Prepare dictionary rules once per query, not once for every catalog row.
+  const groups = dictionary.map(group => ({canonical:normalizeSearch(group.canonical), aliases:group.aliases.map(normalizeSearch)}));
+  const replacements = groups.flatMap(group => group.aliases.map(alias => ({alias, canonical:group.canonical}))).sort((a,b) => b.alias.length-a.alias.length);
+  const expand = (text:string) => {
+    let value = ` ${normalizeSearch(text)} `;
+    for (const rule of replacements) value = value.split(` ${rule.alias} `).join(` ${rule.canonical} `);
+    return value.trim();
+  };
+  const terms = expand(query).split(" ");
+  return products.map((product,index) => {
+    if (/^[a-z]+\d+$/.test(identity) && [product.compatibleModel.toLowerCase().replace(/[^a-z0-9]/g,''),...product.compatibleModel.toLowerCase().split(/[^a-z0-9]+/)].some(word=>word.startsWith(identity))) return {product,index,score:0.1};
+    const raw = normalizeSearch([product.name,product.compatibleModel,product.brand,...product.aliases].join(" "));
+    const canonical = expand(raw);
+    // Keep original words and dictionary alternatives so "pa" can find panel/screen.
+    const synonyms = groups.filter(group => (` ${canonical} `).includes(` ${group.canonical} `)).flatMap(group => group.aliases);
+    const words = [...new Set([raw,canonical,...synonyms].join(" ").split(" "))];
+    let score = 0;
+    for (const term of terms) {
+      let best = 99;
+      for (const [position,word] of words.entries()) {
+        const candidate = word === term ? 0 : !/^\d+$/.test(term) && word.startsWith(term) ? 0.2 + Math.min(position,99)*0.0001
+          : /^\d+$/.test(term) || term.length < 3 || Math.abs(word.length-term.length)>2 ? 99 : distance(term,word);
+        best = Math.min(best,candidate);
+        if (best === 0) break;
       }
-      return { product, index, score };
-    })
-    .filter((result) => result.score < 999)
-    .sort((a, b) => a.score - b.score || a.index - b.index)
-    .map((result) => result.product);
+      if (best > Math.max(0.25,Math.min(2,Math.floor(term.length*0.3)))) return {product,index,score:999};
+      score += best;
+    }
+    return {product,index,score};
+  }).filter(row => row.score<999).sort((a,b)=>a.score-b.score||a.index-b.index).map(row=>row.product);
 }
 export function suggestAliases(product: {
   name: string;

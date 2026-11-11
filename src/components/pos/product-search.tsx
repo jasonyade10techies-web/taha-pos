@@ -36,6 +36,7 @@ export function ProductSearch({ products }: { products: PosProduct[] }) {
       (category === "All Products" || p.category === category) &&
       (!availableOnly || p.quantity > 0),
   );
+  const resultButtons = () => Array.from(document.querySelectorAll<HTMLButtonElement>('#product-results .product-add:not(:disabled)'));
   return (
     <section className="pos-catalog" aria-label="Product catalog">
       <div className="pos-search">
@@ -48,6 +49,13 @@ export function ProductSearch({ products }: { products: PosProduct[] }) {
           placeholder="Search product, phone model, local name, service or scan barcode..."
           onKeyDown={(e) => {
             if (e.key === "Escape") setQuery("");
+            if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+              e.preventDefault(); const buttons=resultButtons();
+              (e.key==='ArrowDown'?buttons[0]:buttons.at(-1))?.focus();
+            }
+            if (e.key === 'Enter' && query.trim()) {
+              e.preventDefault(); resultButtons()[0]?.click();
+            }
           }}
           autoComplete="off"
         />
@@ -127,6 +135,13 @@ export function ProductSearch({ products }: { products: PosProduct[] }) {
         className="catalog-products"
         role="tabpanel"
         aria-labelledby={`category-${categories.findIndex((item) => item === category)}`}
+        onKeyDown={e=>{
+          if (!(e.target instanceof HTMLButtonElement) || !e.target.classList.contains('product-add')) return;
+          const buttons=resultButtons(),current=buttons.indexOf(e.target);
+          const delta=['ArrowDown','ArrowRight'].includes(e.key)?1:['ArrowUp','ArrowLeft'].includes(e.key)?-1:0;
+          if(delta){e.preventDefault();buttons[(current+delta+buttons.length)%buttons.length]?.focus();}
+          if(e.key==='Escape'){e.preventDefault();search.current?.focus();}
+        }}
       >
         {results.length ? (
           <div className="product-grid">

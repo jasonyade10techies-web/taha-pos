@@ -1,4 +1,6 @@
 import { MediaImage } from "../../components/media/media-image";
+import {useCopyText} from '../../components/ui/copy-text';
+import {prepareExternalWindow,openWhatsappDestination} from '../../lib/external-actions';
 import { useState } from "react";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { repositories as r } from "../../lib/repositories";
@@ -314,6 +316,7 @@ export function CustomerFormPage() {
   );
 }
 export function CreditDetailPage() {
+  const clipboard=useCopyText();
   const now = useShopClock(),
     navigate = useNavigate();
   const { id = "" } = useParams();
@@ -409,15 +412,11 @@ export function CreditDetailPage() {
               </Button>
             )}
             {canCreateSale && <Button onClick={newSale}>New Sale</Button>}
+            {customer&&<Button onClick={()=>void a.run(async()=>{if(!await clipboard.copy([customer.name,customer.shopName,customer.phone,customer.whatsappNumber,customer.address].filter(Boolean).join('\n')))throw Error('Automatic copy is unavailable. Copy the selected text shown.');},'Customer details copied. Nothing was sent.')}>Copy Customer Info</Button>}
             {whatsapp && normalizeWhatsapp(whatsapp) ? (
-              <a
-                className="button button-secondary"
-                href={whatsappUrl(whatsapp, "")}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
+              <Button onClick={()=>{const popup=prepareExternalWindow();void a.run(async()=>{try{await openWhatsappDestination(whatsappUrl(whatsapp,''),popup);}catch(error){popup?.close();throw error;}},'WhatsApp opened. Nothing was sent.');}}>
                 WhatsApp
-              </a>
+              </Button>
             ) : (
               canEdit && (
                 <Link className="button button-secondary" to={editHref}>
@@ -842,6 +841,7 @@ export function CreditDetailPage() {
           <Button onClick={() => window.print()}>Print Receipt</Button>
         </Dialog>
       )}
+      {clipboard.fallback}
     </>
   );
 }

@@ -9,9 +9,12 @@ import { ProductThumbnail } from "../ui/product-thumbnail";
 import { Button } from "../ui/button";
 import {repositories} from '../../lib/repositories';
 import {toast} from '../../stores/toast-store';
+import {Link} from 'react-router-dom';
+import {usePermission} from '../../hooks/use-permission';
 
 export function ProductCard({ product }: { product: PosProduct }) {
   const add = useCartStore((s) => s.add);
+  const canInspect=usePermission('inventory.view');
   const allowNegativeStock = useCartStore((s) => s.allowNegativeStock);
   const inCart = useCartStore(
     (s) =>
@@ -52,6 +55,10 @@ export function ProductCard({ product }: { product: PosProduct }) {
         </Badge>
         <span>{service ? "Service" : `Stock ${product.quantity}`}</span>
       </div>
+      {!service&&(product.damagedQuantity??0)>0&&<div className="product-stock" aria-label="Unavailable stock">
+        {canInspect?<Link className="stock-count-link damaged" to={'/products/'+product.id+'?view=stock'} title="View quarantine locations, reasons and movement history">Damaged / Quarantine {product.damagedQuantity}</Link>:<span>Damaged / Quarantine {product.damagedQuantity}</span>}
+        <small>Not available for sale</small>
+      </div>}
       <div className="product-card-bottom">
         <span
           className="product-location"

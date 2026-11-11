@@ -26,6 +26,7 @@ export interface Product {
 
 /** Explicit employee DTO; cost is intentionally absent from the POS boundary. */
 export interface PosProduct {
+  damagedQuantity?: number;
   customService?: { name: string; description: string; sellingPrice: number; minimumSellingPrice: number; material?: ServiceMaterial };
   image?: string;
   id: string;

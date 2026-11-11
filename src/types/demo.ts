@@ -248,7 +248,7 @@ export interface ReturnRecord {
   createdAt: string;
 }
 export interface RepairService {
-  linkedProductId?:string;
+  linkedProductId?:string|null;
   defaultLaborCharge?:number;
   pricingRule?:'current-product-plus-labor';
   description?:string;

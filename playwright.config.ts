@@ -15,7 +15,7 @@ export default defineConfig({
   projects: [
     {
       name: "chromium",
-      testIgnore: /(?:r1-api-acceptance|api-backend|phase4d|device-bridge-integration|authorization|supabase(?:-transactions)?|shop-connection|instant-camera|phase6a-(?:frontend|browser-api))\.spec\.ts/,
+      testIgnore: /(?:r2a-counter|r1-api-acceptance|api-backend|phase4d|device-bridge-integration|authorization|supabase(?:-transactions)?|shop-connection|instant-camera|phase6a-(?:frontend|browser-api))\.spec\.ts/,
       use: {
         ...devices["Desktop Chrome"],
         viewport: { width: 1366, height: 768 },
