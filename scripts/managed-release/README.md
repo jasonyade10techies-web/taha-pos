@@ -1,0 +1,51 @@
+# Taha POS R2B — staging package, not a deployed shop
+
+One managed Node application serves bundled React and `/api/v1`. No Vite,
+Docker, second application port, inbound cloud WebSocket, or worker is required.
+The LAN device bridge remains a separate local integration.
+
+Hostinger eligibility, proxy trust boundary, domain, external PostgreSQL and
+private S3-compatible storage must be approved before deployment. This ZIP
+contains no database, owner password, media originals, signing material or real
+environment file. Do not put secrets in `public/` or `environment.example`.
+
+Use Node 22 or 24. Project root is this directory; start entry is `server.cjs`.
+Hostinger installs dependencies; build command is `npm run build` (verifies the
+precompiled release); start command is `npm start`. PORT comes from the platform.
+Inject the blank-template variables through private hosting environment controls.
+Native dependencies must install successfully on the actual Linux runtime.
+
+Migration is a separate, explicitly approved administration step:
+
+1. Create a fresh dedicated staging database and migration login. Back it up.
+2. Set staging approval, exact database name, migration URL and a distinct runtime
+   URL privately. If using a different provider pooling hostname, explicitly set
+   `TAHA_STAGING_RUNTIME_HOST`. Use verified TLS and the provider CA if needed.
+3. Run `npm run migrate:staging` in an authorized bounded deployment job, or run
+   the same compiled tool from a secure administration computer. Never per request
+   or automatically at application startup.
+4. For an empty staging database only, supply a unique staging owner email/password
+   and run `npm run seed:staging`. Samples are synthetic, financially linked and
+   idempotent. Existing shop records cause refusal.
+5. Remove migration credentials, seed password and approval variables from the
+   normal web runtime. Never upload an administration secret file with this ZIP.
+6. Confirm `/api/v1/health/live` and `/api/v1/health/readyz`, then sign in and call
+   authorized `/api/v1/health/ready?refresh=1`. Readiness must be `ready`.
+7. Run `node smoke.mjs https://APPROVED-STAGING-DOMAIN`. Use a short-lived access
+   token via `TAHA_SMOKE_ACCESS_TOKEN` only for authorized deep diagnostics. Do not
+   paste tokens in terminals shared with other users or retain them in logs.
+
+The storage provider must support exact-size signed S3 form POST policies,
+bounded GET/PUT/DELETE, private objects and the approved browser POST CORS origin.
+R2/S3 compatibility must be proved against the chosen provider; the label
+“S3-compatible” alone is insufficient. Application directories are replaceable.
+
+Before each migration keep a verified PostgreSQL custom-format dump, the previous
+release ZIP/hash, environment-version record and object-storage recovery copy.
+Test restore into another isolated database. Never overwrite a live financial
+database to roll back code. Prefer a compatible previous release or forward fix;
+there are no automatic destructive down-migrations. Restore financial data only
+under a separate approved recovery plan accounting for post-backup transactions.
+
+No cloud or physical-device acceptance is implied by this package. The complete
+project runbook is `docs/TAHA_POS_HOSTINGER_STAGING_RUNBOOK.md` in the source tree.

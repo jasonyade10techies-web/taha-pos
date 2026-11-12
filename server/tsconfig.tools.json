@@ -1,6 +1,6 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": { "rootDir": ".", "outDir": "dist-tools" },
-  "include": ["scripts/migrate.ts", "scripts/provision.ts", "scripts/seed-staging.ts"],
+  "include": ["scripts/migrate.ts", "scripts/migrate-staging.ts", "scripts/inventory-media.ts", "scripts/provision.ts", "scripts/seed-staging.ts"],
   "exclude": ["node_modules", "dist", "dist-tools", "test"]
 }

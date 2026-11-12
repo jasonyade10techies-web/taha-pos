@@ -11,7 +11,8 @@ export class WorkflowsService {
   }
   private async write(actor: Actor, store: string, name: string, args: unknown[], resource: string) {
     const value = await this.rpc(actor, name, args);
-    await this.realtime.changed(actor, store, resource);
+    // Already committed; HTTPS clients recover from the durable revision stream.
+    await this.realtime.changed(actor, store, resource).catch(()=>undefined);
     return value;
   }
   services(actor: Actor, store: string, id?: string) { return this.rpc(actor, 'repair_service_data', [workflowId(store), id ? workflowId(id) : null]); }

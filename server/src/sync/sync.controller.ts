@@ -60,9 +60,10 @@ export class SyncController {
     @Req() req: AuthRequest,
     @Param("storeId") store: string,
     @Query("after") after = "0",
+    @Query("bootstrap") bootstrap = "0",
   ) {
     uuid(store);
-    if (!/^\d{1,18}$/.test(after))
+    if (!/^\d{1,19}$/.test(after) || BigInt(after)>9223372036854775807n || !['0','1'].includes(bootstrap))
       throw new BadRequestException("Invalid synchronization reference.");
     const permissions: Record<string, string[]> = {
       products: ["sales.create", "inventory.view"],
@@ -72,6 +73,16 @@ export class SyncController {
       sales: ["sales.view", "sales.create", "returns.create"],
       payments: ["sales.view", "payments.approve_electronic", "payments.reverse", "credit.receive_payment"],
       services: ["sales.create", "services.save_catalog", "repair.services.manage"],
+      jobs: ["repairs.view", "repairs.create", "repairs.edit"],
+      shifts: ["shifts.manage", "reports.view"],
+      catalog: ["sales.create", "inventory.view", "products.create", "products.edit"],
+      suppliers: ["inventory.view", "inventory.receive", "products.create", "products.edit"],
+      receiving: ["inventory.view", "inventory.receive"],
+      returns: ["returns.create", "sales.view"],
+      coupons: ["sales.create", "settings.manage"],
+      "purchased-devices": ["devices.buy_used"],
+      employees: ["employees.view", "employees.manage", "employees.permissions"],
+      audit: ["audit.view"],
       "payment-methods": ["sales.create"],
       settings: ["sales.create", "settings.manage"],
       permissions: ["employees.permissions"],
@@ -82,23 +93,33 @@ export class SyncController {
       throw new ForbiddenException(
         "This account is connected to another shop.",
       );
-    const rows = (
-      await this.db.query(
-        "select revision::text,resource,entity_id as id,operation from app_private.sync_changes where store_id=$1 and revision>$2 order by revision limit 200",
-        [store, after],
-      )
-    ).rows;
-    const allowed = new Set<string>();
-    for (const [resource, keys] of Object.entries(permissions))
-      for (const key of keys)
-        if (await this.db.permission(req.actor, key, store)) {
-          allowed.add(resource);
-          break;
-        }
+    const boundary = (await this.db.query<{
+      head:string;first:string;
+      changes:{revision:string;resource:string;id:string;operation:string;own:boolean}[];
+    }>(`with boundary as (
+      select coalesce((select revision from app_private.sync_heads where store_id=$1),0) head,
+             coalesce((select min(revision) from app_private.sync_changes where store_id=$1),0) first
+    ) select head::text,first::text,coalesce((select jsonb_agg(page order by page.revision::bigint) from (
+      select c.revision::text,c.resource,c.entity_id id,c.operation,false own
+      from app_private.sync_changes c where c.store_id=$1 and c.revision>$2::bigint
+        and c.revision<=boundary.head and not $3::boolean order by c.revision limit 200
+    ) page),'[]'::jsonb) changes from boundary`,[store,after,bootstrap==='1'])).rows[0];
+    const resetRequired=bootstrap==='1'||BigInt(after)>BigInt(boundary.head)||
+      (BigInt(boundary.head)>BigInt(after)&&BigInt(boundary.first)>BigInt(after)+1n);
+    const rows=resetRequired?[]:boundary.changes;
+    const granted=new Set<string>(Array.isArray(context.permissions)?context.permissions:[]);
+    const allowed=new Set(Object.entries(permissions).filter(([,keys])=>keys.some(key=>granted.has(key))).map(([resource])=>resource));
+    // The runtime login has no direct public-table SELECT. Evaluate own-shift
+    // visibility through the same transaction-local identity/RLS as normal reads.
+    const shiftIds=rows.filter(row=>row.resource==='shifts').map(row=>row.id);
+    const ownShifts=new Set<string>(!allowed.has('shifts')&&shiftIds.length?await this.db.asActor(req.actor,async db=>(await db.query('select id::text from public.shifts where store_id=$1 and employee_id=$2 and id::text=any($3::text[])',[store,context.profile.id,shiftIds])).rows.map(row=>row.id)):[]);
     return {
-      cursor: rows.at(-1)?.revision ?? after,
+      cursor: resetRequired?boundary.head:rows.at(-1)?.revision ?? after,
       hasMore: rows.length === 200,
-      changes: rows.filter((row) => allowed.has(row.resource)),
+      resetRequired,
+      changes: rows.filter(row=>allowed.has(row.resource)||
+        (['permissions','employees'].includes(row.resource)&&row.id===context.profile.id)||
+        (row.resource==='shifts'&&ownShifts.has(row.id))).map(({revision,resource,id,operation})=>({revision,resource,id,operation})),
     };
   }
   @Post("offline-grant") async grant(

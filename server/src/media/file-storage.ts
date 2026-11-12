@@ -1,14 +1,14 @@
-import {Inject,Injectable} from '@nestjs/common';
+import {Inject,Injectable,OnModuleDestroy} from '@nestjs/common';
 import {access,mkdir,readFile,unlink,writeFile} from 'node:fs/promises';
-import {createHmac} from 'node:crypto';
+import {createHmac,randomBytes,randomUUID} from 'node:crypto';
 import path from 'node:path';
 import {constants} from 'node:fs';
 import {CONFIG,type Configuration} from '../config';
-import {S3Client,PutObjectCommand,GetObjectCommand,DeleteObjectCommand,HeadBucketCommand} from '@aws-sdk/client-s3';
+import {S3Client,PutObjectCommand,GetObjectCommand,DeleteObjectCommand,HeadBucketCommand,HeadObjectCommand} from '@aws-sdk/client-s3';
 export interface FileStorage{write(key:string,bytes:Buffer):Promise<void>;read(key:string):Promise<Buffer>;remove(key:string):Promise<void>}
 export const MAX_IMAGE_BYTES=16*1024*1024;
 @Injectable()
-export class LocalFileStorage implements FileStorage{
+export class LocalFileStorage implements FileStorage,OnModuleDestroy{
  readonly root:string;
  private cloud?:{client:S3Client;bucket:string;region:string;endpoint?:string;accessKey:string;secretKey:string};
  constructor(@Inject(CONFIG) config:Configuration){
@@ -35,18 +35,46 @@ export class LocalFileStorage implements FileStorage{
   return {url:c.endpoint?`${new URL(c.endpoint).origin}/${c.bucket}`:`https://${c.bucket}.s3.${c.region}.amazonaws.com`,fields};
  }
  async probe(){if(this.cloud){await this.cloud.client.send(new HeadBucketCommand({Bucket:this.cloud.bucket}),{abortSignal:AbortSignal.timeout(3000)});return;}await mkdir(this.root,{recursive:true});await access(this.root,constants.R_OK|constants.W_OK);}
- async write(key:string,bytes:Buffer){const file=this.file(key);if(this.cloud){await this.cloud.client.send(new PutObjectCommand({Bucket:this.cloud.bucket,Key:key,Body:bytes,ContentType:'application/octet-stream',IfNoneMatch:'*'}));return;}await mkdir(path.dirname(file),{recursive:true});await writeFile(file,bytes,{flag:'wx'});}
+ async probePrivateStorage(){
+  const key='diagnostics/health-'+randomUUID(),bytes=randomBytes(32);
+  try{
+   if(this.cloud)await this.cloud.client.send(new PutObjectCommand({Bucket:this.cloud.bucket,Key:key,Body:bytes,ContentType:'application/octet-stream',IfNoneMatch:'*'}),{abortSignal:AbortSignal.timeout(3000)});
+   else await this.write(key,bytes);
+   if(!(await this.readBounded(key,64,3000)).equals(bytes))throw new Error('Private storage verification failed.');
+   if(this.cloud){
+    const c=this.cloud,origin=c.endpoint?`${new URL(c.endpoint).origin}/${c.bucket}`:`https://${c.bucket}.s3.${c.region}.amazonaws.com`;
+    const anonymous=await fetch(origin+'/'+key,{redirect:'error',signal:AbortSignal.timeout(3000)});
+    await anonymous.body?.cancel();
+    if(![401,403,404].includes(anonymous.status))throw new Error('The diagnostic object is not private.');
+   }
+  }finally{
+   // Delete only this newly generated diagnostic key, even after a lost PUT ack.
+   if(this.cloud)await this.cloud.client.send(new DeleteObjectCommand({Bucket:this.cloud.bucket,Key:key}),{abortSignal:AbortSignal.timeout(3000)});
+   else await this.remove(key);
+  }
+ }
+ onModuleDestroy(){this.cloud?.client.destroy();}
+ async objectStatus(key:string):Promise<'present'|'missing'|'unavailable'>{
+  const file=this.file(key);try{
+   if(this.cloud)await this.cloud.client.send(new HeadObjectCommand({Bucket:this.cloud.bucket,Key:key}),{abortSignal:AbortSignal.timeout(3000)});
+   else await access(file,constants.R_OK);
+   return 'present';
+  }catch(cause){const error=cause as {code?:string;$metadata?:{httpStatusCode?:number}};return error.code==='ENOENT'||error.$metadata?.httpStatusCode===404?'missing':'unavailable';}
+ }
+ async write(key:string,bytes:Buffer){const file=this.file(key);if(this.cloud){await this.cloud.client.send(new PutObjectCommand({Bucket:this.cloud.bucket,Key:key,Body:bytes,ContentType:'application/octet-stream',IfNoneMatch:'*'}),{abortSignal:AbortSignal.timeout(20000)});return;}await mkdir(path.dirname(file),{recursive:true});await writeFile(file,bytes,{flag:'wx'});}
  async read(key:string){return this.readBounded(key,MAX_IMAGE_BYTES);}
- async readBounded(key:string,maxBytes:number){
+ async readBounded(key:string,maxBytes:number,timeout=20000){
   const file=this.file(key);if(!Number.isInteger(maxBytes)||maxBytes<1||maxBytes>MAX_IMAGE_BYTES)throw new Error('Invalid object size limit.');
   if(!this.cloud){const value=await readFile(file);if(value.length>maxBytes)throw new Error('Image is too large.');return value;}
-  const result=await this.cloud.client.send(new GetObjectCommand({Bucket:this.cloud.bucket,Key:key}),{abortSignal:AbortSignal.timeout(20000)});
+  const abort=AbortSignal.timeout(timeout);
+  const result=await this.cloud.client.send(new GetObjectCommand({Bucket:this.cloud.bucket,Key:key}),{abortSignal:abort});
   if(!result.Body)throw new Error('Image unavailable');
   const body=result.Body as AsyncIterable<Uint8Array>&{destroy?:()=>void};
+  const cancelled=()=>body.destroy?.();abort.addEventListener('abort',cancelled,{once:true});
   try{if(result.ContentLength!==undefined&&result.ContentLength>maxBytes)throw new Error('Image is too large.');
    const chunks:Buffer[]=[];let length=0;for await(const chunk of body){length+=chunk.length;if(length>maxBytes)throw new Error('Image is too large.');chunks.push(Buffer.from(chunk));}return Buffer.concat(chunks,length);
-  }finally{body.destroy?.();}
+  }finally{abort.removeEventListener('abort',cancelled);body.destroy?.();}
  }
- async remove(key:string){const file=this.file(key);if(this.cloud){await this.cloud.client.send(new DeleteObjectCommand({Bucket:this.cloud.bucket,Key:key}));return;}try{await unlink(file);}catch(e){if((e as NodeJS.ErrnoException).code!=='ENOENT')throw e;}}
+ async remove(key:string){const file=this.file(key);if(this.cloud){await this.cloud.client.send(new DeleteObjectCommand({Bucket:this.cloud.bucket,Key:key}),{abortSignal:AbortSignal.timeout(20000)});return;}try{await unlink(file);}catch(e){if((e as NodeJS.ErrnoException).code!=='ENOENT')throw e;}}
 }
 

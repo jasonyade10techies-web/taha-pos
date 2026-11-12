@@ -25,7 +25,7 @@ export function ApiAuthProvider({ children }: { children: ReactNode }) {
         }
         if (disposed || run !== generation) return;
         const previous = useSessionStore.getState();
-        if (!context || previous.profile?.id !== context.profile?.id || JSON.stringify(previous.permissions) !== JSON.stringify(context.permissions)) clearWorkspace(client);
+        if (!context || previous.profile?.id !== context.profile?.id || previous.context?.store?.id !== context.store?.id || JSON.stringify(previous.permissions) !== JSON.stringify(context.permissions)) clearWorkspace(client);
         if (!context) { previous.resetAuth(); return; }
         previous.applyContext(context);
         if(bundledMobile&&context.store)useShopConnectionStore.setState({shopName:`${context.store.name} / ${context.store.branch_name}`});

@@ -11,6 +11,8 @@ import {useInventoryRealtime} from '../../hooks/use-inventory-realtime';
 import {bundledMobile} from '../../lib/mobile/runtime';
 import {useMobilePreferences} from '../../stores/mobile-preferences-store';
 import {useEffect,useState} from 'react';
+import {useCloudSyncStore} from '../../stores/cloud-sync-store';
+import {apiEnabled} from '../../lib/config';
 export function MobileShell() {
   useInventoryRealtime();
   useMobileKeyboard();
@@ -20,7 +22,9 @@ export function MobileShell() {
   const navigate = useNavigate(),
     session = useSessionStore(),
     connection = useShopConnectionStore();
-  const connected = bundledMobile ? connection.connectionStatus === "connected" : online && verified;
+  const cloud=useCloudSyncStore();
+  const connected = bundledMobile ? connection.connectionStatus === "connected" : online && verified && (!apiEnabled||cloud.status==='connected');
+  const connectionLabel=connected?'Connected':!online?'Offline':apiEnabled&&cloud.status==='connecting'?'Connecting…':apiEnabled&&cloud.status==='reconnecting'?'Reconnecting…':'Offline';
   return (
     <div className="staff-app">
       <header className="staff-app-header">
@@ -43,7 +47,7 @@ export function MobileShell() {
               aria-label="Connection status"
             >
               <i />
-              {connected ? "Connected" : "Offline"}
+              {connectionLabel}
               <ChevronDown size={12} />
             </button>
           }

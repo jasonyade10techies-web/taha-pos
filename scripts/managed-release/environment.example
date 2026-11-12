@@ -1,0 +1,30 @@
+# Blank public template. Configure secrets privately in hPanel, never in public/.
+NODE_ENV=production
+TAHA_RUNTIME=cloud
+TAHA_DEPLOYMENT_ENV=staging
+TAHA_SERVE_FRONTEND=true
+# PORT is assigned by hosting. No second application port.
+FRONTEND_ORIGIN=https://APPROVED-STAGING-DOMAIN
+PUBLIC_API_URL=https://APPROVED-STAGING-DOMAIN
+# REQUIRED: verified hosting proxy address/CIDR; never trust all.
+TAHA_TRUST_PROXY=
+DATABASE_URL=
+DATABASE_POOL_MAX=2
+JWT_SECRET=
+STORAGE_DRIVER=s3
+S3_BUCKET=
+S3_REGION=
+S3_ENDPOINT=
+S3_ACCESS_KEY_ID=
+S3_SECRET_ACCESS_KEY=
+# Only for a provider private CA, provisioned separately:
+# NODE_EXTRA_CA_CERTS=/private/path/provider-ca.pem
+# Fixed Android origin, only when APK access is approved:
+# MOBILE_APP_ORIGIN=http://localhost
+# Administration job ONLY; remove these from normal runtime after the job:
+# MIGRATION_DATABASE_URL=
+# TAHA_STAGING_DATABASE_APPROVED=true
+# TAHA_STAGING_DATABASE_NAME=
+# TAHA_STAGING_RUNTIME_HOST=provider-approved-pooling-host
+# STAGING_OWNER_EMAIL=
+# STAGING_OWNER_PASSWORD=

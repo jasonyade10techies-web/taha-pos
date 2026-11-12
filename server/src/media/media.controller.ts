@@ -4,6 +4,8 @@ import {ApiBearerAuth,ApiConsumes,ApiTags} from '@nestjs/swagger';
 import type {Request,Response} from 'express';
 import {AuthGuard,type AuthRequest} from '../auth/auth.guard';
 import {MediaService} from './media.service';
+import {CONFIG,type Configuration} from '../config';
+import {secureTransport} from '../health/secure-transport';
 @ApiTags('Media') @ApiBearerAuth() @UseGuards(AuthGuard) @Controller('stores/:storeId/media')
 export class MediaController{
  constructor(@Inject(MediaService) private readonly media:MediaService){}
@@ -19,7 +21,7 @@ export class MediaController{
 }
 @ApiTags('Media') @Controller('media')
 export class MediaReadController{
- constructor(@Inject(MediaService) private readonly media:MediaService){}
- @Get(':id') async read(@Param('id') id:string,@Query('token') token:string,@Query('thumbnail') thumbnail:string,@Query('original') original:string,@Req() req:Request,@Res() res:Response){const image=await this.media.read(id,token,thumbnail==='1',original==='1',Boolean((req.socket as {encrypted?:boolean}).encrypted));res.set({'Content-Type':image.mimeType,'Cache-Control':'private, no-store','X-Content-Type-Options':'nosniff','Cross-Origin-Resource-Policy':'cross-origin'});res.send(image.buffer);}
+ constructor(@Inject(MediaService) private readonly media:MediaService,@Inject(CONFIG) private readonly config:Configuration){}
+ @Get(':id') async read(@Param('id') id:string,@Query('token') token:string,@Query('thumbnail') thumbnail:string,@Query('original') original:string,@Req() req:Request,@Res() res:Response){const image=await this.media.read(id,token,thumbnail==='1',original==='1',secureTransport(req,this.config));res.set({'Content-Type':image.mimeType,'Cache-Control':'private, no-store','X-Content-Type-Options':'nosniff','Cross-Origin-Resource-Policy':'cross-origin'});res.send(image.buffer);}
 }
 

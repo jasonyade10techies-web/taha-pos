@@ -25,7 +25,9 @@ export class BusinessService {
    if(typeof payload.productId==='string'&&payload.productId.startsWith('custom:')){if(!await this.db.permission(actor,'services.create_custom',store))throw new BadRequestException('Custom service permission required.');payload.productId=uuid(payload.productId.slice(7));}
   }
   const value=await this.db.asActor(actor,async db=>(await db.query(`select public.${op.function}(${args.map((_,i)=>'$'+(i+1)).join(',')}) value`,args)).rows[0].value);
-  if(['save','archive','duplicate','complete','void','return','receive','transfer','adjust','permissions','pin','send','update','reverse','create','action','note','history'].includes(key.split('.').at(-1)??''))await this.realtime.changed(actor,store,key.split('.')[0]);
+  // The RPC has committed. A lost optional LAN notification must not turn that
+  // confirmed mutation into an HTTP failure; the durable stream is authoritative.
+  if(['save','archive','duplicate','complete','void','return','receive','transfer','adjust','permissions','pin','send','update','reverse','create','action','note','history'].includes(key.split('.').at(-1)??''))await this.realtime.changed(actor,store,key.split('.')[0]).catch(()=>undefined);
   if((key==='sales.get'||key==='sales.complete')&&value?.id)value.receiptUrl=await this.receiptLinks.url(store,value.id,value.invoice);
   if((key==='sales.list'||key==='returns.receipts')&&Array.isArray(value?.rows))await Promise.all(value.rows.map(async(sale:{id?:string;invoice?:string;receiptUrl?:string})=>{if(sale?.id)sale.receiptUrl=await this.receiptLinks.url(store,sale.id,sale.invoice);}));
   return value;

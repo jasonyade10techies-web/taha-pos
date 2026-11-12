@@ -2,6 +2,7 @@ import 'dotenv/config';
 import pg from 'pg';
 import {randomUUID} from 'node:crypto';
 import {hashPassword,validatePassword} from '../src/auth/crypto';
+import {stagingTarget,stagingClient} from './staging-target';
 
 type SeedOptions={environment:string;approved:boolean;url:string;email:string;password:string};
 export function validateStagingSeedTarget(input:SeedOptions){
@@ -21,6 +22,10 @@ export async function seedStaging(db:pg.Client,input:SeedOptions){
   const existing=(await db.query('select manifest from app_private.staging_datasets where id=true')).rows[0];
   if(existing){await db.query('COMMIT');return {created:false,manifest:existing.manifest};}
   if(Number((await db.query('select count(*) n from app_private.accounts')).rows[0].n)!==0)throw new Error('Refusing to seed a database with existing accounts and no staging dataset marker.');
+  for(const table of ['profiles','products','customers','sales','payments','stock_movements','credit_ledger_entries','repair_jobs','shifts','suppliers','purchased_devices']){
+   if((await db.query(`select exists(select 1 from public.${table}) occupied`)).rows[0].occupied)throw Error('Refusing to seed a database containing existing shop records.');
+  }
+  if((await db.query('select exists(select 1 from app_private.media) occupied')).rows[0].occupied)throw Error('Refusing to seed existing private media.');
   const store='10000000-0000-4000-8000-000000000001',owner=randomUUID();
   await db.query('insert into auth.users(id,email) values($1,$2)',[owner,input.email]);
   await db.query("insert into public.profiles(id,email,full_name,role,status) values($1,$2,'Staging Shop Owner','owner','active')",[owner,input.email]);
@@ -52,6 +57,7 @@ export async function seedStaging(db:pg.Client,input:SeedOptions){
  }catch(error){await db.query('ROLLBACK');throw error;}
 }
 if(require.main===module){
+ const target=stagingTarget();
  const options={environment:process.env.TAHA_DEPLOYMENT_ENV??'',approved:process.env.TAHA_STAGING_DATABASE_APPROVED==='true',url:process.env.MIGRATION_DATABASE_URL??'',email:process.env.STAGING_OWNER_EMAIL??'',password:process.env.STAGING_OWNER_PASSWORD??''};
- validateStagingSeedTarget(options);const db=new pg.Client({connectionString:options.url});db.connect().then(async()=>{try{const result=await seedStaging(db,options);console.log(JSON.stringify({created:result.created,datasetId:result.manifest.datasetId,status:'Staging sample history is internally linked. No credentials printed.'}));}finally{await db.end();}}).catch(()=>{console.error('Staging seed failed. Check the isolated target and required migrated domain operations. No credentials were logged.');process.exitCode=1;});
+ validateStagingSeedTarget(options);const db=stagingClient(target);db.connect().then(async()=>{try{const result=await seedStaging(db,options);console.log(JSON.stringify({created:result.created,datasetId:result.manifest.datasetId,status:'Staging sample history is internally linked. No credentials printed.'}));}finally{await db.end();}}).catch(()=>{console.error('Staging seed failed. Check the isolated target and required migrated domain operations. No credentials were logged.');process.exitCode=1;});
 }

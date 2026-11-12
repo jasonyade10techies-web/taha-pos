@@ -23,6 +23,7 @@ import {MediaController,MediaReadController} from './media/media.controller';
 import {WorkflowsController} from './workflows/workflows.controller';
 import {WorkflowsService} from './workflows/workflows.service';
 import {HealthController} from './health.controller';
+import {ReadinessService} from './health/readiness.service';
 import {DisplayController,PublicDisplayController} from './display/display.controller';
 import {DisplayService} from './display/display.service';
 import {DevelopmentDownloadController} from './development-download.controller';
@@ -30,6 +31,6 @@ import {DevelopmentDownloadController} from './development-download.controller';
 export class AppModule{
  static register():DynamicModule{
   const config=configuration();
-  return {module:AppModule,controllers:[EnrollmentController,SyncController,ReceiptController,AuthController,BusinessController,CameraController,MediaController,MediaReadController,WorkflowsController,HealthController,DisplayController,PublicDisplayController,...(config.cloud?[]:[DevelopmentDownloadController])],providers:[EnrollmentService,CashReconciliationService,ReceiptService,{provide:CONFIG,useValue:config},Database,AuthService,AuthGuard,BusinessService,...(config.cloud?[{provide:CounterGateway,useClass:PollingGateway}]:[CounterGateway]),CameraService,PushService,LocalFileStorage,MediaService,WorkflowsService,DisplayService]};
+  return {module:AppModule,controllers:[EnrollmentController,SyncController,ReceiptController,AuthController,BusinessController,CameraController,MediaController,MediaReadController,WorkflowsController,HealthController,DisplayController,PublicDisplayController,...(config.cloud||config.production?[]:[DevelopmentDownloadController])],providers:[EnrollmentService,CashReconciliationService,ReceiptService,{provide:CONFIG,useValue:config},Database,AuthService,AuthGuard,BusinessService,...(config.cloud?[{provide:CounterGateway,useClass:PollingGateway}]:[CounterGateway]),CameraService,PushService,LocalFileStorage,MediaService,WorkflowsService,DisplayService,ReadinessService]};
  }
 }

@@ -9,12 +9,13 @@ export function useInventoryRealtime() {
   const store = useSessionStore((s) => s.context?.store?.id);
   const subject = useSessionStore((s) => s.profile?.id);
   const terminal = useSessionStore((s) => s.terminal);
+  const context = useSessionStore((s) => s.context);
   const cache = useQueryClient();
   useEffect(() => {
-    if (localDemoEnabled || !store || !subject) return;
+    if (localDemoEnabled || !store || !subject || context?.companion) return;
     if (apiEnabled) {
       const invalidate = () => void cache.invalidateQueries();
-      const disconnect = subscribeCounter(store, useUiStore.getState().terminalId, invalidate);
+      const disconnect = subscribeCounter(store, useUiStore.getState().terminalId, invalidate, subject);
       window.addEventListener("taha-remote-changed", invalidate); window.addEventListener("online", invalidate);
       return () => { disconnect(); window.removeEventListener("taha-remote-changed", invalidate); window.removeEventListener("online", invalidate); };
     }
@@ -42,5 +43,5 @@ export function useInventoryRealtime() {
       window.removeEventListener("online", invalidate);
       if (channel) void client.removeChannel(channel);
     };
-  }, [store, subject, terminal, cache]);
+  }, [store, subject, terminal, context, cache]);
 }

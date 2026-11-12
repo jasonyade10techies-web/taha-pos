@@ -9,6 +9,7 @@ let token: string | null = null;
 let counterToken: string | null = null;
 let refreshPromise: Promise<SessionContext | null> | null = null;
 let sessionGeneration=0;
+export const getApiSessionRevision=()=>sessionGeneration;
 export const getAccessToken = () => token;
 export const getApiCounterToken = () => counterToken;
 export function acceptCompanionSession(result:{accessToken:string;context:SessionContext}){++sessionGeneration;token=result.accessToken;counterToken=null;tokenChanged();window.dispatchEvent(new Event('taha-session-refresh'));return result.context;}

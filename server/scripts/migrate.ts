@@ -1,18 +1,15 @@
 import 'dotenv/config';
-import {readFile,readdir} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
 import path from 'node:path';
 import pg from 'pg';
+import {migrationManifest} from '../src/database/migration-manifest';
 
 export async function migrate(client:pg.Client){
  await client.query(`select pg_advisory_lock(838912349)`);
  try {
   await client.query('create schema if not exists app_migrations;create table if not exists app_migrations.applied(name text primary key,checksum text not null,applied_at timestamptz not null default now())');
   const root=path.resolve(__dirname,'../migrations');
-  const legacy=(await readdir(path.join(root,'legacy'))).filter(x=>x.endsWith('.sql')).sort().map(x=>['legacy/'+x,path.join(root,'legacy',x)]);
-  const files=[['0000_compatibility.sql',path.join(root,'0000_compatibility.sql')],...legacy,...(await readdir(root)).filter(x=>x.endsWith('.sql')&&x!=='0000_compatibility.sql').sort().map(x=>[x,path.join(root,x)])];
-  for(const [name,file] of files){
-   const source=await readFile(file,'utf8');const digest=createHash('sha256').update(source).digest('hex');
+  for(const {name,source,checksum:digest} of await migrationManifest(root)){
    const applied=(await client.query('select checksum from app_migrations.applied where name=$1',[name])).rows[0];
    if(applied){if(applied.checksum!==digest)throw new Error(`Applied migration changed: ${name}. Create a new migration.`);continue;}
    // Record each migration atomically, including the imported scripts' schema changes.
@@ -29,6 +26,7 @@ export async function runtimeRole(client:pg.Client,url:string){
   await client.query(`create role ${quoted} login password '${pass.replaceAll("'","''")}' nosuperuser nobypassrls nocreatedb nocreaterole noinherit`);
  }
  await client.query(`alter role ${quoted} nosuperuser nobypassrls nocreatedb nocreaterole noinherit;grant authenticated to ${quoted};grant usage on schema app_private to ${quoted};grant select,insert,update,delete on all tables in schema app_private to ${quoted};grant usage on schema public,auth,storage to ${quoted}`);
+ await client.query(`grant usage on schema app_migrations to ${quoted};grant select on app_migrations.applied to ${quoted}`);
  await client.query(`revoke update,delete on app_private.offline_imports,app_private.sync_changes,app_private.media_uploads,app_private.cash_captures,app_private.cash_capture_events from ${quoted}`);
  // Runtime storage catalog access is private metadata; files are served only by the authorization service.
  await client.query(`grant select,insert,delete on storage.objects to ${quoted};grant select on storage.buckets to ${quoted};grant execute on all functions in schema app_private to ${quoted}`);
