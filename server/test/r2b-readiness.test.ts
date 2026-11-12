@@ -55,6 +55,14 @@ test('R2B actual application readiness separates process, schema, runtime grants
    const dead=new Database(config),readiness=new ReadinessService(dead,app!.get(LocalFileStorage),config);readiness.onApplicationBootstrap();
    try{const state=await readiness.check(true);assert.equal(state.status,'unavailable');assert.equal(state.checks.database,'fail');assert.equal((await fetch(base+'/health/live')).status,200);}finally{await dead.onModuleDestroy();}
   });
+  await t.test('termination of a checked-out transaction rejects safely without crashing the API',async()=>{
+   const {Database}=await import('../src/database/database.service');let entered!:(pid:number)=>void;
+   const ready=new Promise<number>(resolve=>{entered=resolve;});
+   const transaction=app!.get(Database).transaction(async connection=>{entered((await connection.query('select pg_backend_pid() pid')).rows[0].pid);await connection.query('select pg_sleep(15)');});
+   const rejected=assert.rejects(transaction);const pid=await ready;
+   await db!.query('select pg_terminate_backend(pid) from pg_stat_activity where pid=$1 and datname=current_database()',[pid]);await rejected;
+   assert.equal((await fetch(base+'/health/live')).status,200);assert.equal((await inspect()).status,200);
+  });
  }finally{await app?.close();await db?.end();assert.match(name,/^taha_r2b_readiness_\d+$/);await admin.query('drop database if exists '+name);await admin.query('drop role if exists '+role);await admin.end();}
 });
 

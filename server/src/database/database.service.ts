@@ -6,12 +6,21 @@ export interface Actor { userId:string; sessionId:string; counterToken?:string; 
 @Injectable()
 export class Database implements OnModuleDestroy {
  readonly pool:Pool;
- constructor(@Inject(CONFIG) config:Configuration) {this.pool=new Pool(databasePoolOptions(config));this.pool.on('error',()=>{/* Replaced idle connections reconnect on the next bounded request; never log credentials. */});}
+ constructor(@Inject(CONFIG) config:Configuration) {
+  this.pool=new Pool(databasePoolOptions(config));
+  // pg-pool forwards idle-client errors, but removes its listener while a
+  // transaction owns the client. Keep an error listener for that entire life;
+  // individual query promises still reject and no financial POST is retried.
+  this.pool.on('connect',client=>client.on('error',()=>{}));
+  this.pool.on('error',()=>{/* Idle failed clients are removed; never log connection secrets. */});
+ }
  async onModuleDestroy(){await this.pool.end();}
  query<T extends QueryResultRow=QueryResultRow>(sql:string,args:unknown[]=[]){return this.pool.query<T>(sql,args);}
  async transaction<T>(fn:(db:PoolClient)=>Promise<T>):Promise<T>{
-  const db=await this.pool.connect();try{await db.query('BEGIN');const result=await fn(db);await db.query('COMMIT');return result;}
-  catch(e){await db.query('ROLLBACK');throw e;}finally{db.release();}
+  const db=await this.pool.connect();let broken=false;const failed=()=>{broken=true;};db.on('error',failed);
+  try{await db.query('BEGIN');const result=await fn(db);await db.query('COMMIT');return result;}
+  catch(e){try{if(!broken)await db.query('ROLLBACK');}catch{broken=true;}throw e;}
+  finally{db.removeListener('error',failed);db.release(broken);}
  }
  async asActor<T>(actor:Actor,fn:(db:PoolClient)=>Promise<T>):Promise<T>{
   return this.transaction(async db=>{
