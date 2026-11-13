@@ -2,21 +2,21 @@
 
 Evidence date: 13 November 2026. **NOT DEPLOYED. There is no accepted public Taha staging URL.** This document distinguishes local acceptance from a real hosting deployment.
 
-Historical first R2C release implementation: `5f35b1884dedab4aa5c9ce1c441639216900ddb6`, branch `codex/r2c-hostinger-staging`. Final clean-source package: `artifacts/managed/Taha-POS-staging-R2C-0.5.0-r2c.1-20261113T101355.zip` (1,903,648 bytes), SHA256 `8c0c9dc04f615685722e086faed5a38e20ac83dd82c5ae01b6dd5a3a6f7d3d19`. Full frontend 187 pass/one intentional skip, backend 269 pass, final packaged fresh-shop 25/25 pass. This is **ready for the next real-provider validation step**, not accepted cloud operation or production readiness.
+Latest locally accepted application: **`88b6076e3e6ab6940ab0cb96373ead9324193b46`**, branch `codex/r2c-hostinger-staging`, **`0.5.0-r2c.3`**, ZIP `artifacts/managed/Taha-POS-staging-R2C-0.5.0-r2c.3-20261113T121256.zip`, SHA256 `9dcaf3097a4303343648c5d66c6668d8e3d84d34c2e9dd68b69f662b372985d3`. Backend 279/279, final packaged fresh-shop 25/25, actual Neon 69 migrations and private storage transport checks pass. The full isolated frontend rerun is recorded in the cloud test report. No hosted application or production acceptance is implied. Historical `.1`/`.2` artifacts remain preserved; `.2` predates the fixed setup-navigation race.
 
 ## Confirmed decisions and account access
 
 - Preserve the existing React/NestJS application, custom authentication, PostgreSQL financial functions, private MediaService, HTTPS revision polling and independent LAN Device Bridge.
 - The owner confirms the purchased plan is **Hostinger Unlimited** and hPanel offers website/Web App creation and application upload. Exact Node.js entitlement, remaining slots, memory/process limits, deployment settings and trusted reverse-proxy addresses have **not** been independently verified.
 - Fresh [official Hostinger limits](https://www.hostinger.com/support/hostinger-node-js-limits-for-web-and-cloud-plans/) explicitly list **Business/Unlimited: 5 Node.js websites, NPROC 120, entry processes 60**. Each app uses one long-running server; resources are shared and HTTP requests have a 120-second limit. Inbound WebSockets, custom ports, Docker/extra services and independent always-running workers are unsupported. This establishes the documented plan capability; it does **not** verify this account's remaining allowance or shared resource consumption.
-- The authenticated connector still exposes an older Business-v3 inventory. It is not evidence about Unlimited. No existing website was changed and no temporary site was created.
+- Earlier, the authenticated connector exposed an older Business-v3 inventory; Hostinger hosting tools are no longer exposed in the current session. The live plugin search currently finds only Hostinger Mail, which cannot verify/deploy Node Web Apps. It is not evidence about Unlimited. No existing website was changed and no temporary site was created.
 - Browser inspection could not safely determine the current Windows browser URL. Computer Use stopped; account checks were not bypassed through another automation method. Reconnect Hostinger to the Unlimited account, or open that account's Node.js Web Apps allowance for a later verified browser session. No password/token needs to be sent in chat.
 - The owner initially confirmed no external resources existed, then explicitly approved **Free staging only**. The Neon Free project/database and private bucket have now been created and verified as described below. No paid resources, Hostinger website or DNS change occurred.
 - Neon plugin installation is now verified in the live inventory and tools are exposed; initial read-only calls return `Unknown tool`. CLI 9.4.0 is authenticated in the named `taha-staging` profile using Windows keyring. Provider verification below uses actual CLI/API/database/storage requests, not an assumed working MCP connection.
 
 ## Approved Free resources — created and provider-tested
 
-The owner approved project `taha-pos-staging`, database `taha_staging` and private bucket `taha-staging-private`, synthetic data only, no paid add-ons. The actual organization reported `plan=free` before creation. CLI sign-in completed securely. Existing environment files, Codex user configuration and default CLI profile were preserved.
+The owner approved project `taha-pos-staging`, database `taha_staging` and private bucket `taha-staging-private`, synthetic data only, no paid add-ons. The actual organization reported `plan=free` before project and acceptance-branch creation. CLI sign-in completed securely. Existing environment files, Codex user configuration and default CLI profile were preserved.
 
 | Resource | Actual state |
 |---|---|
@@ -28,7 +28,7 @@ The owner approved project `taha-pos-staging`, database `taha_staging` and priva
 | Runtime identity | SQL-created `taha_runtime`, NOINHERIT, no superuser/RLS bypass/CREATEDB/CREATEROLE |
 | Private bucket | `taha-staging-private`; provider confirms private access |
 | Real storage checks | **4/4**: signed CRUD/private denial, exact-size POST 204/readback, oversize 400, changed-key 403 |
-| Future acceptance branches | Create isolated clean-shop/transaction branches before owner initialization or synthetic activity; not created yet |
+| Acceptance branch | `r2c-acceptance-20261113` created from empty `main`; synthetic owner/activity only; actual API financial/media 10/10 and auth 3/3 pass. `main` remains empty. |
 | Hostinger app/domain | Not created/deployed; no public staging URL |
 
 Two real managed-provider blockers were corrected: restricted role provisioning no longer attempts a superuser-only ALTER, and TLS readiness verifies the actual authorized live client socket/certificate hostname instead of the proxy's internal `pg_stat_ssl` hop. No insecure TLS fallback or financial SQL change was introduced. Full backend 279/279 passes. See `NEON_AGENT_SETUP_2026-11-13.md` for tooling/configuration changes.
@@ -74,3 +74,5 @@ See `TAHA_POS_R2C_CLEAN_SHOP_ACCEPTANCE.md` and `TAHA_POS_R2C_CLOUD_TEST_RESULTS
 ## Managed PostgreSQL restore note
 
 The first actual Neon empty-schema restore passed after excluding exactly two provider-owned `cloud_admin` default ACL TOC entries and applying three retained owner-sequence grant statements. Application ACLs/RLS were retained and compared by effective permissions; ten tables and constraints match. Use the retained dump, reviewed TOC, SQL grant sidecar, permissions snapshot and CA bundle as one recovery set. Never use a blanket `--no-acl` workaround. This is not populated financial/media or offsite backup acceptance. Exact evidence is in the R2C cloud test report.
+
+Actual restricted-pooler financial/media API acceptance now passes 10/10 on the separate synthetic branch; refresh/logout/replay checks pass 3/3. Populated PostgreSQL and three private photo-object recovery rehearsals pass. These used a local production-mode API against real providers; public Hostinger HTTPS, proxy settings, browser CORS, two internet browser sessions and hosting restart/redeployment remain unverified. No staging URL exists.

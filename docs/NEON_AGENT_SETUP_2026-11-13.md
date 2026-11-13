@@ -61,9 +61,15 @@ Evidence is in ignored `.test-postgres/neon-skills-setup-20261113/`: configurati
 
 - Complete backend suite: **279 passed, 0 failed, 0 skipped**, 13 Nov 16:00:39-16:05:11 PKT, exit 0. This includes five managed-role and five actual-TLS fixture cases.
 - Backend TypeScript and lint: both exit 0 at 16:16 PKT.
-- Existing unchanged frontend complete run: **187 passed, one intentional API-profile skip, zero failed**, 13 Nov 14:44-15:14 PKT. It was not relabeled as a new run after backend-only fixes.
+- After the later minimal setup-link correction, the complete isolated frontend suite was rerun: **187 passed, one intentional API-profile skip, zero failed**, 13 Nov **17:15:24-17:38:22 PKT**, exit 0. The earlier 14:44 run remains historical evidence.
 - Source/media integrity, release archive, final compiled-package rehearsal and backup results are recorded in `TAHA_POS_R2C_CLOUD_TEST_RESULTS.md`.
 
 Actual empty Neon schema backup/restore also passed: ten source tables, constraints, effective grants and RLS match in a separate generated target. Two provider-owned default ACLs and three owner-sequence grants require the retained documented restoration sidecars. The cloud test report records the exact limitation and dump hash; this is not a populated-shop/object recovery pass.
 
 Real pooled-runtime deep dependency readiness passes every infrastructure check; authentication deliberately fails until first-owner initialization, so the uninitialized base remains degraded. No default test owner was introduced.
+
+Final locally accepted package is `0.5.0-r2c.3`, application `88b6076e3e6ab6940ab0cb96373ead9324193b46`, 345 payload files and 25/25 fresh-shop checks. During verification, an actual setup progress-link busy-state race was reproduced before the minimal accessibility/disabled-state correction. This was a bounded staging-blocking fix, not a redesign. The four normal progress links and one waiting style changed; a real delayed-readback regression was added to the existing harness. Configuration fingerprints remain unchanged.
+
+A Free child branch `r2c-acceptance-20261113` now holds synthetic API acceptance records; `main` remains the empty migrated base. Actual compiled Nest/Neon pooler/private-media acceptance passes **10/10**, separate refresh/logout/replay checks **3/3**, populated PostgreSQL restore and all three photo-object backup/restore checks pass. New branch-scoped connection/storage/test credentials are kept only in the same private owner-only directory. The Free account does not permit editing the suspend timeout, so its default was retained. No new paid resources or application auth provider was introduced.
+
+Final source/release recovery copies are recorded in the R2C cloud test report. No source, public artifact or report contains the private provider environment files. The original eight configuration fingerprints still match after all tooling, branch and API acceptance work. Current CLI project context remains `main`; every acceptance mutation explicitly targets the child branch. Do not use unscoped mutation commands against the empty base.

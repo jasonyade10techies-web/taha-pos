@@ -2,6 +2,14 @@
 
 Evidence date: 13 November 2026. **No public cloud acceptance has occurred.** Approved Neon Free PostgreSQL and private storage now exist and have passed limited real-provider checks; the selected Unlimited account is not yet aligned with the hosting connector. There is no deployed commit or HTTPS staging URL.
 
+## Current committed release after the setup regression correction
+
+**`0.5.0-r2c.3`**, application commit **`88b6076e3e6ab6940ab0cb96373ead9324193b46`**, branch `codex/r2c-hostinger-staging`. ZIP: `artifacts/managed/Taha-POS-staging-R2C-0.5.0-r2c.3-20261113T121256.zip`, **1,905,307 bytes**, SHA256 **`9dcaf3097a4303343648c5d66c6668d8e3d84d34c2e9dd68b69f662b372985d3`**. All 345 payload hashes, archive CRCs, forbidden-private-file checks and eight exact known private values pass. Source was clean when packaged.
+
+The final production-style fresh-shop harness passed **25/25**, exit 0, **17:15:24-17:18:01 PKT**. This includes the deterministic held-real-readback disabled/enabled link assertion and successful tax navigation, full financial/media/reconnect/outage flows and actual isolated backup/restore. Evidence: `clean-shop-fixed.log`, matching result JSON, `.test-postgres/r2c-20261113/taha_r2c_clean_1794572125571/results.json`, and `release-final-inspection.json` under the Neon evidence directory. Backend still 279/279; frontend typecheck/lint pass. **Fresh complete isolated frontend rerun: 187 passed, one intentional API-profile skip, zero failed**, exit 0; **17:15:24-17:38:22 PKT**, 22.9 minutes (`frontend-isolated-full.log` and result JSON).
+
+The default **unqualified `npm test`** configuration is not the validated isolated baseline: it selects 222 mixed-profile cases without the required setup. It was interrupted after four `cash-reconciliation.spec.ts` cases failed at an Opening workspace screen. Assertions/exclusions were not edited. The existing dedicated API reconciliation configuration subsequently passes **5/5**, exit 0, **17:15:24-17:16:08 PKT** (`reconciliation-browser.log`). The actual full local regression command is the preexisting **`npm run test:local`**, with its own fixture/global setup. Repairing the default aggregate entrypoint is a separate test-configuration cleanup; do not claim that aborted command passed.
+
 ## Latest real-provider and backend verification
 
 Evidence: ignored `.test-postgres/neon-skills-setup-20261113/` (13 November 2026).
@@ -20,7 +28,7 @@ Evidence: ignored `.test-postgres/neon-skills-setup-20261113/` (13 November 2026
 
 The TLS check uses the live authorized TLSSocket plus certificate/hostname validation. The observed proxy-internal `pg_stat_ssl=false` does not override actual client encryption. The runtime role guard rejects elevated existing roles/memberships before grants. Historical migration SQL and recovered MediaService were not changed.
 
-The full unchanged frontend result below remains current for its source: 187 passed, one intentional skip. It was not rerun or relabeled after backend-only changes. The first `.1` package predates these two fixes; a new committed `.2` package is required before real deployment.
+The earlier frontend result below belongs to its earlier source. After the subsequent setup-link fix, the complete 188-case isolated suite was rerun; its 187 pass/one intentional skip result is recorded above. The first `.1` package predates these two fixes. `.2` exposed the separate setup-navigation race. The accepted local `.3` package includes both compatibility corrections and the navigation guard; earlier artifacts are preserved.
 
 ## Earlier complete local checks (before provider compatibility fixes)
 
@@ -87,4 +95,24 @@ At **17:03:57 PKT**, the actual ReadinessService with the restricted pooled Neon
 
 The clean `c09873a...` package `0.5.0-r2c.2` builds and all 345 payload hashes/privacy checks pass, but its fresh-shop rehearsal failed after four completed checks: the tax-review link remained on the wizard. A deterministic regression delays an **actual** settings readback during cache invalidation (no fabricated API data) and confirms the link incorrectly remains enabled while `useAction.run` refuses another action. The initial diagnostic interception cleanup raised `Route is already handled`; it was corrected to wait for in-flight route completion, then the unchanged application failed specifically at `toBeDisabled` as intended (`setup-navigation-red-corrected.log`).
 
-All four save-and-navigate links now expose their existing busy state via `aria-disabled`, with a subdued waiting style. Their save, readback and cache-refresh behavior is unchanged. The regression verifies disabled state during the delayed real readback, re-enabled state after completion, successful tax navigation and retained setup values. A newer committed package/full frontend run must pass before acceptance. This race is distinct from the still-open interrupted refresh-token restoration case; no authentication guard was relaxed.
+All four save-and-navigate links now expose their existing busy state via `aria-disabled`, with a subdued waiting style. Their save, readback and cache-refresh behavior is unchanged. The regression verifies disabled state during the delayed real readback, re-enabled state after completion, successful tax navigation and retained setup values. The subsequent clean `.3` package passes all 25 checks, including this forced race. The complete isolated frontend run is recorded in the current-release section. This race is distinct from the still-open interrupted refresh-token restoration case; no authentication guard was relaxed.
+
+## Actual Neon financial/media API acceptance
+
+Approved Free child branch **`r2c-acceptance-20261113`**, separate from empty `main`, **10/10 passed** against the compiled `.3` application, the real restricted transaction pooler and private object storage. The API process ran on this Windows PC in production/cloud mode with a loopback trusted-proxy fixture and a nonpublished test origin. This is **real provider/API verification**, not a hosted HTTPS URL, desktop/mobile browser acceptance or native testing.
+
+Covered: guarded 69-migration verification and first-owner initialization with no sample activity; full authenticated readiness; first product/locations/supplier/stock receipt; cash sale and exact retry; one-line PKR 3,600 material + 500 labor and one stock deduction; damaged return/quarantine; PKR 3,600 credit less 1,000 collection = 2,600 ledger and preserved due date; two authenticated sessions racing for the last unit; actual MediaService original/decoded thumbnail/private access and duplicate upload retry; application restart preserving sessions, SQL state and identical photo bytes. Four synthetic sales now exist only on the acceptance branch. `main` remains zero owners/products/customers/sales/payments/movements, rechecked at **17:35:57 PKT**.
+
+Separate actual-provider auth checks **3/3 passed**: Secure/HttpOnly/SameSite-strict refresh cookie rotation; logout denying persisted session/access/refresh; old-refresh replay revoking that isolated session family. This preserves strict replay detection and does not resolve the distinct rapid-browser-interruption lifecycle issue.
+
+Evidence: `neon-api-results.json`, `neon-api-verified.log`, `neon-security-results.json`, `neon-security.log`, `final-preservation.json`. Earlier fixture attempts were retained: omitted explicit staging environment was correctly refused; a legacy `/auth/context` test URL was corrected to the existing `/auth/session`; location fixtures were corrected from `parentId` to the real `parent_id` contract. No endpoint or application validation was changed to accommodate these fixture errors, no business state was reset, and the created synthetic rack/owner were safely reused.
+
+The Free account rejected explicitly changing its suspend timeout, even to 300 seconds. The branch was then created using the provider's unchanged default, at fixed 0.25 CU, after listing existing branches to avoid duplication. No upgrade or paid add-on was enabled.
+
+Durations are workflow groups, not individual request latency: cash + exact retry + SQL assertions **4.41 s**; combined service + retry + SQL **6.21 s**; damaged return + SQL **2.03 s**; credit/customer/collection + SQL **5.58 s**. Actual Hostinger-region latency, cold startup and load remain unmeasured. Latest local `.3` production-entry startup was **15.07 s** under concurrent test load; preceding local runs varied (3.24 s and 34.65 s). Their cause has not been isolated; do not promise the earlier fast timing on managed hosting.
+
+## Populated provider database and photo recovery rehearsal
+
+The acceptance branch's **four synthetic sales** were dumped over verified TLS and restored into a separate generated Neon database. At **17:34:11 PKT**, ten tables, constraints, effective function/object grants and RLS matched. The disposable restore target was removed; source unchanged. Custom dump: **846,139 bytes**, SHA256 **`445d6e7ab49e4cb3041287f4d157831ddab13ada1d9033da8b0d91799d317ac2`**. The two provider ACL exclusions and three owner-sequence grant sidecars described above are retained for this backup too. Evidence: `real-acceptance-backup-restore.json` and log.
+
+All **three** synthetic photo objects (processed image, byte-identical original, thumbnail; **301 bytes total**) were downloaded to private storage, SHA256 checked, restored under fresh private diagnostic keys, read/hash-verified, checked against anonymous access, and diagnostic copies removed. Original keys were re-read unchanged. Evidence: `real-object-backup-restore.json`; private `synthetic-object-backup/manifest.json` maps each original key to its local recovery bytes. This bounded rehearsal is not an operational scheduled retention system, offsite disaster recovery or a full restored application exercise. Independent off-machine backups and recovery procedures remain required before daily use.
