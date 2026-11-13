@@ -28,6 +28,7 @@ export async function runtimeRole(client:pg.Client,url:string){
  await client.query(`alter role ${quoted} nosuperuser nobypassrls nocreatedb nocreaterole noinherit;grant authenticated to ${quoted};grant usage on schema app_private to ${quoted};grant select,insert,update,delete on all tables in schema app_private to ${quoted};grant usage on schema public,auth,storage to ${quoted}`);
  await client.query(`grant usage on schema app_migrations to ${quoted};grant select on app_migrations.applied to ${quoted}`);
  await client.query(`revoke update,delete on app_private.offline_imports,app_private.sync_changes,app_private.media_uploads,app_private.cash_captures,app_private.cash_capture_events from ${quoted}`);
+ await client.query(`revoke all on app_private.shop_initialization from ${quoted}`);
  // Runtime storage catalog access is private metadata; files are served only by the authorization service.
  await client.query(`grant select,insert,delete on storage.objects to ${quoted};grant select on storage.buckets to ${quoted};grant execute on all functions in schema app_private to ${quoted}`);
  await client.query(`grant usage,select on all sequences in schema app_private to ${quoted}`);

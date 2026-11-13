@@ -13,6 +13,7 @@ import {useMobilePreferences} from '../../stores/mobile-preferences-store';
 import {useEffect,useState} from 'react';
 import {useCloudSyncStore} from '../../stores/cloud-sync-store';
 import {apiEnabled} from '../../lib/config';
+import {ShopSetupGate} from '../settings/first-run-setup';
 export function MobileShell() {
   useInventoryRealtime();
   useMobileKeyboard();
@@ -87,7 +88,7 @@ export function MobileShell() {
         </Link>
       </header>
       <main className="staff-app-content">
-        <Outlet />
+        <ShopSetupGate><Outlet /></ShopSetupGate>
       </main>
       <MobileNavigation />
     </div>

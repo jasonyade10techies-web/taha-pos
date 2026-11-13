@@ -17,6 +17,9 @@ import { apiAuth } from "../../lib/api/client";
 import { permitted } from "../../lib/permissions";
 import type { PermissionKey } from "../../types/auth";
 import {bundledMobile} from '../../lib/mobile/runtime';
+import {FirstRunSetupPage,FirstRunTaxPage} from '../settings/first-run-setup';
+const SetupLocations=lazy(()=>import('../inventory/locations-page').then(module=>({default:module.LocationsPage})));
+const SetupPayments=lazy(()=>import('../admin/catalog-pages').then(module=>({default:module.PaymentsPage})));
 const Home = lazy(() =>
     import("./mobile-home-page").then((m) => ({ default: m.MobileHomePage })),
   ),
@@ -167,6 +170,10 @@ export function MobileRoutes() {
           <Route path="/login" element={<MobileLoginPage />} />
           <Route element={<Guard />}>
             <Route element={<MobileShell />}>
+              <Route path="/setup" element={<FirstRunSetupPage mobile/>}/>
+              <Route path="/setup/tax" element={<FirstRunTaxPage/>}/>
+              <Route element={<Guard permission="inventory.view"/>}><Route path="/locations" element={<SetupLocations/>}/></Route>
+              <Route element={<Guard permission="settings.manage"/>}><Route path="/payment-methods" element={<SetupPayments/>}/></Route>
               <Route path="/mobile" element={<Home />} />
               <Route path="/mobile/activity" element={<Activity />} />
               <Route path="/mobile/devices" element={<Devices />} />

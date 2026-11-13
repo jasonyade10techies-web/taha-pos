@@ -1,6 +1,7 @@
 export interface ShopConfiguration {
   operatingMode: "owner-only" | "staff";
   setupCompleted: boolean;
+  setupRequired?: boolean;
   setupStep: number;
   enabledFeatures: { credit: boolean; testItems: boolean; repairs: boolean; usedDevices: boolean; suppliers: boolean; mobileSales: boolean; website: boolean };
   storageLabels: { rack: string; shelf: string; box: string };

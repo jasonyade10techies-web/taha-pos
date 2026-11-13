@@ -1,4 +1,4 @@
-# Taha POS R2B — staging package, not a deployed shop
+# Taha POS — managed staging package, not a deployed shop
 
 One managed Node application serves bundled React and `/api/v1`. No Vite,
 Docker, second application port, inbound cloud WebSocket, or worker is required.
@@ -24,9 +24,14 @@ Migration is a separate, explicitly approved administration step:
 3. Run `npm run migrate:staging` in an authorized bounded deployment job, or run
    the same compiled tool from a secure administration computer. Never per request
    or automatically at application startup.
-4. For an empty staging database only, supply a unique staging owner email/password
-   and run `npm run seed:staging`. Samples are synthetic, financially linked and
-   idempotent. Existing shop records cause refusal.
+4. For the **clean first-run shop**, do NOT run the sample seed. Privately supply
+   `INITIALIZE_SHOP_APPROVED=true`, `PROVISION_EMAIL`, `PROVISION_NAME` and a new
+   `PROVISION_PASSWORD`, then run `npm run initialize:staging` once. It creates
+   only the authorized first owner and setup state, with zero business activity.
+   Repeated initialization is refused. There is no public owner signup endpoint.
+   Login opens Shop Setup; optional devices/modules do not block completion.
+   Use `npm run seed:staging` only in a separate disposable sample database with
+   explicitly supplied staging sample credentials, never in the clean scenario.
 5. Remove migration credentials, seed password and approval variables from the
    normal web runtime. Never upload an administration secret file with this ZIP.
 6. Confirm `/api/v1/health/live` and `/api/v1/health/readyz`, then sign in and call

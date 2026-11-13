@@ -2,7 +2,23 @@
 
 Evidence updated: **13 November 2026** (earlier sections retain their historical dates). Root: `D:\Inventory system POS`. This checklist records the original audit and subsequent authorized R1/R2A implementation. Historical results are labelled; only the current completion section controls the next work. See `TAHA_POS_COMPLETE_HANDOFF_2026-11-11.md` for architecture, test boundaries and history.
 
-## Phase R2B completed — current status (13 November 2026)
+## Phase R2C — current preparation status (13 November 2026)
+
+Branch `codex/r2c-hostinger-staging`, preserving the R2B documentation checkpoint `f408a59ad15b5cb4b035e9ac5e38945ba5b4d3ec` and tested implementation `6bea29a59a767802635ae0213154c8345c5381c1`. **Not deployed; no public staging URL.**
+
+- [x] Guarded first-owner initialization creates no sample business activity, refuses occupied databases and repeated/concurrent initialization, and closes public bootstrap. Seven isolated tests pass.
+- [x] Existing six-stage Shop Setup reused for fresh API owners on desktop/mobile, with persisted progress, optional tools, payment/storage links, zero-tax review and empty Dashboard.
+- [x] Migration registry now **69**, with a new immutable private initialization marker. Historical 68-migration R2B packages remain preserved.
+- [x] Full backend rerun **269 passed / 0 failed / 0 skipped**, 13 Nov 14:49–15:02 PKT. Recovered MediaService remains frozen.
+- [ ] Complete final fresh-shop production-package rehearsal, full frontend rerun, final artifact/source provenance and report gates. See the R2C test report for actual completion evidence; do not substitute partial rehearsal results.
+- [ ] Investigate rapid page interruption during refresh-token rotation: one immediate navigation/reload rehearsal returned to login. Normal settled-page reload is tested separately. Do not weaken token replay protection to conceal this case.
+- [ ] External PostgreSQL/private bucket **NONE**, explicitly confirmed by owner. Neon Free PostgreSQL plus private Object Storage proposed for synthetic staging, pending approval, authenticated access and real compatibility tests. Installed plugin is not a provisioned resource.
+- [ ] Hostinger Unlimited account alignment and remaining Node slots/proxy/resource usage. Official docs now explicitly list Unlimited with five Node apps and Node 22/24, NestJS, ZIP/temporary-domain support. No account-specific remaining allowance is inferred.
+- [ ] Real Hostinger/cloud acceptance: public HTTPS, provider roles/TLS/pooling, signed POST/CORS/privacy/durability, fresh setup, two sessions, financial SQL assertions and backup/restore. No local or physical result replaces these gates.
+
+See `TAHA_POS_R2C_HOSTINGER_DEPLOYMENT.md`, `TAHA_POS_R2C_CLEAN_SHOP_ACCEPTANCE.md`, `TAHA_POS_R2C_CLOUD_TEST_RESULTS.md`, and `TAHA_POS_R2C_REMAINING_PRODUCTION_WORK.md`. Native Android/Windows, repair accounting and physical hardware limitations below remain open. No purchase, DNS change, public Git push or saved-shop migration is authorized by this preparation.
+
+## Phase R2B completed — historical status (13 November 2026)
 
 Local implementation and acceptance completed on `codex/r2b-cloud-staging`, preserving R2A `2955c204b645ef9d11a8ef78be88f81f36e915f0`. Release implementation is `6bea29a59a767802635ae0213154c8345c5381c1`; later documentation checkpoint does not change the tested application. See `TAHA_POS_PHASE_R2B_REPORT.md`, `TAHA_POS_R2B_TEST_RESULTS.md`, `TAHA_POS_HOSTINGER_STAGING_RUNBOOK.md` and `TAHA_POS_DEPLOYMENT_DEPENDENCIES.md`.
 

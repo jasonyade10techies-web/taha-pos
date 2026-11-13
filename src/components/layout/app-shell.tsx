@@ -11,6 +11,7 @@ import { MobileNavigation } from "./mobile-navigation";
 import { useInventoryRealtime } from "../../hooks/use-inventory-realtime";
 import { useSessionStore } from "../../stores/session-store";
 import { VirtualKeyboardHost } from "../ui/virtual-keyboard";
+import {ShopSetupGate} from '../../features/settings/first-run-setup';
 
 export function AppShell() {
   useShortcuts();
@@ -33,7 +34,7 @@ export function AppShell() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.17 }}
           >
-            <Outlet />
+            <ShopSetupGate><Outlet /></ShopSetupGate>
           </motion.div>
         </main>
         <div className="workspace-footer">

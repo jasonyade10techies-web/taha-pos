@@ -15,6 +15,7 @@ import {
 import { isTauri } from "@tauri-apps/api/core";
 import { MotionConfig } from "framer-motion";
 import { AppShell } from "../components/layout/app-shell";
+import {FirstRunSetupPage,FirstRunTaxPage} from '../features/settings/first-run-setup';
 
 import { ToastHost } from "../components/ui/feedback";
 
@@ -353,6 +354,8 @@ export function App() {
                   </Route>
                   <Route element={<ProtectedRoute />}>
                     <Route element={<AppShell />}>
+                      <Route path="/setup" element={<FirstRunSetupPage/>}/>
+                      <Route path="/setup/tax" element={<FirstRunTaxPage/>}/>
                       <Route path="/" element={<HomeRedirect />} />
                       <Route
                         path="/dashboard"

@@ -28,3 +28,8 @@ S3_SECRET_ACCESS_KEY=
 # TAHA_STAGING_RUNTIME_HOST=provider-approved-pooling-host
 # STAGING_OWNER_EMAIL=
 # STAGING_OWNER_PASSWORD=
+# Clean-shop initialization job ONLY (never in normal web runtime):
+# INITIALIZE_SHOP_APPROVED=true
+# PROVISION_EMAIL=
+# PROVISION_NAME=
+# PROVISION_PASSWORD=
