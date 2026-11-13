@@ -1,8 +1,33 @@
 # Taha POS remaining work checklist
 
-Evidence date: **11 November 2026**. Root: `D:\Inventory system POS`. This checklist records the original audit and subsequent authorized R1/R2A implementation. Historical results are labelled; only the current completion section controls the next work. See `TAHA_POS_COMPLETE_HANDOFF_2026-11-11.md` for architecture, test boundaries and history.
+Evidence updated: **13 November 2026** (earlier sections retain their historical dates). Root: `D:\Inventory system POS`. This checklist records the original audit and subsequent authorized R1/R2A implementation. Historical results are labelled; only the current completion section controls the next work. See `TAHA_POS_COMPLETE_HANDOFF_2026-11-11.md` for architecture, test boundaries and history.
 
-## Phase R2A completed — current status
+## Phase R2B completed — current status (13 November 2026)
+
+Local implementation and acceptance completed on `codex/r2b-cloud-staging`, preserving R2A `2955c204b645ef9d11a8ef78be88f81f36e915f0`. Release implementation is `6bea29a59a767802635ae0213154c8345c5381c1`; later documentation checkpoint does not change the tested application. See `TAHA_POS_PHASE_R2B_REPORT.md`, `TAHA_POS_R2B_TEST_RESULTS.md`, `TAHA_POS_HOSTINGER_STAGING_RUNBOOK.md` and `TAHA_POS_DEPLOYMENT_DEPENDENCIES.md`.
+
+- [x] **Full frontend rerun**: 187 passed / 1 intentional API-only skip / 0 failed, exit 0. R2A's full-run failure is no longer an open regression gate.
+- [x] **Full corrected backend**: 262 passed / 0 failed / 0 skipped, exit 0; typecheck, lint and combined frontend/backend production build pass. Runtime audits zero known advisories.
+- [x] Durable, transaction-bound per-store revisions cover repair jobs, shifts and other shared mutation gaps. Real permissions, rollback, concurrent commit order and missed notification tests pass.
+- [x] Shared HTTPS polling with single-flight, scoped cursors, paging/reset, abort/stale-response protection, visibility/backoff, reconnect and cache invalidation. Existing LAN bridge retained independently.
+- [x] Real deep readiness checks schema/checksums/functions/RLS/runtime grants/TLS configuration/authentication/private storage. Public liveness and readiness are separate.
+- [x] Active PostgreSQL client termination no longer crashes the API; failed transactions reject without a blind financial retry. Real outage and reconnect acceptance passes.
+- [x] Frozen recovered MediaService hash preserved; private originals/thumbnails/uploads remain. Deep object privacy/CRUD fixture checks and read-only historical inventory tooling added.
+- [x] Same-origin compiled Nest + React staging package, guarded separate migration/seed, synthetic sample history, manifest/hash/secret inspection, smoke and rollback instructions.
+- [x] **16/16 production-style local package checks**: real authentication/DB/files, desktop/mobile shared updates, financial invariants, restart, catch-up, DB/storage failures. No Vite/demo data substituted for online acceptance.
+- [x] Verified private source ZIP/Git bundle on C and D with independently cloned object integrity. Saved shop port 55439 and earlier recovery archives untouched.
+- [x] Isolated real localhost: frontend `http://127.0.0.1:1423/dashboard`, API `http://127.0.0.1:3306/api/v1`, readiness ready and 68/68 migrations matched. Loopback-only fixture; no physical phone acceptance.
+- [ ] **R2C staging gate:** selected Unlimited account entitlement/remaining Node slot, trusted proxy, domain, external PostgreSQL/roles/pool/TLS and private object POST/CORS/backup capabilities must be verified and approved. Current entitlement UNKNOWN; no cloud resource provisioned or deployment performed.
+- [ ] Historical missing originals: retain truthful placeholders and metadata; run a separately approved read-only inventory/reconciliation. Do not fabricate or delete history.
+- [ ] Android corrupt-item queue isolation and camera process-recreation recovery; rebuild/sign and physically accept APK. Shared polling source changes are not in an already-installed old APK.
+- [ ] Windows MSVC/SDK toolchain/native build/installer, SQLite offline launch/cash/receipt/outbox/reconnect acceptance. Source/SQL tests do not prove native operation.
+- [ ] Physical printer, USB/HID scanner, customer second monitor, phone pairing/camera and LAN-without-internet acceptance.
+- [ ] Repair-job materials/deposits/settlement and expense-adjusted net-profit scope/accounting; separate controlled phase before relying on those workflows in production.
+- [ ] Hosted backup/restore, monitoring, signing, real payment-account checks and daily-shop release acceptance.
+
+**Next:** R2C — approved isolated Hostinger staging deployment and real-provider acceptance. No further UI redesign or repetition of R2A is needed. Production/hardware acceptance remains separate.
+
+## Phase R2A completed — historical status
 
 R2A is implemented on `r2a-counter-corrections`, descending from preserved R1 commit `fed76251bb7c5f3de89d58ee76a248a23db2402a`. See `TAHA_POS_PHASE_R2A_COUNTER_CORRECTIONS_REPORT.md` and `TAHA_POS_PHASE_R2A_TEST_RESULTS.md`. The final local commit and independently verified private bundle are recorded in ignored `.test-postgres/r2a-20261111/git-checkpoint.json` and the owner response. No push, deployment, APK/installer build or saved-database migration occurred.
 
@@ -17,7 +42,7 @@ R2A is implemented on `r2a-counter-corrections`, descending from preserved R1 co
 - [x] Existing broad local browser run: **186 pass / 1 fail / 1 intentional skip**, followed by the affected legacy WhatsApp case passing with original phone/message assertions retained. **187 unique cases pass**, not a claim that the full-run exit was green. PDF coverage passed.
 - [x] Real API/auth fixture available at frontend `http://127.0.0.1:1423/dashboard`, API health `http://127.0.0.1:3306/api/v1/health`, disposable PostgreSQL 55459. No LAN/mobile availability claim.
 
-**Next:** R2B synchronization/readiness corrections and Hostinger staging packaging, without deploying until separately authorized. Production remains blocked by the rows in section B and the unchanged Android/native/accounting gaps below. Native apps/hardware/actual WhatsApp sending are not certified by browser tests.
+**Historical R2A next step (now completed):** R2B synchronization/readiness corrections and staging packaging. The R2B section above controls current next work. Production remains blocked by the rows in section B and the unchanged Android/native/accounting gaps below. Native apps/hardware/actual WhatsApp sending are not certified by browser tests.
 
 ## Phase R1 implementation update
 
