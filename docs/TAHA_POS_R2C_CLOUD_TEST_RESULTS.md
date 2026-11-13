@@ -1,8 +1,29 @@
 # R2C — tests and environment boundaries
 
-Evidence date: 13 November 2026. **No public cloud acceptance has occurred.** External PostgreSQL and private storage are explicitly NONE; the selected Unlimited account is not yet aligned with the connector. There is no deployed commit or HTTPS staging URL.
+Evidence date: 13 November 2026. **No public cloud acceptance has occurred.** Approved Neon Free PostgreSQL and private storage now exist and have passed limited real-provider checks; the selected Unlimited account is not yet aligned with the hosting connector. There is no deployed commit or HTTPS staging URL.
 
-## Fresh local checks
+## Latest real-provider and backend verification
+
+Evidence: ignored `.test-postgres/neon-skills-setup-20261113/` (13 November 2026).
+
+| Check | Actual result | Evidence |
+|---|---|---|
+| Neon identity/plan/resources | Authenticated CLI 9.4.0; organization Free; approved project, PG17 database and private bucket created | Organization/project/bucket readback records; no paid add-ons |
+| Existing configuration | Eight existing fingerprints unchanged; no app env overwrite, global Codex edit or app dependency change | `config-preservation.json` |
+| Agent skill/MCP | Exact requested skill fetched HTTP 200; seven existing cached skills reused; live plugin now installed; exposed tool calls return `Unknown tool` | `NEON_AGENT_SETUP_2026-11-13.md`; CLI remains functional |
+| Real guarded Neon migration | **69/69**, actual admin and pooled runtime certificate/hostname-verified TLS, admin non-superuser, restricted runtime | `cloud-migration-result.json`, `actual-database-roles.json` |
+| Empty remote shop | Zero owners/accounts/products/customers/sales/stock movements; no initialization or seed | Actual post-migration SQL assertions |
+| Real private storage | **4/4 pass**: SDK CRUD/privacy, exact POST/readback, oversized rejection, wrong-key rejection | `real-storage-probe.json` |
+| New regression tests | Five non-superuser migration/runtime-role tests and five real TLS fixture tests | `server/test/r2c-managed-role.test.ts`, `r2c-verified-tls.test.ts` |
+| Complete backend after fixes | **279 passed, 0 failed, 0 skipped**, 16:00:39-16:05:11 PKT, exit 0 | `backend-final-full.log`, `backend-final-full-result.json` |
+| Latest backend typecheck/lint | Both exit 0 at 16:16 PKT | `backend-final-checks.json`, matching logs |
+
+The TLS check uses the live authorized TLSSocket plus certificate/hostname validation. The observed proxy-internal `pg_stat_ssl=false` does not override actual client encryption. The runtime role guard rejects elevated existing roles/memberships before grants. Historical migration SQL and recovered MediaService were not changed.
+
+The full unchanged frontend result below remains current for its source: 187 passed, one intentional skip. It was not rerun or relabeled after backend-only changes. The first `.1` package predates these two fixes; a new committed `.2` package is required before real deployment.
+
+## Earlier complete local checks (before provider compatibility fixes)
+
 
 | Gate | Fresh result | Evidence under `.test-postgres/r2c-20261113/` |
 |---|---|---|
@@ -42,10 +63,22 @@ The first five clean-shop rehearsals stopped at explicit assertions; they are no
 ## Not tested / not deployed
 
 - Actual Hostinger target, Linux native dependency installation, reverse proxy, public HTTPS/startup/restart/resource limits.
-- Actual external PostgreSQL role permissions, schema functions/extensions, verified TLS and transaction pooler behavior.
-- Real provider S3 POST policy, CORS, exact upload bounds, private originals/thumbnails and redeploy/backup durability.
+- Real-provider financial/concurrency/RLS scenarios and full authenticated operations through the actual pooler. Migration/role flags and verified client TLS already pass; this does not substitute for transaction acceptance.
+- Hosted-browser CORS, complete media/thumbnail workflow and redeploy/object-backup durability. Real SDK/private/exact-size POST transport checks already pass.
 - Hosted owner bootstrap and two real internet sessions, session expiry/interruption, provider outages and recovery.
 - Physical Android camera/scanner/gallery/pairing/process-death/offline behavior or a newly built APK.
 - Windows native EXE/installer, SQLite acceptance, thermal printer, HID scanner or customer second monitor.
 
 Local implementation, automated verification, real provider verification, physical testing and deployment are separate acceptance levels. R2C deployment acceptance and daily production readiness remain **NO** until applicable gates pass.
+
+## Actual Neon empty-schema backup and isolated restore
+
+Passed **13 Nov 17:02:39 PKT**. A real PostgreSQL custom-format dump of the new empty staging base was created with libpq `verify-full` TLS. It was restored into a separately generated Neon database, compared against ten source state tables, and that disposable target was removed. The source database was not reset or modified. Constraints are validated; effective application object/function grants and RLS policies match the source.
+
+The ordinary restore first failed on two provider-owned `cloud_admin` default-ACL entries. Exactly these two entries are commented in the retained TOC restore list; application ACLs remain included. Neon restore defaults also left three owner-sequence ACLs as USAGE-only. A retained SQL sidecar reinstates the source owner's exact full privileges on `private.location_code_seq`, `private.product_code_seq` and `public.permissions_id_seq` before comparing effective privileges. No runtime authority was expanded. A null default ACL and explicit equivalent owner ACL are compared by effective grants, not raw null representation.
+
+Recovery material is held in the private Neon directory outside the repository: `neon-main-empty-shop.dump` (832,082 bytes; SHA256 `bd32e1a243d8d5f8a51407ecb8602751d963e67db224061557299f2cd13063ec`), `neon-restore-list.txt`, `neon-restore-owner-sequence-grants.sql`, `neon-source-permissions.json`, and the public CA bundle. `real-backup-restore.json` records the pass; earlier timeout/ACL/comparison failures remain in separate logs. This is an **empty-schema managed-provider recovery rehearsal**, not backup acceptance for a populated live shop or private image collection. Independent object backups, populated financial/media restoration and an off-machine recovery copy remain required.
+
+## Real dependency readiness before first-owner initialization
+
+At **17:03:57 PKT**, the actual ReadinessService with the restricted pooled Neon role and real private bucket passed configuration/startup/database/TLS/schema/functions/permissions/private-storage checks, matching 69/69 checksums. Authentication correctly fails because the empty base has no owner; overall status is **degraded**, not ready. This was an in-process provider probe with a loopback-proxy configuration fixture, not Hostinger HTTPS/proxy verification or real authenticated shop operation. Evidence: `real-deep-readiness.json`.

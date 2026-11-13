@@ -2,7 +2,7 @@
 
 Evidence date: 13 November 2026. **NOT DEPLOYED. There is no accepted public Taha staging URL.** This document distinguishes local acceptance from a real hosting deployment.
 
-Local R2C release implementation: `5f35b1884dedab4aa5c9ce1c441639216900ddb6`, branch `codex/r2c-hostinger-staging`. Final clean-source package: `artifacts/managed/Taha-POS-staging-R2C-0.5.0-r2c.1-20261113T101355.zip` (1,903,648 bytes), SHA256 `8c0c9dc04f615685722e086faed5a38e20ac83dd82c5ae01b6dd5a3a6f7d3d19`. Full frontend 187 pass/one intentional skip, backend 269 pass, final packaged fresh-shop 25/25 pass. This is **ready for the next real-provider validation step**, not accepted cloud operation or production readiness.
+Historical first R2C release implementation: `5f35b1884dedab4aa5c9ce1c441639216900ddb6`, branch `codex/r2c-hostinger-staging`. Final clean-source package: `artifacts/managed/Taha-POS-staging-R2C-0.5.0-r2c.1-20261113T101355.zip` (1,903,648 bytes), SHA256 `8c0c9dc04f615685722e086faed5a38e20ac83dd82c5ae01b6dd5a3a6f7d3d19`. Full frontend 187 pass/one intentional skip, backend 269 pass, final packaged fresh-shop 25/25 pass. This is **ready for the next real-provider validation step**, not accepted cloud operation or production readiness.
 
 ## Confirmed decisions and account access
 
@@ -11,31 +11,33 @@ Local R2C release implementation: `5f35b1884dedab4aa5c9ce1c441639216900ddb6`, br
 - Fresh [official Hostinger limits](https://www.hostinger.com/support/hostinger-node-js-limits-for-web-and-cloud-plans/) explicitly list **Business/Unlimited: 5 Node.js websites, NPROC 120, entry processes 60**. Each app uses one long-running server; resources are shared and HTTP requests have a 120-second limit. Inbound WebSockets, custom ports, Docker/extra services and independent always-running workers are unsupported. This establishes the documented plan capability; it does **not** verify this account's remaining allowance or shared resource consumption.
 - The authenticated connector still exposes an older Business-v3 inventory. It is not evidence about Unlimited. No existing website was changed and no temporary site was created.
 - Browser inspection could not safely determine the current Windows browser URL. Computer Use stopped; account checks were not bypassed through another automation method. Reconnect Hostinger to the Unlimited account, or open that account's Node.js Web Apps allowance for a later verified browser session. No password/token needs to be sent in chat.
-- The owner explicitly confirms **external PostgreSQL: NONE**, **private S3-compatible storage: NONE**. No resources or billing have been created by this phase.
-- Neon now appears installed in Codex's plugin inventory. Installation does not establish an authenticated provider connection, approve a resource creation, or prove that a database/bucket exists. No Neon management tools were exposed in this session.
+- The owner initially confirmed no external resources existed, then explicitly approved **Free staging only**. The Neon Free project/database and private bucket have now been created and verified as described below. No paid resources, Hostinger website or DNS change occurred.
+- Neon plugin installation is now verified in the live inventory and tools are exposed; initial read-only calls return `Unknown tool`. CLI 9.4.0 is authenticated in the named `taha-staging` profile using Windows keyring. Provider verification below uses actual CLI/API/database/storage requests, not an assumed working MCP connection.
 
-## Proposed resources — approval and real-provider verification still required
+## Approved Free resources — created and provider-tested
 
-For isolated synthetic staging, the simplest proposed option is a **Neon Free** project for PostgreSQL and its private Object Storage, with Hostinger running the existing application. This is a compatibility recommendation, not a provider acceptance result.
+The owner approved project `taha-pos-staging`, database `taha_staging` and private bucket `taha-staging-private`, synthetic data only, no paid add-ons. The actual organization reported `plan=free` before creation. CLI sign-in completed securely. Existing environment files, Codex user configuration and default CLI profile were preserved.
 
-Create only these resources after approval:
+| Resource | Actual state |
+|---|---|
+| Project | `taha-pos-staging`, Free organization |
+| Region | Singapore `aws-ap-southeast-1` |
+| PostgreSQL | Version 17; `taha_staging`; all **69** current migrations applied through the guarded runner |
+| Base branch | `main`, empty migrated shop; zero owners/products/customers/sales/movements |
+| Migration identity | `taha_migration`, provider administrator, not superuser |
+| Runtime identity | SQL-created `taha_runtime`, NOINHERIT, no superuser/RLS bypass/CREATEDB/CREATEROLE |
+| Private bucket | `taha-staging-private`; provider confirms private access |
+| Real storage checks | **4/4**: signed CRUD/private denial, exact-size POST 204/readback, oversize 400, changed-key 403 |
+| Future acceptance branches | Create isolated clean-shop/transaction branches before owner initialization or synthetic activity; not created yet |
+| Hostinger app/domain | Not created/deployed; no public staging URL |
 
-| Resource | Proposed name / setting | Purpose |
-|---|---|---|
-| Neon project | `taha-pos-staging`, Free, no paid add-ons | Isolated staging, never import the saved shop database |
-| Region | Prefer Singapore if available for both services; verify Hostinger latency | Avoid unnecessary inter-region round trips |
-| PostgreSQL | Version 17, database `taha_staging` | Match the locally tested engine major version |
-| Empty base branch | `migrated-empty` | Migrate once; no owner or sample business history |
-| Fresh-shop branch | `clean-shop` from that empty base | First-owner/setup acceptance |
-| Transaction acceptance branch | `acceptance` from that empty base | Synthetic financial, outage and concurrency exercises |
-| Runtime role | `taha_runtime`, created through SQL by the guarded migration process | Separate restricted identity; not the provider's administrator role |
-| Private bucket | `taha-staging-private` on the matching branch | Originals, thumbnails and sensitive evidence, never public |
-| Storage credential | Branch-scoped `taha-staging-media`, `storage:write` | Server-side read/write/delete; never bundled into React/APK |
-| Hostinger application | One new isolated Node.js app, temporary HTTPS domain | Bundled frontend and `/api/v1` on the same origin |
+Two real managed-provider blockers were corrected: restricted role provisioning no longer attempts a superuser-only ALTER, and TLS readiness verifies the actual authorized live client socket/certificate hostname instead of the proxy's internal `pg_stat_ssl` hop. No insecure TLS fallback or financial SQL change was introduced. Full backend 279/279 passes. See `NEON_AGENT_SETUP_2026-11-13.md` for tooling/configuration changes.
+
+Private credentials are held outside the repository in owner-only storage and Windows keyring, not in frontend `VITE_*`, reports, source control or the application ZIP. No Neon Auth, Functions, Data API, Realtime or AI Gateway was enabled; NestJS custom authentication and HTTPS polling remain intact.
 
 Provider documentation checked on 13 November: [Neon pricing](https://neon.com/pricing) lists Free at $0/no card, 1 GB PostgreSQL and 100 CU-hours/month per project, plus 5 GB object storage. Exceeding the free compute/transfer allowance can suspend service; continuous polling can keep compute active. This is for bounded staging, not a daily-shop reliability promise. Paid compute is usage-based; obtain explicit budget approval before upgrading. A paid PostgreSQL tier plus private AWS S3 is an alternative for production, subject to pricing, backups and provider acceptance.
 
-[Neon's S3 compatibility](https://neon.com/docs/storage/s3-compatibility) documents path-style AWS SDK access, browser form POST and CORS. These match the existing `server/src/media/file-storage.ts` contract on paper. **An actual signed POST, original/thumbnail retrieval, anonymous denial and restart/redeployment durability test are mandatory before acceptance.** Its versioning/lifecycle configuration is not enforced; independent object backups are necessary. Do not infer storage recovery from PostgreSQL branch history.
+[Neon's S3 compatibility](https://neon.com/docs/storage/s3-compatibility) documents path-style AWS SDK access, browser form POST and CORS. The real S3 transport and exact-size POST checks now pass against `server/src/media/file-storage.ts`. Full MediaService thumbnail/completion through a hosted browser, exact-domain CORS and restart/redeployment durability remain mandatory; the transport probe alone is not hosted media acceptance. Its versioning/lifecycle configuration is not enforced; independent object backups are necessary. Do not infer storage recovery from PostgreSQL branch history.
 
 [Neon roles](https://neon.com/docs/manage/roles) warns that ordinary Console/API-created roles receive administrator membership. Keep the migration administrator private and use the existing SQL-created restricted role for the web app. [Storage authentication](https://neon.com/docs/storage/authentication) maps `token_id` to the S3 access key and `s3_secret_access_key` to the secret. Use the exact endpoint/signing region supplied for the chosen branch; do not guess the region from its marketing location.
 
@@ -43,7 +45,7 @@ Cloudflare R2 is **not a drop-in provider** for the current exact-size signed HT
 
 ## Secure connection procedure
 
-1. Approve the provider/project and free staging scope. Authenticate through the provider/plugin screen. Do not send connection strings, passwords or keys in chat.
+1. Free staging resources and CLI sign-in are complete. Reuse the existing project and private bucket; do not recreate them. Verify the target branch before each mutation and create clean acceptance branches from the empty base. Do not enable paid resources or add-ons. Do not send connection strings, passwords or keys in chat.
 2. Record only nonsecret project/branch/bucket names in this report. Keep connection details in an owner-only local secret file outside the repository or directly in hPanel environment controls. Never put them into `public`, build-time `VITE_*`, the ZIP or screenshots.
 3. Obtain a **direct administrator** PostgreSQL connection for the separately run migration job and a distinct restricted runtime connection. Use verified TLS. Start with `DATABASE_POOL_MAX=2`; pooled-hostname differences require the explicit `TAHA_STAGING_RUNTIME_HOST` guard. Verify transaction-local actor identity/RLS through that actual pooler.
 4. Use the release's `environment.example`. Configure normal web runtime: `NODE_ENV=production`, `TAHA_RUNTIME=cloud`, `TAHA_DEPLOYMENT_ENV=staging`, `TAHA_SERVE_FRONTEND=true`, exact HTTPS `FRONTEND_ORIGIN` and `PUBLIC_API_URL`, `DATABASE_URL`, a random persistent `JWT_SECRET`, `STORAGE_DRIVER=s3`, `S3_BUCKET`, `S3_ENDPOINT`, `S3_REGION`, `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY`. Hostinger assigns `PORT`. Determine `TAHA_TRUST_PROXY` from verified hosting information; never set trust-all or disable TLS verification.
@@ -68,3 +70,7 @@ After resources and target are verified, create a **new** temporary-domain appli
 Rollback keeps the previous verified application ZIP and private configuration, stops new writes if a financial/schema issue appears, and redeploys the compatible prior release. Never delete or blindly downgrade financial data. Back up and rehearse restoration to a separate target first. Original media requires its own integrity-checked recovery copy.
 
 See `TAHA_POS_R2C_CLEAN_SHOP_ACCEPTANCE.md` and `TAHA_POS_R2C_CLOUD_TEST_RESULTS.md` for local evidence and explicit untested cloud gates.
+
+## Managed PostgreSQL restore note
+
+The first actual Neon empty-schema restore passed after excluding exactly two provider-owned `cloud_admin` default ACL TOC entries and applying three retained owner-sequence grant statements. Application ACLs/RLS were retained and compared by effective permissions; ten tables and constraints match. Use the retained dump, reviewed TOC, SQL grant sidecar, permissions snapshot and CA bundle as one recovery set. Never use a blanket `--no-acl` workaround. This is not populated financial/media or offsite backup acceptance. Exact evidence is in the R2C cloud test report.

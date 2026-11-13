@@ -67,3 +67,6 @@ recovery/
 private/
 # Browser-generated screenshots are evidence artifacts, retained in private backups.
 docs/screenshots/
+
+# Local Neon project context (no application environment overrides)
+/.neon

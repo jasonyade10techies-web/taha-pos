@@ -4,6 +4,7 @@ import {randomBytes} from 'node:crypto';
 import jwt from 'jsonwebtoken';
 import {CONFIG,type Configuration} from '../config';
 import {Database} from '../database/database.service';
+import {verifiedPostgresTls} from '../database/verified-tls';
 import {migrationManifest} from '../database/migration-manifest';
 import {LocalFileStorage} from '../media/file-storage';
 import {hashPassword,verifyPassword} from '../auth/crypto';
@@ -39,7 +40,7 @@ export class ReadinessService implements OnApplicationBootstrap,OnModuleDestroy 
    await this.db.transaction(async client=>{
     await client.query("set local statement_timeout='3500ms'");
     await client.query('select 1');checks.database='pass';
-    if(this.config.cloud){const ssl=(await client.query('select ssl from pg_stat_ssl where pid=pg_backend_pid()')).rows[0];checks.tls=ssl?.ssl?'pass':'fail';}
+    if(this.config.cloud)checks.tls=verifiedPostgresTls(client)?'pass':'fail';
     const registry=(await client.query<{name:string;checksum:string}>('select name,checksum from app_migrations.applied')).rows;applied=registry.length;
     const installed=new Map(registry.map(row=>[row.name,row.checksum]));matched=manifest.filter(row=>installed.get(row.name)===row.checksum).length;
     checks.schema=matched===expected&&applied===expected?'pass':'fail';

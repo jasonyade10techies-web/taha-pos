@@ -21,11 +21,18 @@ export async function runtimeRole(client:pg.Client,url:string){
  const parsed=new URL(url);const user=decodeURIComponent(parsed.username),pass=decodeURIComponent(parsed.password);
  if(!/^[a-zA-Z_][a-zA-Z0-9_]{0,62}$/.test(user)||['postgres','authenticated','service_role','anon'].includes(user))throw new Error('DATABASE_URL must use a dedicated runtime login.');
  const quoted='"'+user+'"';
- if(!(await client.query('select 1 from pg_roles where rolname=$1',[user])).rowCount){
+ const existing=(await client.query<{rolsuper:boolean;rolbypassrls:boolean;rolreplication:boolean;rolcreatedb:boolean;rolcreaterole:boolean;rolcanlogin:boolean;unsafe_membership:boolean}>(`select r.rolsuper,r.rolbypassrls,r.rolreplication,r.rolcreatedb,r.rolcreaterole,r.rolcanlogin,
+  exists(select 1 from pg_roles parent where parent.oid<>r.oid and parent.rolname<>'authenticated' and pg_has_role(r.oid,parent.oid,'MEMBER')) unsafe_membership
+  from pg_roles r where r.rolname=$1`,[user])).rows[0];
+ if(existing&&(existing.rolsuper||existing.rolbypassrls||existing.rolreplication||existing.rolcreatedb||existing.rolcreaterole||!existing.rolcanlogin||existing.unsafe_membership))throw new Error('Use a dedicated restricted SQL-created runtime login; privileged roles or additional role memberships are refused.');
+ if(!existing){
   // PostgreSQL utility DDL cannot bind passwords as parameters. Quote literals by doubling apostrophes.
   await client.query(`create role ${quoted} login password '${pass.replaceAll("'","''")}' nosuperuser nobypassrls nocreatedb nocreaterole noinherit`);
  }
- await client.query(`alter role ${quoted} nosuperuser nobypassrls nocreatedb nocreaterole noinherit;grant authenticated to ${quoted};grant usage on schema app_private to ${quoted};grant select,insert,update,delete on all tables in schema app_private to ${quoted};grant usage on schema public,auth,storage to ${quoted}`);
+ // Even ALTER ... NOSUPERUSER requires a real superuser. Managed PostgreSQL
+ // administrators can create restricted roles, but cannot issue that clause.
+ // Reject elevated existing identities above instead of silently reusing them.
+ await client.query(`alter role ${quoted} noinherit;grant authenticated to ${quoted};grant usage on schema app_private to ${quoted};grant select,insert,update,delete on all tables in schema app_private to ${quoted};grant usage on schema public,auth,storage to ${quoted}`);
  await client.query(`grant usage on schema app_migrations to ${quoted};grant select on app_migrations.applied to ${quoted}`);
  await client.query(`revoke update,delete on app_private.offline_imports,app_private.sync_changes,app_private.media_uploads,app_private.cash_captures,app_private.cash_capture_events from ${quoted}`);
  await client.query(`revoke all on app_private.shop_initialization from ${quoted}`);
