@@ -2,6 +2,8 @@
 
 Evidence date: 13 November 2026. **NOT DEPLOYED. There is no accepted public Taha staging URL.** This document distinguishes local acceptance from a real hosting deployment.
 
+Local R2C release implementation: `5f35b1884dedab4aa5c9ce1c441639216900ddb6`, branch `codex/r2c-hostinger-staging`. Final clean-source package: `artifacts/managed/Taha-POS-staging-R2C-0.5.0-r2c.1-20261113T101355.zip` (1,903,648 bytes), SHA256 `8c0c9dc04f615685722e086faed5a38e20ac83dd82c5ae01b6dd5a3a6f7d3d19`. Full frontend 187 pass/one intentional skip, backend 269 pass, final packaged fresh-shop 25/25 pass. This is **ready for the next real-provider validation step**, not accepted cloud operation or production readiness.
+
 ## Confirmed decisions and account access
 
 - Preserve the existing React/NestJS application, custom authentication, PostgreSQL financial functions, private MediaService, HTTPS revision polling and independent LAN Device Bridge.

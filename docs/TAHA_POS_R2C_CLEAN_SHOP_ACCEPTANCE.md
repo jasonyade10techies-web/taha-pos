@@ -18,6 +18,8 @@
 
 The initial complete candidate rehearsal passed **25/25**, exit 0, **13 Nov 15:08:33–15:11:01 PKT**. Evidence: `.test-postgres/r2c-20261113/clean-shop-sixth.log`, its result JSON, and `taha_r2c_clean_1794564502119/results.json`. That candidate was built from an uncommitted tree over R2B `f408a59...`; it is not final deployment provenance. A final committed-package record must be recorded in the cloud test report before release handoff.
 
+**Final accepted local package:** clean implementation commit `5f35b1884dedab4aa5c9ce1c441639216900ddb6`, release `0.5.0-r2c.1` ending `20261113T101355.zip`, **25/25 pass**, exit 0, **15:17:12–15:19:05 PKT**. Evidence `clean-shop-committed.log`, corresponding result and `taha_r2c_clean_1794565034048/results.json`. The cloud test report records exact artifact hash and complete build/frontend/backend results. This supersedes candidate provenance, not the outstanding cloud/physical gates.
+
 Verified:
 
 1. Compiled migration and first-owner initialization; 69 migrations, one owner, zero business records.
