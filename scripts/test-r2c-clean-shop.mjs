@@ -52,8 +52,17 @@ try{
  });
  await check('owner completes the existing six-stage wizard, tax review and empty Dashboard',async()=>{
   await page.getByLabel('Shop name',{exact:true}).fill('Taha R2C Acceptance');await page.getByLabel('Branch',{exact:true}).fill('Empty Shop Branch');
-  for(let i=0;i<4;i++)await page.getByRole('button',{name:'Save & Continue',exact:true}).click();
-  await expect(page.getByRole('heading',{name:'Payments and receipts',exact:true})).toBeVisible();
+  let settingsReads=0,holdReads=false,blocked=false,releaseRead;const resumed=new Promise(resolve=>releaseRead=resolve);
+  // Delay an actual settings readback to exercise the period after the next
+  // stage is visible but cache invalidation is still completing. No fake data.
+  const holdSettings=async route=>{const response=await route.fetch();if(holdReads&&route.request().method()==='GET'&&++settingsReads===2){blocked=true;await resumed;}await route.fulfill({response});};
+  await page.route('**/api/v1/stores/*/settings',holdSettings);
+  try{
+   for(let i=0;i<4;i++){if(i===3)holdReads=true;await page.getByRole('button',{name:'Save & Continue',exact:true}).click();}
+   await expect(page.getByRole('heading',{name:'Payments and receipts',exact:true})).toBeVisible();await until(async()=>assert.equal(blocked,true),10000);
+   await expect(page.getByRole('link',{name:'Review tax settings',exact:true})).toBeDisabled();
+  }finally{releaseRead();await page.unrouteAll({behavior:'wait'});}
+  await expect(page.getByRole('link',{name:'Review tax settings',exact:true})).toBeEnabled();
   await page.getByRole('button',{name:'Receipt printing',exact:true}).click();await page.getByRole('menuitem',{name:'Never Auto Print',exact:true}).click();
   await page.getByRole('link',{name:'Review tax settings',exact:true}).click();await expect(page.getByRole('heading',{name:'Tax settings',exact:true})).toBeVisible();await expect(page.getByRole('button',{name:'Default profile',exact:true})).toContainText('No tax (0%)');await page.getByRole('link',{name:'Return to Shop Setup',exact:true}).click();await expect(page.getByRole('heading',{name:'Payments and receipts',exact:true})).toBeVisible();
   await page.getByRole('button',{name:'Save & Continue',exact:true}).click();await page.getByRole('button',{name:'Finish Setup',exact:true}).click();await expect(page.getByRole('heading',{name:'Dashboard',exact:true})).toBeVisible({timeout:30000});

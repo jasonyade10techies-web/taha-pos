@@ -82,3 +82,9 @@ Recovery material is held in the private Neon directory outside the repository: 
 ## Real dependency readiness before first-owner initialization
 
 At **17:03:57 PKT**, the actual ReadinessService with the restricted pooled Neon role and real private bucket passed configuration/startup/database/TLS/schema/functions/permissions/private-storage checks, matching 69/69 checksums. Authentication correctly fails because the empty base has no owner; overall status is **degraded**, not ready. This was an in-process provider probe with a loopback-proxy configuration fixture, not Hostinger HTTPS/proxy verification or real authenticated shop operation. Evidence: `real-deep-readiness.json`.
+
+## Newly reproduced setup-navigation race
+
+The clean `c09873a...` package `0.5.0-r2c.2` builds and all 345 payload hashes/privacy checks pass, but its fresh-shop rehearsal failed after four completed checks: the tax-review link remained on the wizard. A deterministic regression delays an **actual** settings readback during cache invalidation (no fabricated API data) and confirms the link incorrectly remains enabled while `useAction.run` refuses another action. The initial diagnostic interception cleanup raised `Route is already handled`; it was corrected to wait for in-flight route completion, then the unchanged application failed specifically at `toBeDisabled` as intended (`setup-navigation-red-corrected.log`).
+
+All four save-and-navigate links now expose their existing busy state via `aria-disabled`, with a subdued waiting style. Their save, readback and cache-refresh behavior is unchanged. The regression verifies disabled state during the delayed real readback, re-enabled state after completion, successful tax navigation and retained setup values. A newer committed package/full frontend run must pass before acceptance. This race is distinct from the still-open interrupted refresh-token restoration case; no authentication guard was relaxed.
