@@ -6,7 +6,7 @@ Evidence updated: **14 November 2026** (earlier sections retain their historical
 
 Branch `codex/r3a-release-system`; private repository `jasonyade10techies-web/taha-pos`, draft PR1. Build13/application24aecd7fc1fbbffb091fc779667169e9b4dd1498, tag `r3a-source-build13`, APK/download ZIP/full POS package and recovery copies are ready. Dashboard Download App and Devices install QR are implemented. Hosting remains manual; no deployment occurred.
 
-**Remaining before source promotion:** review complete CI run43607701944 at39eebefd2188cd59b1ccd5ed00e62b454baa53e8. It is PENDING at owner departure, not a claimed pass. Its test-harness readiness correction has4/4 targeted passes and fresh types/lint, with no retries/assertion weakening. See the R3A report for earlier failed and passed runs separately. GitHub can finish this run without the chat remaining open.
+**Remaining before source promotion:** review current-head Checks on private PR1. Initial full rerun43607701944 tested code checkpoint39eebefd2188cd59b1ccd5ed00e62b454baa53e8; documentation-only pushes can supersede/cancel it. The current full gate is PENDING at owner departure, not a claimed pass. Its readiness correction has4/4 targeted passes and fresh types/lint, with no retries/assertion weakening. See the R3A report for earlier failed/passed runs separately. GitHub runs independently of this chat.
 
 After that: manual HTTPS download-site acceptance, physical build11→13 retention and subsequent higher-build updater test, then separate full hosted POS acceptance. Windows/native offline, physical printer/HID/second display, stable signing/key custody and repair-job accounting remain daily-use gates. Older dated sections below are retained historical evidence, not the current branch/status.
 

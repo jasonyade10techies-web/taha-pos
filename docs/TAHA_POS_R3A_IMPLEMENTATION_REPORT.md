@@ -126,7 +126,7 @@ The corrected blocked-bootstrap regression and complete390px light/dark route sw
 
 ## Owner departure checkpoint —14 November2026
 
-The owner needs to leave; all local implementation/artifact work is saved. **Full remote CI is still PENDING**, not passed: https://github.com/jasonyade10techies-web/taha-pos/actions/runs/43607701944 tests source **39eebefd2188cd59b1ccd5ed00e62b454baa53e8**. It continues on GitHub independently of this chat. Later changes are documentation only. Do not merge/promote the draft PR until its actual complete result is reviewed; if it fails, inspect the retained logs/traces before fixing anything. No failed test was removed or automatically retried.
+The owner needs to leave; all local implementation/artifact work is saved. **Full remote CI is still PENDING**, not passed. The controlling live status is the current-head Checks on https://github.com/jasonyade10techies-web/taha-pos/pull/1 . Run43607701944 began at code/test checkpoint **39eebefd2188cd59b1ccd5ed00e62b454baa53e8**; later documentation-only pushes can cancel/supersede that run, so follow the latest PR checks rather than assuming a superseded run will finish. GitHub executes these independently of this chat. Do not merge/promote the draft PR until its actual complete result is reviewed; if it fails, inspect retained logs/traces before fixing anything. No failed test was removed or automatically retried.
 
 Current application artifacts remain the clean build13/application24aecd7fc1fbbffb091fc779667169e9b4dd1498 package above; tag **r3a-source-build13** was verified on the private remote. Source39eebef changes only test/CI/documentation files after that application checkpoint. APK bytes and certificate are unchanged.
 
