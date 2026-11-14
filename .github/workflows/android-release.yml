@@ -40,7 +40,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: node scripts/ci/check-release-context.mjs
       - run: npm ci && npm run build:mobile
-      - run: sdkmanager 'platforms;android-35' 'build-tools;35.0.0' && node scripts/ci/setup-gradle.mjs
+      - run: node scripts/ci/android-tools.mjs && node scripts/ci/setup-gradle.mjs
       - name: Restore approved channel signing key
         env:
           SIGNING_KEY: ${{ secrets.ANDROID_TEST_KEYSTORE_B64 }}

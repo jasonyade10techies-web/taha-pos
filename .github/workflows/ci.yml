@@ -88,7 +88,7 @@ jobs:
       - run: npm ci && npm ci --prefix server && npm run typecheck && npm run build:mobile
       - name: Install official Android build dependencies
         run: |
-          sdkmanager 'platforms;android-35' 'build-tools;35.0.0'
+          node scripts/ci/android-tools.mjs
           node scripts/ci/setup-gradle.mjs
       - run: .tools/gradle-8.11.1/bin/gradle --no-daemon -p mobile/android testDebugUnitTest lintDebug assembleDebug
       # Validation APK deliberately isn't published: runner debug key is not the approved test key.
