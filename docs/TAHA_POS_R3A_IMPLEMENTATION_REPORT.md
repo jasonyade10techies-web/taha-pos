@@ -124,4 +124,14 @@ CI now also retains failed synthetic local-browser error contexts/traces in priv
 
 The corrected blocked-bootstrap regression and complete390px light/dark route sweep each passed twice (**4/4**,2.7minutes), with fresh TypeScript/lint and workflow YAML validation passed. The old readiness regression's failure was retained before correction. No automatic retries were added. APK13 was additionally inspected directly: bundled index,38 JavaScript assets, the corrected hash navigation and native updater class are present (`build13-bundled-assets.json`).
 
+## Owner departure checkpoint —14 November2026
+
+The owner needs to leave; all local implementation/artifact work is saved. **Full remote CI is still PENDING**, not passed: https://github.com/jasonyade10techies-web/taha-pos/actions/runs/43607701944 tests source **39eebefd2188cd59b1ccd5ed00e62b454baa53e8**. It continues on GitHub independently of this chat. Later changes are documentation only. Do not merge/promote the draft PR until its actual complete result is reviewed; if it fails, inspect the retained logs/traces before fixing anything. No failed test was removed or automatically retried.
+
+Current application artifacts remain the clean build13/application24aecd7fc1fbbffb091fc779667169e9b4dd1498 package above; tag **r3a-source-build13** was verified on the private remote. Source39eebef changes only test/CI/documentation files after that application checkpoint. APK bytes and certificate are unchanged.
+
+Owner can test the desktop at `http://localhost:1423` (verified HTTP200) and inspect the local API at `http://127.0.0.1:3306/api/v1/health` (verified status ok). These fixture services bind loopback; this is not a claim of phone/LAN reachability. The saved-shop port55439 remains stopped. The new APK is ready for physical retest, with install/camera/pairing/update retention still unverified on hardware.
+
+**R3A source and packages: implemented and locally verified within the stated limits. Overall clean CI gate: pending. Public hosting: not performed. Physical acceptance: not performed. Daily-shop production readiness: NO.** Hosting remains the owner's manual task; the source PR is draft/unmerged, main/staging retain the earlier baseline, and no signing secrets were uploaded. Private branch/reviewer enforcement remains unavailable on the current account plan. Use manual controlled signing/releases until an enforceable CI policy is chosen.
+
 The Dashboard contains compact **Download App** access; **Install QR** is in Settings → Devices. Without a configured hosted release origin, the UI truthfully reports that the download site is not configured. No public HTTPS APK URL or Hostinger deployment exists. Physical Android upgrade/camera/scanner/pairing acceptance, enforceable release-review protections and daily-shop production acceptance remain open.

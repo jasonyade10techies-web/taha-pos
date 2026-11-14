@@ -2,6 +2,14 @@
 
 Evidence updated: **14 November 2026** (earlier sections retain their historical dates). Root: `D:\Inventory system POS`. This checklist records the original audit and subsequent authorized R1/R2A implementation. Historical results are labelled; only the current completion section controls the next work. See `TAHA_POS_COMPLETE_HANDOFF_2026-11-11.md` for architecture, test boundaries and history.
 
+## Latest controlling checkpoint —R3A
+
+Branch `codex/r3a-release-system`; private repository `jasonyade10techies-web/taha-pos`, draft PR1. Build13/application24aecd7fc1fbbffb091fc779667169e9b4dd1498, tag `r3a-source-build13`, APK/download ZIP/full POS package and recovery copies are ready. Dashboard Download App and Devices install QR are implemented. Hosting remains manual; no deployment occurred.
+
+**Remaining before source promotion:** review complete CI run43607701944 at39eebefd2188cd59b1ccd5ed00e62b454baa53e8. It is PENDING at owner departure, not a claimed pass. Its test-harness readiness correction has4/4 targeted passes and fresh types/lint, with no retries/assertion weakening. See the R3A report for earlier failed and passed runs separately. GitHub can finish this run without the chat remaining open.
+
+After that: manual HTTPS download-site acceptance, physical build11→13 retention and subsequent higher-build updater test, then separate full hosted POS acceptance. Windows/native offline, physical printer/HID/second display, stable signing/key custody and repair-job accounting remain daily-use gates. Older dated sections below are retained historical evidence, not the current branch/status.
+
 ## Current local release hardening — 14 November 2026
 
 The owner has **paused hosting/account/deployment activity**. Continue local completion and verification; do not contact hosting accounts, deploy, buy services or change DNS. Earlier R2C hosting instructions below are historical and do not override this scope.
