@@ -2,6 +2,8 @@
 
 Nothing in this document means hosting has been configured. Do not create a public source repository or upload signing keys to a website.
 
+**Current physical-test candidate: build13 (`0.5R.3a-test`). Build12 is superseded.** Install13 over the existing TEST app without uninstalling; session/pairing/photo retention must be physically verified. The Dashboard has Download App; Settings → Devices also provides the install QR. The public download link becomes usable after the owner hosts and configures the prepared release site.
+
 ## First: Android downloads only
 
 Use the generated **Taha-Staff-downloads-test-13.zip**, not a source ZIP and not the full POS staging ZIP. Its exact path is `artifacts/android-release-R3A-build13/Taha-Staff-downloads-test-13.zip`; checksums and the private GitHub draft are recorded in the R3A report.

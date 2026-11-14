@@ -36,7 +36,7 @@ Final source/artifact references are recorded in the acceptance addendum below a
 | Backend full suite |284 passed,0 failures/skips | `backend-final-tests.log` |
 | Backend types/lint/build |Passed | `backend-final-types.log`, `backend-final-lint.log`, `backend-final-build.log` |
 | Android JVM/lint/assembly/signature |43 JVM tests passed; lint/assemble/signature passed | `android-final.log`, native test XML |
-| Release/URL/package/CI safety tests |15 passed | `release-system.log` |
+| Release/URL/package/CI safety tests |17 passed | `release-system.log` |
 | SQLite |7 passed | `test-desktop.log` |
 | SQL security/inventory/transactions |20/14/25 passed | `test-security.log` |
 | Actual PostgreSQL concurrency |2 passed | `test-concurrency.log` |
@@ -71,7 +71,7 @@ Local Graphify0.9.108, pinned/hash-verified isolated wheels, no network/model ke
 
 Use `docs/TAHA_POS_R3A_OWNER_SETUP.md` for the separate download-only ZIP versus full POS package. Hostinger plan/slot/resource verification, actual HTTPS hosting and public URL are owner tasks now. Keep PostgreSQL/private object storage/custom authentication; do not replace them with MySQL, Supabase or unrelated demo data.
 
-Next controlled phase: approve/review the source PR and choose an enforceable signing/release policy; manually host the verified download package; physically test build11→12 retention and a subsequent higher-version update; then perform isolated hosted POS staging/shared desktop/mobile acceptance. Native Windows/hardware and repair accounting remain explicit production gates, not a reason to redesign approved screens.
+Next controlled phase: approve/review the source PR and choose an enforceable signing/release policy; manually host the verified download package; physically test build11→13 retention and a subsequent higher-version update; then perform isolated hosted POS staging/shared desktop/mobile acceptance. Native Windows/hardware and repair accounting remain explicit production gates, not a reason to redesign approved screens.
 
 ## Superseded build12 acceptance record
 
@@ -97,4 +97,21 @@ No Hostinger deployment/public HTTPS URL, production database/storage acceptance
 
 ## Build13 final acceptance
 
-Pending final clean build13 artifacts and verification. Do not use the superseded build12 draft/paths above for installation or manual hosting. No production deployment or physical installation is claimed.
+Application source: **24aecd7fc1fbbffb091fc779667169e9b4dd1498**, clean when built. Subsequent source63ad3faff7c1cc842cd0e41dbd73e74a1ebe5452 changes CI SDK discovery only. The preconnection update screen works without Router context; all4 focused browser cases pass after a retained failing reproduction. Final frontend typecheck/lint and Android43 JVM tests/lint/assembly/signature pass (`build13-types.log`, `build13-lint.log`, `build13-android.log`).
+
+Current deliverables:
+
+- `artifacts/android-release-R3A-build13/Taha-Staff-test-build13.apk`: **4,033,766 bytes**, version **0.5R.3a-test /13**, package `com.tahamobiles.staff.debug`; SHA256 **5fcc6dd868e3c582d19e3bea4680e4e1808170382299d460fbba28baf8441f01**.
+- `artifacts/android-release-R3A-build13/Taha-Staff-downloads-test-13.zip`: **7,865,234 bytes**; SHA256 **d77bc3e3999793310e4f9764337c75064d10f03dd757f58be17deb4949bc1c98**. Includes current13 and retained known-good11, not superseded12.
+- `artifacts/android-release-R3A-build13/release.json`, `sha256.txt` and local provenance `artifact-manifest.json`.
+- `artifacts/managed/Taha-POS-staging-R3A-0.5.0-r3a.2-20261114T130752.zip`: **350 manifest-listed files**; SHA256 **70ec6b21c3b45ffb2ed93748cef1d92dd2df75024744330143d1f95ecbee7075**.
+
+The exact final managed package passed **26/26** real compiled-app acceptance checks, including isolated persisted financial assertions, private media, outage recovery and backup/restore. Log `build13-compiled-acceptance.log`; evidence `.test-postgres/r2c-20261113/taha_r2c_clean_1794662338897`. The extracted download ZIP starts without business credentials or PostgreSQL; actual anonymous HTTP downloads of11 and13 match their size/MIME/SHA256. Evidence `download-package-build13-results.json`. Temporary verification servers were stopped; no persistent download preview is claimed.
+
+Private **unpublished draft**, with all4 assets downloaded again and SHA256/size verified: https://github.com/jasonyade10techies-web/taha-pos/releases/tag/untagged-c740768bcdb1c89b50b0 . Evidence `github-draft13-verification.json`. Build12 remains retained and marked SUPERSEDED; do not install or host it.
+
+GitHub PR: https://github.com/jasonyade10techies-web/taha-pos/pull/1 . The first CI runs revealed genuine runner setup issues: Docker health-check quoting, absent backend dependency installation in Android typecheck, then a versioned official Android SDK manager absent from PATH. Each has a bounded correction; SDK discovery has two fixture tests. Local release-system tests now **17/17** and lint/YAML validation pass. Python's optional YAML module was absent locally; existing Node js-yaml validated both workflows without installing anything.
+
+The complete updated remote suite is running in https://github.com/jasonyade10techies-web/taha-pos/actions/runs/43599209459 at this documentation checkpoint. **Android validation passed on the clean Linux runner; full regression remains in progress. No complete remote green result is claimed until all jobs actually complete.** The verified full local result remains197 passed/1 intentional skip, plus4 updated-screen cases; these are separate runs, not a fabricated198-pass full run. CI evidence is retained on the private PR/Actions and in ignored local logs.
+
+The Dashboard contains compact **Download App** access; **Install QR** is in Settings → Devices. Without a configured hosted release origin, the UI truthfully reports that the download site is not configured. No public HTTPS APK URL or Hostinger deployment exists. Physical Android upgrade/camera/scanner/pairing acceptance, enforceable release-review protections and daily-shop production acceptance remain open.
