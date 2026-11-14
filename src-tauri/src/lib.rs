@@ -5,6 +5,7 @@ mod desktop;
 mod http;
 mod images;
 mod outbox;
+mod updates;
 mod vault;
 #[cfg(all(debug_assertions, any(target_os = "windows", target_os = "linux")))]
 use tauri_plugin_deep_link::DeepLinkExt;
@@ -21,6 +22,7 @@ pub fn run() {
         }))
         .plugin(tauri_plugin_deep_link::init())
         .plugin(tauri_plugin_opener::init())
+        .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(
             tauri_plugin_window_state::Builder::default()
                 .with_state_flags(
@@ -52,7 +54,10 @@ pub fn run() {
             outbox::desktop_receipts,
             cash::desktop_cash_records,
             cash::desktop_cash_backlog,
-            cash::desktop_cash_resolution
+            cash::desktop_cash_resolution,
+            updates::desktop_update_check,
+            updates::desktop_update_download,
+            updates::desktop_update_install
         ])
         .setup(|app| {
             match desktop::Desktop::open(app.handle()) {

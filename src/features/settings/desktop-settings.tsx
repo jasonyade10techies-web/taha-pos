@@ -10,6 +10,7 @@ import { useSyncStore } from "../../stores/sync-store";
 import { CashExceptions } from './cash-exceptions';
 import { Button } from "../../components/ui/button";
 import { AppSelect } from "../../components/ui/app-select";
+import { WindowsUpdates } from './windows-updates';
 import { ConfirmDialog } from "../../components/ui/workspace";
 export function SynchronizationSettings() {
   const state = useSyncStore();
@@ -86,10 +87,7 @@ export function DesktopSettings({ about = false }: { about?: boolean }) {
             ? "Bundled Windows application · SQLite local database"
             : localDemoEnabled ? "Browser development preview · Local demo database" : "Browser development preview · Shared shop backend"}
         </p>
-        <p>
-          Updates will require signed releases. Automatic updates are not
-          enabled.
-        </p>
+        <WindowsUpdates/>
       </>
     );
   if (!nativeDesktop)
