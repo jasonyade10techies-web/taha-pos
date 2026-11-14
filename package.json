@@ -28,6 +28,7 @@
     "validate:migrations": "node scripts/check-migrations.mjs",
     "validate:tauri": "node scripts/validate-tauri.mjs",
     "build:mobile": "node scripts/build-mobile.mjs",
+    "build:desktop": "node scripts/build-desktop.mjs",
     "build:apk": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/build-android.ps1",
     "dev:mobile": "node scripts/start-mobile-preview.mjs",
     "test:desktop": "node --test scripts/test-desktop-sqlite.mjs",

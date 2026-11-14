@@ -1,0 +1,11 @@
+{
+  "productName": "Taha POS Staging",
+  "identifier": "com.tahamobiles.pos.staging",
+  "build": {
+    "beforeBuildCommand": "npm run build:desktop",
+    "frontendDist": "../dist-desktop"
+  },
+  "bundle": {
+    "createUpdaterArtifacts": false
+  }
+}
