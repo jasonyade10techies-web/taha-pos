@@ -1,4 +1,5 @@
 Check for compatible Taha Staff updates from Settings.
+App Updates also opens before the phone has connected to a shop.
 Verify downloaded APK size, SHA256, application identity and installed signing certificate before Android installation.
 Keep existing shop sessions, pairing and retained photo queues during an in-place update.
 Android installation, camera recovery and cross-device acceptance still require a physical phone test.

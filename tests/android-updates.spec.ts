@@ -16,3 +16,8 @@ test('desktop download panel distinguishes download QR from pairing and handles 
  await page.route('**/downloads/taha-staff/releases/test.json',route=>route.fulfill({status:404,json:{message:'Unavailable'}}));await page.goto('/login');await page.evaluate(async()=>{(await import(String('/tests/fixtures/update-harness.tsx')) as typeof import('./fixtures/update-harness')).mount('downloads');});
  await expect(page.getByText('Download site not configured here')).toBeVisible();await page.getByRole('button',{name:'Install QR'}).click();await expect(page.getByText('Phone pairing is a separate step.')).toBeVisible();await expect(page.getByRole('link',{name:'Download App'})).toHaveAttribute('href','/downloads/taha-staff');
 });
+test('update recovery opens outside shop routing before the phone has connected',async({page})=>{
+ await page.addInitScript(()=>{window.TahaNative={info:()=>'{}',configure:()=>true,request:()=>{},updateStatus:()=>'{"state":"not-configured"}',checkUpdates:()=>{}};});
+ await page.goto('/login');await page.evaluate(async()=>{(await import(String('/tests/fixtures/update-harness.tsx')) as typeof import('./fixtures/update-harness')).mount('updates-without-router');});
+ await expect(page.getByRole('heading',{name:'App Updates',exact:true})).toBeVisible({timeout:5000});await expect(page.getByLabel('Website address')).toBeEnabled();await expect(page.getByRole('link',{name:'← Settings',exact:true})).toHaveAttribute('href','/mobile/settings');
+});

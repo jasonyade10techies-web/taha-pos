@@ -4,7 +4,7 @@ Nothing in this document means hosting has been configured. Do not create a publ
 
 ## First: Android downloads only
 
-Use the generated **Taha-Staff-downloads-test-12.zip**, not a source ZIP and not the full POS staging ZIP. Its exact path is `artifacts/android-release-R3A/Taha-Staff-downloads-test-12.zip`; checksums and the private GitHub draft are recorded in the R3A report.
+Use the generated **Taha-Staff-downloads-test-13.zip**, not a source ZIP and not the full POS staging ZIP. Its exact path is `artifacts/android-release-R3A-build13/Taha-Staff-downloads-test-13.zip`; checksums and the private GitHub draft are recorded in the R3A report.
 
 1. hPanel → Websites → Create site/Web App → upload the download ZIP into an unused app/temporary domain.
 2. Select a supported Node22/24 runtime. Build command `npm run build`, start command `npm start`, entry `server.mjs`. Let Hostinger assign `PORT`; do not configure the LAN port.

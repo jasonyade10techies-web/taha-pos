@@ -11,12 +11,12 @@ Two independent products are prepared:
 
 ## Versions and signing
 
-`mobile/android/release.properties` is the version source for Gradle and bundled mobile UI. R3A introduces versionName `0.5R.3a`, test suffix `-test`, versionCode12. Test package: `com.tahamobiles.staff.debug`. Stable package: `com.tahamobiles.staff`.
+`mobile/android/release.properties` is the version source for Gradle and bundled mobile UI. R3A introduces versionName `0.5R.3a`, test suffix `-test`, versionCode13. Test package: `com.tahamobiles.staff.debug`. Stable package: `com.tahamobiles.staff`.
 
 The existing test certificate SHA256 is public identity metadata:
 `fe4bd258ec8f80aa5aeb2fcc608e7fe42c2dd0af3931767ca8bfd84af3618a38`.
 
-It matches builds10/11. This development identity supports current TEST installations; it is not a controlled production signing identity. Stable publication is intentionally not enabled. Never uninstall the app to update, or silently change signing identity. Build11 has no in-app updater: installing R3A over build11 is a one-time manual step. Actual Android installer/data retention must still be tested on a physical phone.
+It matches builds10/11. This development identity supports current TEST installations; it is not a controlled production signing identity. Stable publication is intentionally not enabled. Never uninstall the app to update, or silently change signing identity. Build11 has no in-app updater: installing build13 over build11 is a one-time manual step. Actual Android installer/data retention must still be tested on a physical phone.
 
 ## Public download contract
 
@@ -73,4 +73,6 @@ The workflow retains the previous verified repository APK where available, build
 
 Keep the last verified site ZIP, manifests, APK and private signing backup. Roll back the website as a complete verified package; do not change APK bytes at an existing versioned path. Installed apps will not be downgraded: publish a corrective higher version if needed.
 
-On a physical Android phone verify: install over build11, retained login/pairing/photos, check/download/cancel, unknown-source approval, installer cancellation/retry, lock/resume, process recreation, active-camera/cart deferral, offline update-site behavior and successful newer same-certificate installation. Automated JVM/browser tests do not prove those OS behaviors.
+On a physical Android phone verify: install build13 over build11, retained login/pairing/photos, check/download/cancel, unknown-source approval, installer cancellation/retry, lock/resume, process recreation, active-camera/cart deferral, offline update-site behavior and successful newer same-certificate installation. Automated JVM/browser tests do not prove those OS behaviors.
+
+Build12 was a retained private draft and is superseded because its preconnection update page required a missing Router. Build13 removes that dependency; it is the current retest candidate. No build12 public hosting occurred.

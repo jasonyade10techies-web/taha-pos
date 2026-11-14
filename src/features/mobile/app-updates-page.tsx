@@ -1,8 +1,7 @@
 import "../../components/devices/android-downloads.css";
 import {useEffect,useState} from 'react';
-import {Link} from 'react-router-dom';
 import {Button} from '../../components/ui/button';
-import {nativeInfo} from '../../lib/mobile/runtime';
+import {nativeInfo,bundledMobile} from '../../lib/mobile/runtime';
 import {useCartStore} from '../../stores/cart-store';
 import {useSessionStore} from '../../stores/session-store';
 import type {AndroidRelease} from '../../../distribution/manifest.mjs';
@@ -13,7 +12,7 @@ export function AppUpdatesPage(){
  const [status,setStatus]=useState<Status>(readStatus),[origin,setOrigin]=useState(()=>readStatus().configuredOrigin||''),[invalid,setInvalid]=useState(false);
  const hasCart=useCartStore(s=>s.items.length>0),checkout=useSessionStore(s=>s.checkoutOpen),native=window.TahaNative;
  useEffect(()=>{const change=(event:Event)=>setStatus((event as CustomEvent<Status>).detail);window.addEventListener('taha-app-update',change);native?.checkUpdates?.(1);return()=>window.removeEventListener('taha-app-update',change);},[native]);
- return <main className="staff-page app-updates-page"><Link to="/mobile/settings">← Settings</Link><h1>App Updates</h1><p>Taha Staff {status.currentVersionName||nativeInfo().version||'browser'}{status.currentVersionCode?` · Build ${status.currentVersionCode}`:''}</p>
+ return <main className="staff-page app-updates-page"><a href={bundledMobile?'#/mobile/settings':'/mobile/settings'}>← Settings</a><h1>App Updates</h1><p>Taha Staff {status.currentVersionName||nativeInfo().version||'browser'}{status.currentVersionCode?` · Build ${status.currentVersionCode}`:''}</p>
  {!native?.updateStatus?<p>App installation is managed by Android. <a href="/downloads/taha-staff">Open downloads</a></p>:<>
  <section className="panel"><h2>{labels[status.state]||'Update status unavailable'}</h2>{status.latest&&<><p>{status.latest.versionName} · Build {status.latest.versionCode}</p><ul>{status.latest.releaseNotes.map((note,index)=><li key={index}>{note}</li>)}</ul></>}
  {status.state==='downloading'&&<progress max={status.totalBytes||1} value={status.bytesDownloaded||0} aria-label="Update download"/>}

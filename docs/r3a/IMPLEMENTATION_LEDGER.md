@@ -33,3 +33,10 @@ Remaining: finish full browser run, exact final builds/artifacts/packaged accept
 - Private GitHub build12 draft assets4/4 downloaded and hashed successfully. Published-tag draft lookup404 was reproduced and CI helper corrected to authenticated list lookup; regression added. No private signing key uploaded.
 - Automatic approval review rejected a persistent loopback download preview (“blocked by policy” only). Existing POS services unchanged; temporary-package verification passed. No hosted/public URL claimed.
 - Private recovery snapshot D:\Taha-Private-Recovery\R3A-20261114-173259, user/SYSTEM ACL, source bundle clone/fsck passed. Final source/docs upload and PR/Actions state are recorded in the final handoff; no Hostinger interaction.
+
+
+## Actual CI and preconnection correction
+
+- GitHub PR1 created, source9a8dcce. Real Actions runs43596808864/43596808386 started but failed setup: Docker single-quoted health command parsed -U as a Docker option; Android job lacked server Sharp dependency for shared TypeScript tests. Fixed double quotes/backend install and verified current vendor action releases/SHA/node24 inputs. Feature PR push duplicates removed.
+- Native-flow review reproduced the updater's missing Router context before connection. preconnection-red.log records1 failed case before correction; preconnection-green.log records all4 updater-screen cases passed after replacing the Router-dependent link with native-safe navigation. No assertion removed.
+- Build12 draft was marked SUPERSEDED and retained, never publicly deployed. Build13 is the new candidate; new application source checkpoint/artifacts follow. Source application changes are limited to navigation/version; financial/backend contracts unchanged. Existing full local result197/1skip plus284backend remains historical to this bounded final fix, with4 fresh targeted update tests. Await actual updated full GitHub run.
