@@ -48,3 +48,8 @@ Remaining: finish full browser run, exact final builds/artifacts/packaged accept
 - Private build13 draft4/4 assets read back and verified; draft retained for physical retest. Build12 remains superseded; no publication/deployment/hardware acceptance claimed.
 - Third runner setup finding: official Android command-line tools are versioned rather than on PATH. CI now verifies actual cached platform/build/signing files and locates the official SDK manager when needed. Two fixture regressions added; release-system17/17 and lint pass. Existing Node js-yaml validates workflows without installing Python YAML.
 - CI-only63ad3fa pushed; Actions43599209459 running at this checkpoint. Complete remote results must be read from Actions; no assumed green result.
+
+## Clean-runner regression result and ordering correction
+
+- Actions43599209459 completed: Android validation green, backend284/284, full browser193+5=198 passes/1 intentional skip, SQLite/SQL/concurrency all green. Overall job failed afterward at the credential-boundary scan: `dist/assets` did not yet exist in the clean checkout. Downloaded logs/results retain this exact failure.
+- Minimal correction: run frontend-build immediately before client-secrets-boundary. Both privileged credential rejection and output byte scanning remain unchanged; no test or assertion excluded. No packaged application/financial source changed. Rerun the complete remote gate before claiming overall CI success.
