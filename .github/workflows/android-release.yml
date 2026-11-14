@@ -1,0 +1,69 @@
+name: Approve Android test release
+on:
+  workflow_dispatch:
+    inputs:
+      approve_release:
+        description: Publish a verified TEST APK to this private repository (hosting stays manual)
+        required: true
+        type: boolean
+        default: false
+permissions:
+  contents: read
+concurrency:
+  group: android-test-release
+  cancel-in-progress: false
+jobs:
+  verify:
+    uses: ./.github/workflows/ci.yml
+  release:
+    needs: verify
+    if: inputs.approve_release == true
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    environment: android-test-release
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: '22'
+      - uses: actions/setup-java@d1374f8ac74474200d16ef8ecee22c7ae7a51880
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Verify repository, branch, approval and increasing version
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node scripts/ci/check-release-context.mjs
+      - run: npm ci && npm run build:mobile
+      - run: node scripts/ci/android-tools.mjs && node scripts/ci/setup-gradle.mjs
+      - name: Restore approved channel signing key
+        env:
+          SIGNING_KEY: ${{ secrets.ANDROID_TEST_KEYSTORE_B64 }}
+        run: |
+          node --input-type=module -e 'import fs from "node:fs";if(!process.env.SIGNING_KEY)throw Error("Approved test signing secrets must be configured");fs.writeFileSync(process.env.RUNNER_TEMP+"/taha-test.jks",Buffer.from(process.env.SIGNING_KEY,"base64"),{mode:0o600});'
+      - name: Build and verify with approved identity
+        env:
+          TAHA_ANDROID_KEYSTORE: ${{ runner.temp }}/taha-test.jks
+          TAHA_ANDROID_STORE_PASSWORD: ${{ secrets.ANDROID_TEST_STORE_PASSWORD }}
+          TAHA_ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_TEST_KEY_ALIAS }}
+          TAHA_ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_TEST_KEY_PASSWORD }}
+        run: |
+          test -n "$TAHA_ANDROID_STORE_PASSWORD" && test -n "$TAHA_ANDROID_KEY_ALIAS" && test -n "$TAHA_ANDROID_KEY_PASSWORD"
+          .tools/gradle-8.11.1/bin/gradle --no-daemon -p mobile/android testDebugUnitTest lintDebug assembleDebug
+      - name: Retain a verified known-good previous APK
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node scripts/ci/prepare-previous-android.mjs
+      - run: node scripts/ci/package-android.mjs
+      - name: Publish privately only after verifying uploaded bytes
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node scripts/ci/publish-android.mjs
+      - name: Remove runner signing copy
+        if: always()
+        run: rm -f "$RUNNER_TEMP/taha-test.jks"

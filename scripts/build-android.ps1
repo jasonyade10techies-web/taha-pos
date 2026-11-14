@@ -28,7 +28,9 @@ try {
   if ($LASTEXITCODE -ne 0) { throw 'Android build or validation failed.' }
   $taskOutput = Join-Path $taskRoot 'artifacts\android'
   New-Item -ItemType Directory -Force $taskOutput | Out-Null
-  $taskApk = Join-Path $taskOutput 'Taha-Staff-test-R3-build11.apk'
+  $taskVersion = ConvertFrom-StringData (Get-Content -LiteralPath (Join-Path $taskRoot 'mobile\android\release.properties') -Raw)
+  $taskApk = Join-Path $taskOutput ("Taha-Staff-test-R3a-build$($taskVersion.versionCode).apk")
+  if (Test-Path -LiteralPath $taskApk) { throw 'Versioned APK already exists. Increment the version or retain the existing artifact.' }
   Copy-Item -LiteralPath 'app\build\outputs\apk\debug\app-debug.apk' -Destination $taskApk -Force
   $taskSigner = Join-Path $env:ANDROID_HOME 'build-tools\35.0.0\apksigner.bat'
   & $taskSigner verify --verbose $taskApk

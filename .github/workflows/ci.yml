@@ -1,0 +1,96 @@
+name: Regression and private source checks
+on:
+  pull_request:
+  push:
+    branches: [main, staging]
+  workflow_call:
+permissions:
+  contents: read
+concurrency:
+  group: regression-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  regression:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    services:
+      postgres:
+        image: postgres:17-bookworm
+        env:
+          POSTGRES_USER: taha_phase5c
+          POSTGRES_HOST_AUTH_METHOD: trust
+          PGDATA: /var/lib/postgresql/data/.test-postgres/phase5c-20261014/pgdata
+        ports: ['127.0.0.1:55459:5432']
+        options: >-
+          --health-cmd "pg_isready -U taha_phase5c -d postgres"
+          --health-interval 5s --health-timeout 5s --health-retries 12
+    env:
+      TZ: Asia/Karachi
+      TAHA_TEST_POSTGRES_URL: postgresql://taha_phase5c@127.0.0.1:55459/postgres
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            server/package-lock.json
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0
+        with:
+          python-version: '3.11'
+      - run: npm ci && npm ci --prefix server
+      - run: python -m pip install pypdf==6.21.4 cryptography==50.0.2
+      - name: Install matching PostgreSQL client and PDF inspection
+        run: |
+          sudo install -d /usr/share/postgresql-common/pgdg
+          sudo curl --fail --location https://www.postgresql.org/media/keys/ACCC4CF8.asc -o /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc
+          test "$(gpg --show-keys --with-colons /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc | awk -F: '$1=="fpr" {print $10;exit}')" = B97B0AFCAA1A47F044F244A07FCC7D46ACCC4CF8
+          echo 'deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] https://apt.postgresql.org/pub/repos/apt noble-pgdg main' | sudo tee /etc/apt/sources.list.d/taha-ci-pgdg.list
+          sudo apt-get update
+          sudo apt-get install -y poppler-utils postgresql-client-17
+          echo 'TAHA_TEST_POSTGRES_BIN=/usr/lib/postgresql/17/bin' >> "$GITHUB_ENV"
+      - run: node scripts/security/setup-gitleaks.mjs && npm run scan:secrets
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:release-system && npm run test:release-tools
+      - run: npm run verify:release
+      - run: npm run build:hostinger
+      - run: node scripts/package-r2b.mjs --phase R3A --version 0.5.0-r3a.1
+      - run: npm run ci:package
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        if: always()
+        with:
+          name: regression-evidence
+          path: |
+            .test-postgres/release-checks/**/results.json
+            .test-postgres/release-checks/**/*.log
+            .test-postgres/r2c-20261113/*/results.json
+            .test-postgres/phase5c1-20261015/local-browser-results/**/error-context.md
+            .test-postgres/phase5c1-20261015/local-browser-results/**/trace.zip
+          retention-days: 14
+          include-hidden-files: true
+  android-validation:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: '22'
+          cache: npm
+      - uses: actions/setup-java@d1374f8ac74474200d16ef8ecee22c7ae7a51880
+        with:
+          distribution: temurin
+          java-version: '17'
+      - run: npm ci && npm ci --prefix server && npm run typecheck && npm run build:mobile
+      - name: Install official Android build dependencies
+        run: |
+          node scripts/ci/android-tools.mjs
+          node scripts/ci/setup-gradle.mjs
+      - run: .tools/gradle-8.11.1/bin/gradle --no-daemon -p mobile/android testDebugUnitTest lintDebug assembleDebug
+      # Validation APK deliberately isn't published: runner debug key is not the approved test key.

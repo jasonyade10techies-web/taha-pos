@@ -1,0 +1,12 @@
+import {execFileSync} from 'node:child_process';
+import {mkdirSync,writeFileSync} from 'node:fs';
+import {validateRelease} from '../../distribution/manifest.mjs';
+import {inspectApk} from '../android-release.mjs';
+import {createHash} from 'node:crypto';
+const repo=process.env.GITHUB_REPOSITORY;if(repo!=='jasonyade10techies-web/taha-pos')throw Error('Wrong repository.');
+const api=resource=>JSON.parse(execFileSync('gh',['api',resource],{encoding:'utf8'}));
+const releases=api(`repos/${repo}/releases?per_page=100`);if(releases.length===100)throw Error('Paginate release history before packaging more releases.');
+const prior=releases.filter(r=>!r.draft&&/^android-test-v[1-9][0-9]*$/.test(r.tag_name)).sort((a,b)=>Number(b.tag_name.split('v').at(-1))-Number(a.tag_name.split('v').at(-1)))[0];
+if(prior){const download=name=>{const asset=prior.assets.find(a=>a.name===name);if(!asset)throw Error('Previous known-good release is incomplete.');return execFileSync('gh',['api',`repos/${repo}/releases/assets/${asset.id}`,'-H','Accept: application/octet-stream'],{maxBuffer:70*1024*1024});};const json=download('release.json'),release=validateRelease(JSON.parse(json.toString('utf8'))),apk=download(release.apkUrl.split('/').at(-1));if(apk.length!==release.sizeBytes||createHash('sha256').update(apk).digest('hex')!==release.sha256)throw Error('Previous release bytes failed verification.');
+ const directory='.test-postgres/r3a-ci-previous';mkdirSync(directory,{recursive:true});writeFileSync(directory+'/release.json',json);writeFileSync(directory+'/previous.apk',apk);const identity=inspectApk(directory+'/previous.apk');if(identity.versionCode!==release.versionCode||identity.applicationId!==release.applicationId||identity.signingCertificateSha256!==release.signingCertificateSha256)throw Error('Previous APK identity failed verification.');console.log('Retained the previous verified test release for rollback.');
+}else console.log('First repository release: previous local build11 remains in private recovery archives.');

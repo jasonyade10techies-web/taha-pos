@@ -1,8 +1,15 @@
 export const bundledMobile = import.meta.env.VITE_BUNDLED_MOBILE === "true";
 export const mobileTestBuild = import.meta.env.VITE_MOBILE_TEST === "true";
-export const mobileVersion = "0.5R.3";
+export const mobileVersion = import.meta.env.VITE_MOBILE_VERSION || "0.5.0";
 export interface NativeShop {
   info(): string;
+  setUpdateBusy?(busy:boolean):void;
+  configureUpdates?(origin:string):boolean;
+  checkUpdates?(backendApiVersion:number):void;
+  downloadUpdate?():void;
+  installUpdate?():void;
+  cancelUpdate?():void;
+  updateStatus?():string;
   configure(address: string): boolean;
   beginEnrollment?(qr:string): string;
   completeEnrollment?(id:string,challenge:string): string;

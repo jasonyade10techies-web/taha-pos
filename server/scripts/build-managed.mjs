@@ -12,3 +12,5 @@ cpSync("migrations", "dist-tools/migrations", { recursive: true });
 console.log(
   "Managed Node package ready: dist/main.js and compiled migration/provision tools.",
 );
+
+cpSync("../distribution", "distribution", { recursive: true, filter: file => !file.endsWith(".d.mts") });

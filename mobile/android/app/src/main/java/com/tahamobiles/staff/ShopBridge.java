@@ -32,9 +32,19 @@ final class ShopBridge {
     private final DeviceIdentity deviceIdentity;
     private final CompanionSecurity companion;
     private CounterDiscovery discovery;
+    private final AppUpdater updater;
+    private volatile boolean updateBusy=true;
+    boolean updateBusy(){return updateBusy;}
+    @JavascriptInterface public void setUpdateBusy(boolean busy){updateBusy=busy;}
+    @JavascriptInterface public boolean configureUpdates(String origin){return updater.configureOrigin(origin);}
+    @JavascriptInterface public void checkUpdates(int apiVersion){updater.check(shop,apiVersion);}
+    @JavascriptInterface public void downloadUpdate(){updater.download();}
+    @JavascriptInterface public void installUpdate(){updater.install();}
+    @JavascriptInterface public void cancelUpdate(){updater.cancel();}
+    @JavascriptInterface public String updateStatus(){return updater.status();}
     @JavascriptInterface public void discoverCounters(){activity.runOnUiThread(()->{if(discovery==null)discovery=new CounterDiscovery(activity,web);discovery.start();});}
     @JavascriptInterface public void stopDiscovery(){activity.runOnUiThread(()->{if(discovery!=null)discovery.stop();});}
-    ShopBridge(Activity activity,WebView web){this.activity=activity;this.web=web;photos=new PendingPhotos(activity.getFilesDir());originals=new OriginalCaptures(activity.getFilesDir());deviceIdentity=new DeviceIdentity(activity.getFilesDir());companion=new CompanionSecurity(activity);}
+    ShopBridge(Activity activity,WebView web){this.activity=activity;this.web=web;photos=new PendingPhotos(activity.getFilesDir());originals=new OriginalCaptures(activity.getFilesDir());deviceIdentity=new DeviceIdentity(activity.getFilesDir());companion=new CompanionSecurity(activity);updater=new AppUpdater(activity,web,()->((MainActivity)activity).safeForUpdate());}
     @JavascriptInterface public synchronized String beginEnrollment(String qr){try{JSONObject pending=companion.begin(qr,deviceIdentity.getId(),DeviceIdentity.deviceName(android.os.Build.MANUFACTURER,android.os.Build.MODEL));if(!configure(pending.getString("shop")))throw new SecurityException();return pending.toString();}catch(Exception error){return "{}";}}
     @JavascriptInterface public String completeEnrollment(String id,String challenge){try{return companion.complete(id,challenge).toString();}catch(Exception error){return "{}";}}
     @JavascriptInterface public boolean companionSession(){return companion.active();}
@@ -164,5 +174,5 @@ final class ShopBridge {
         });
     }
     private void putError(JSONObject result,String error){try{result.put("error",error);}catch(Exception ignored){}}
-    void close(){closed=true;if(discovery!=null)discovery.stop();workers.shutdownNow();}
+    void close(){updater.close();closed=true;if(discovery!=null)discovery.stop();workers.shutdownNow();}
 }

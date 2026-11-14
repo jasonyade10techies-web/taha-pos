@@ -172,6 +172,7 @@ export function MobileSettingsPage() {
       )}
       {bundledMobile && <section className="staff-section">
         <h2>Shop &amp; Advanced</h2>
+        <Link className="button button-secondary" to="/mobile/updates">App Updates</Link>
         <div className="panel staff-settings-list">
           <Link to="/mobile/shop-connection">
             <Wifi size={20} />

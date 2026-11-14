@@ -1,3 +1,4 @@
+import {AppUpdatesPage} from "./app-updates-page";
 import { lazy, Suspense, useEffect, useState } from "react";
 import {
   Routes,
@@ -152,6 +153,7 @@ function Logout() {
   );
 }
 export function MobileRoutes() {
+  useEffect(()=>{if(!bundledMobile||!window.TahaNative?.checkUpdates)return;const now=Date.now(),last=Number(sessionStorage.getItem('taha-update-checked')||0);if(now-last>21600000){sessionStorage.setItem('taha-update-checked',String(now));window.TahaNative.checkUpdates(1);}},[]);
   return (
     <>
       <Suspense
@@ -168,6 +170,7 @@ export function MobileRoutes() {
           <Route path="/products" element={<Navigate to="/mobile/products" replace />} />
           <Route path="/settings" element={<Navigate to="/mobile/settings" replace />} />
           <Route path="/login" element={<MobileLoginPage />} />
+          <Route path="/mobile/updates" element={<AppUpdatesPage/>}/>
           <Route element={<Guard />}>
             <Route element={<MobileShell />}>
               <Route path="/setup" element={<FirstRunSetupPage mobile/>}/>

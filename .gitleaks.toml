@@ -1,0 +1,9 @@
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "Nonproduction enrollment JWT fixture: generated isolated database, test-only constant"
+condition = "AND"
+paths = ['''(?:^|/)server/test/device-enrollment\.test\.ts$''']
+regexTarget = "secret"
+regexes = ['''^isolated-enrollment-fixture-secret-2026$''']

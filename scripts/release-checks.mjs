@@ -13,7 +13,7 @@ export const checks=[
  ['frontend-types','.', 'typecheck'],['frontend-lint','.', 'lint'],
  ['backend-types','server','typecheck'],['backend-lint','server','lint'],['backend-build','server','build'],['backend-tests','server','test'],
  ['frontend-suites','.', 'test'],['sqlite','.', 'test:desktop'],['tauri-config','.', 'validate:tauri'],
- ['sql-security-financial','.', 'test:security'],['stock-concurrency','.', 'test:concurrency'],['client-secrets-boundary','.', 'test:client-boundary'],['frontend-build','.', 'build'],
+ ['sql-security-financial','.', 'test:security'],['stock-concurrency','.', 'test:concurrency'],['frontend-build','.', 'build'],['client-secrets-boundary','.', 'test:client-boundary'],
 ];
 async function main(){
  const plan=[...checks,...(process.argv.includes('--android')?[['android-test-apk','.', 'build:apk']]:[])];

@@ -2,6 +2,14 @@
 
 Evidence updated: **14 November 2026** (earlier sections retain their historical dates). Root: `D:\Inventory system POS`. This checklist records the original audit and subsequent authorized R1/R2A implementation. Historical results are labelled; only the current completion section controls the next work. See `TAHA_POS_COMPLETE_HANDOFF_2026-11-11.md` for architecture, test boundaries and history.
 
+## Latest controlling checkpoint —R3A
+
+Branch `codex/r3a-release-system`; private repository `jasonyade10techies-web/taha-pos`, draft PR1. Build13/application24aecd7fc1fbbffb091fc779667169e9b4dd1498, tag `r3a-source-build13`, APK/download ZIP/full POS package and recovery copies are ready. Dashboard Download App and Devices install QR are implemented. Hosting remains manual; no deployment occurred.
+
+**Remaining before source promotion:** review current-head Checks on private PR1. Initial full rerun43607701944 tested code checkpoint39eebefd2188cd59b1ccd5ed00e62b454baa53e8; documentation-only pushes can supersede/cancel it. The current full gate is PENDING at owner departure, not a claimed pass. Its readiness correction has4/4 targeted passes and fresh types/lint, with no retries/assertion weakening. See the R3A report for earlier failed/passed runs separately. GitHub runs independently of this chat.
+
+After that: manual HTTPS download-site acceptance, physical build11→13 retention and subsequent higher-build updater test, then separate full hosted POS acceptance. Windows/native offline, physical printer/HID/second display, stable signing/key custody and repair-job accounting remain daily-use gates. Older dated sections below are retained historical evidence, not the current branch/status.
+
 ## Current local release hardening — 14 November 2026
 
 The owner has **paused hosting/account/deployment activity**. Continue local completion and verification; do not contact hosting accounts, deploy, buy services or change DNS. Earlier R2C hosting instructions below are historical and do not override this scope.
@@ -186,3 +194,17 @@ Repair deposits/parts job settlement and full expense accounting are incomplete.
 5. Hosted shared-data/private-media/restore acceptance, physical apps/hardware, then controlled pilot.
 
 Owner inputs still needed: approved domain, external PostgreSQL/object storage/backup choice, physical printer and device access, later Windows prerequisite installation authorization. The browser Unlimited plan was selected; its usable Node limits and connector/account alignment still require verification. No secrets should be pasted into the planning chat.
+
+
+## R3A — source/release foundation (14 November2026)
+
+- Private source baseline is retained at jasonyade10techies-web/taha-pos; owner elected manual hosting.
+- Downloads-only server, manifests/verified APK packaging, native update policy/UI, source-root POS build and CI workflows implemented. See R3A report and owner setup for exact acceptance/artifacts.
+- Full fresh frontend197 passes/1 intentional skip; backend284 passes. Final preconnection navigation correction has4 focused passing cases; no combined198-pass full local claim. Release-system17 tests pass. Final build13 managed package passes26/26 compiled acceptance checks, including persisted financial assertions and backup/restore. Local/native automated checks are separate from physical/cloud acceptance.
+- GitHub Actions43599209459: Android validation passed, complete browser193+5=198 passed/1 intentional skip, backend284 passed. Overall regression failed afterward because the credential scan needed `dist/assets` before the frontend build step. The build now precedes that unchanged security check; fresh full CI acceptance remains required. Earlier runner setup failures and corrections remain documented.
+- Subsequent43605115593: Android/backend green; browser192 passed/1 failed/1 skipped, with aborted390px dark navigation. A deterministic blocked-bootstrap regression exposed the sweep accepting the startup heading. Both theme sweeps now require the actual workspace heading and preserve all error assertions; final full rerun is required. No APK/application source changed for this test-harness correction.
+- GitHub private branch/reviewer enforcement is blocked by the current account plan. No signing secrets uploaded; CI publication fails closed. Do not make source public or buy an upgrade automatically. Use a controlled local signing/manual release until the owner chooses an enforceable CI policy.
+- Owner: manually host the approved download ZIP, verify HTTPS/hash and install test build13 over build11. Physically test a subsequent higher approved update, retained sessions/pairing/photos, camera/scanner deferral, cancellation/restart and offline behavior.
+- Full POS: verify actual Hostinger slot/runtime and approved PostgreSQL/private object storage, guarded fresh staging migrations, shared browser access, readiness, persistence and recovery. Nothing was hosted by R3A.
+- Keep native Windows MSVC/SDK build/offline acceptance, real printer/HID/second monitor, stable signing and repair-job parts/deposit/settlement accounting as explicit production gates.
+- Claude Design handoff is proposal/audit only; local AST graph is incomplete for SQL. No new redesign has been approved or performed.
