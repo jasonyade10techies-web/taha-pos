@@ -32,52 +32,52 @@ Native bridge contract: `configureUpdates(origin:string):boolean`, `checkUpdates
 
 Files: `.gitignore`, optional focused `.gitleaks.toml`, `scripts/security/*`, owner setup documentation.
 
-- [ ] Inspect all tracked files/history with redacted secret scanning, preserve evidence, review findings rather than blanket-ignore tests.
-- [ ] Verify/create **private** `jasonyade10techies-web/taha-pos` only using that account's authorized access. Verify permissions and existing content before any push; never force-push.
-- [ ] Preserve recovered Git history; establish `main`/`staging` only from a verified commit. Check branch-protection capability; document unavailable enforcement rather than claiming it works.
+- [x] Inspect all tracked files/history with redacted secret scanning, preserve evidence, review findings rather than blanket-ignore tests.
+- [x] Verify/create **private** `jasonyade10techies-web/taha-pos` only using that account's authorized access. Verify permissions and existing content before any push; never force-push.
+- [x] Preserve recovered Git history; establish `main`/`staging` only from a verified commit. Check branch-protection capability; document unavailable enforcement rather than claiming it works.
 
 ## Task 2 — local release manifest and download app
 
 Files: `distribution/*`, `scripts/android-release.mjs`, `scripts/package-downloads.mjs`, Node tests under `scripts/test/*`; mount adapter under `server/src/releases/`.
 
-- [ ] Write failing tests for invalid metadata, identity/version/hash mismatches, missing bytes, immutable collisions, interrupted publication, traversal, anonymous delivery, caching and database-independent startup.
-- [ ] Validate actual APK metadata/signature with Android tools, retain old approved APK and publish atomically to generated output under `artifacts/`.
-- [ ] Implement the standalone assigned-port server and optional existing-Nest mount; no uploads/admin control or private data exposed.
-- [ ] Validate downloaded bytes, Content-Type, filename, manifests, route refresh and rollback locally.
+- [x] Write failing tests for invalid metadata, identity/version/hash mismatches, missing bytes, immutable collisions, interrupted publication, traversal, anonymous delivery, caching and database-independent startup.
+- [x] Validate actual APK metadata/signature with Android tools, retain old approved APK and publish atomically to generated output under `artifacts/`.
+- [x] Implement the standalone assigned-port server and optional existing-Nest mount; no uploads/admin control or private data exposed.
+- [x] Validate downloaded bytes, Content-Type, filename, manifests, route refresh and rollback locally.
 
 ## Task 3 — native Android updater
 
 Files: new `AppUpdater.java`, `UpdatePolicy.java`, related JVM tests. Integration: `ShopBridge.java`, `MainActivity.java`, Android manifest/provider paths.
 
-- [ ] TDD metadata/URL/compatibility/hash/anti-downgrade policy, cancellation, concurrency and retry.
-- [ ] HTTPS only, bounded requests/downloads, same-origin redirects, no authentication-cookie forwarding, app-private files; revalidate package/certificate/version/hash immediately before installer.
-- [ ] Check installed certificate through PackageManager; no trust in manifest certificate alone. Handle unknown-source permission, cancellation and installer failures honestly.
-- [ ] Do not clear session/photo queues; block installation while native camera/scanner work is active. No silent installation or forced downgrade. Preserve verified APK across ordinary Activity recreation where possible.
+- [x] TDD metadata/URL/compatibility/hash/anti-downgrade policy, cancellation, concurrency and retry.
+- [x] HTTPS only, bounded requests/downloads, same-origin redirects, no authentication-cookie forwarding, app-private files; revalidate package/certificate/version/hash immediately before installer.
+- [x] Check installed certificate through PackageManager; no trust in manifest certificate alone. Handle unknown-source permission, cancellation and installer failures honestly.
+- [x] Do not clear session/photo queues; block installation while native camera/scanner work is active. No silent installation or forced downgrade. Preserve verified APK across ordinary Activity recreation where possible.
 
 ## Task 4 — compact desktop and mobile release UI
 
 Files: `src/lib/releases/*`, `src/features/mobile/app-updates-page.tsx`, mobile settings/routes, a small Devices download panel and compact Dashboard entry.
 
-- [ ] TDD current/new/offline/malformed/incompatible/missing-origin states; unverified metadata never marks a phone outdated.
-- [ ] Show native progress and user-driven install; defer installation while a sale/camera operation is active. Check at launch/settings with backoff, not every few seconds.
-- [ ] Download-page QR is explicitly installation, independent from pairing and receipt QR. Reuse existing neutral tokens/branding/components; no redesign.
+- [x] TDD current/new/offline/malformed/incompatible/missing-origin states; unverified metadata never marks a phone outdated.
+- [x] Show native progress and user-driven install; defer installation while a sale/camera operation is active. Check at launch/settings with backoff, not every few seconds.
+- [x] Download-page QR is explicitly installation, independent from pairing and receipt QR. Reuse existing neutral tokens/branding/components; no redesign.
 
 ## Task 5 — reproducible CI, signing and manual release
 
 Files: `.github/workflows/*`, `scripts/ci/*`, Android version/signing configuration and build tooling.
 
-- [ ] PR checks: Node22, types/lint/build, both browser profiles/PDF tooling, full backend and financial tests, ephemeral PostgreSQL17, SQLite, secret/history scan and package inspection. Cache dependencies without caching secrets/runtime databases.
-- [ ] PostgreSQL service uses loopback55459, `taha_phase5c`, and PGDATA suffix `.test-postgres/phase5c-20261014/pgdata` so existing safeguards remain effective. Resolve PostgreSQL executables portably; never weaken guards with `CI=true`.
-- [ ] Manually approved Android release only; enforce a committed increasing version, require the intended channel signing secret, assemble/test/lint/verify, generate checksum/manifest/site package and retain known-good releases. PR APKs are validation-only and are not published as updates.
-- [ ] Private release publication remains draft until all uploaded bytes/metadata match. No Hostinger deployment step while the owner's manual-hosting amendment applies.
-- [ ] Add a Git-root full-stack build entry matching existing source paths and assigned PORT. Migrations remain a separate explicit command.
+- [x] PR checks: Node22, types/lint/build, both browser profiles/PDF tooling, full backend and financial tests, ephemeral PostgreSQL17, SQLite, secret/history scan and package inspection. Cache dependencies without caching secrets/runtime databases.
+- [x] PostgreSQL service uses loopback55459, `taha_phase5c`, and PGDATA suffix `.test-postgres/phase5c-20261014/pgdata` so existing safeguards remain effective. Resolve PostgreSQL executables portably; never weaken guards with `CI=true`.
+- [x] Manually approved Android release only; enforce a committed increasing version, require the intended channel signing secret, assemble/test/lint/verify, generate checksum/manifest/site package and retain known-good releases. PR APKs are validation-only and are not published as updates.
+- [x] Private release publication remains draft until all uploaded bytes/metadata match. No Hostinger deployment step while the owner's manual-hosting amendment applies.
+- [x] Add a Git-root full-stack build entry matching existing source paths and assigned PORT. Migrations remain a separate explicit command.
 
 ## Task 6 — Claude/Graphify handoff
 
 Files: `docs/CLAUDE_DESIGN_TAHA_POS_HANDOFF.md`, `docs/TAHA_POS_CLAUDE_GRAPHIFY_HANDOFF.md`, optional local graph evidence.
 
-- [ ] Verify actual Graphify installation/provenance/dependencies. Only a fully local code/AST index with explicit source allowlist is acceptable; no source/docs/media sent to hosted inference, no config/AGENTS/CLAUDE overwrites.
-- [ ] Map exact routes/components/tokens and safe synthetic screenshots. Distinguish browser/mobile emulation from real Android screenshots. Proposal/audit first; no Claude review is claimed unless performed.
+- [x] Verify actual Graphify installation/provenance/dependencies. Only a fully local code/AST index with explicit source allowlist is acceptable; no source/docs/media sent to hosted inference, no config/AGENTS/CLAUDE overwrites.
+- [x] Map exact routes/components/tokens and safe synthetic screenshots. Distinguish browser/mobile emulation from real Android screenshots. Proposal/audit first; no Claude review is claimed unless performed.
 
 ## Acceptance and review focus
 
@@ -88,3 +88,5 @@ Files: `docs/CLAUDE_DESIGN_TAHA_POS_HANDOFF.md`, `docs/TAHA_POS_CLAUDE_GRAPHIFY_
 5. A download-only site must start without DB credentials and never expose the full POS as if configured.
 
 Keep a task/evidence ledger in `docs/r3a/IMPLEMENTATION_LEDGER.md`; mark each test fresh/historical and each external step prepared/verified/blocked. Final documents: this plan, Android release system, Claude/Graphify handoff, implementation report, Claude Design handoff and practical owner setup. Final branch review follows integration; never claim hosting/publication/hardware success from local tests.
+
+Implementation boxes denote prepared source and local verification. They do not mean hosting, physical installation, branch protection or signed CI publication is active. See the final report for the actual GitHub plan restrictions and external gates.

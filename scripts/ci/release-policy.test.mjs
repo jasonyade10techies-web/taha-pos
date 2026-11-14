@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createHash} from 'node:crypto';
-import {parseReleaseProperties, assertReleaseContext, assertIncreasingVersion, assertAssetBytes,assertSigningEnvironment} from './release-policy.mjs';
+import {parseReleaseProperties, assertReleaseContext, assertIncreasingVersion, assertAssetBytes,assertSigningEnvironment,findDraftRelease} from './release-policy.mjs';
 
 const context = {eventName:'workflow_dispatch', repository:'jasonyade10techies-web/taha-pos', ref:'refs/heads/main', private:true};
 test('release requires manual dispatch in the intended private source repository', () => {
@@ -34,3 +34,4 @@ test('CI signing fails closed without enforceable review and a matching branch p
  for(const changed of [{...environment,protection_rules:[]},{...environment,deployment_branch_policy:null}])assert.throws(()=>assertSigningEnvironment(changed,branches,'staging'));
  assert.throws(()=>assertSigningEnvironment(environment,branches,'feature'));assert.throws(()=>assertSigningEnvironment(environment,{branch_policies:[]},'staging'));
 });
+test('unpublished releases resolve by exact tag in the authenticated release list, not a nonexistent published-tag route',()=>{const draft={id:12,tag_name:'android-test-v12',draft:true};assert.equal(findDraftRelease([{id:11,tag_name:'android-test-v11',draft:false},draft],'android-test-v12'),draft);assert.throws(()=>findDraftRelease([draft],'android-test-v13'));assert.throws(()=>findDraftRelease([{...draft,draft:false}],'android-test-v12'));});

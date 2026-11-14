@@ -34,3 +34,8 @@ export function assertSigningEnvironment(environment,branches,branchName){
   assert.equal(environment.deployment_branch_policy?.custom_branch_policies,true,'Signing environment must restrict named branches.');
   assert.ok(branches.branch_policies?.some(branch=>branch.name===branchName&&branch.type==='branch'),'This branch is not approved for signing.');
 }
+export function findDraftRelease(releases,tag){
+  const release=releases.find(item=>item.tag_name===tag&&item.draft===true);
+  assert.ok(release,'The newly uploaded private draft is missing.');
+  return release;
+}

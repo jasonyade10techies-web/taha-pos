@@ -23,3 +23,13 @@
 - Hostinger manual: no hosting/domain/account configuration/deployment performed.
 
 Remaining: finish full browser run, exact final builds/artifacts/packaged acceptance, final docs/evidence, private R3A source commit and PR/CI checks, verified Git bundle backup. Retain all failed/candidate logs; do not overwrite accepted build11 or private recovery archives.
+
+## Final local acceptance
+
+- Application commit2e91a21260ee9e4e3e152b9a68706885db41f15b packaged clean;12b5839 is the full implementation checkpoint and2e91a21 changes only public Android compatibility wording. Later docs/CI-only work is not a different application package.
+- Complete frontend rerun192 passed/1 intentional local-profile skip plus5 reconciliation passed. Final backend284 passed; native43 tests/lint/assembly/signature passed; release-system15 passed; guard4, SQLite7, SQL20/14/25, actual-PG concurrency2, client boundary/Tauri config passed. Runtime npm audits0; redacted secret/history scans0 unresolved findings.
+- Exact final clean managed package: artifacts/managed/Taha-POS-staging-R3A-0.5.0-r3a.1-20261114T123627.zip.26 final compiled acceptance checks passed, including disposable backup/restore. No saved-shop data touched.
+- Final Android/download output artifacts/android-release-R3A, source2e91a21; APK18763c18719fed62402b97412c28557559bdac8b6be777692d850613563c70ab. Real anonymous extracted-ZIP downloads verified build11/12. Native certificate unchanged.
+- Private GitHub build12 draft assets4/4 downloaded and hashed successfully. Published-tag draft lookup404 was reproduced and CI helper corrected to authenticated list lookup; regression added. No private signing key uploaded.
+- Automatic approval review rejected a persistent loopback download preview (“blocked by policy” only). Existing POS services unchanged; temporary-package verification passed. No hosted/public URL claimed.
+- Private recovery snapshot D:\Taha-Private-Recovery\R3A-20261114-173259, user/SYSTEM ACL, source bundle clone/fsck passed. Final source/docs upload and PR/Actions state are recorded in the final handoff; no Hostinger interaction.

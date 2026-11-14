@@ -30,7 +30,7 @@ Final source/artifact references are recorded in the acceptance addendum below a
 | Backend full suite |284 passed,0 failures/skips | `backend-final-tests.log` |
 | Backend types/lint/build |Passed | `backend-final-types.log`, `backend-final-lint.log`, `backend-final-build.log` |
 | Android JVM/lint/assembly/signature |43 JVM tests passed; lint/assemble/signature passed | `android-final.log`, native test XML |
-| Release/URL/package/CI safety tests |14 passed | `release-system.log` |
+| Release/URL/package/CI safety tests |15 passed | `release-system.log` |
 | SQLite |7 passed | `test-desktop.log` |
 | SQL security/inventory/transactions |20/14/25 passed | `test-security.log` |
 | Actual PostgreSQL concurrency |2 passed | `test-concurrency.log` |
@@ -69,4 +69,21 @@ Next controlled phase: approve/review the source PR and choose an enforceable si
 
 ## Acceptance addendum
 
-Final commit, artifact checksums, private PR/release links and clean-package evidence will be appended after the final source checkpoint and packaging verification. Until that addendum is populated, use this as an implementation/test record, not a final hosted release claim.
+Application source commit: **2e91a21260ee9e4e3e152b9a68706885db41f15b**, clean during packaging; retained tag `r3a-source-0.5.0`. The preceding12b5839 checkpoint contains the full implementation.2e91a21 only clarifies the public page's Android8.0/API26 requirement. Subsequent acceptance-documentation/CI-tooling changes do not alter the packaged frontend/backend/Android application.
+
+Final artifacts:
+
+- `artifacts/android-release-R3A/Taha-Staff-test-build12.apk` —4,208,293 bytes; SHA256 `18763c18719fed62402b97412c28557559bdac8b6be777692d850613563c70ab`.
+- `artifacts/android-release-R3A/Taha-Staff-downloads-test-12.zip` —7,867,109 bytes; SHA256 `5d689ea4e8bcdc1849427a4f5e4942a34dda10169e7dc1bb6bb1319e782b556c`.
+- `artifacts/android-release-R3A/release.json`, `sha256.txt`, `artifact-manifest.json`.
+- `artifacts/managed/Taha-POS-staging-R3A-0.5.0-r3a.1-20261114T123627.zip` —350 manifest-listed files; SHA256 `f6de087912c1ca8402ac2768152f920ef225424ac2d2b1f3dc4d6cf6ed7a8a98`.
+
+The final managed package passed all26 disposable PostgreSQL/browser/backup-restore checks in `final-package-acceptance.log`, evidence `.test-postgres/r2c-20261113/taha_r2c_clean_1794659987700`. It used the current public APK release root independently of private business media. The final standalone ZIP was extracted and started without database/environment secrets; build11 and build12 anonymous HTTP downloads matched their manifest sizes/SHA256/MIME. Evidence: `download-package-results.json`. Older dirty/candidate artifacts remain preserved and must not be mistaken for these final packages.
+
+Private **draft**, not a public release or hosted website: https://github.com/jasonyade10techies-web/taha-pos/releases/tag/untagged-b22b0ce7f2d616465be3 . All four remote assets were downloaded with authorized GitHub access and verified byte-for-byte (`github-draft-verification.json`). The real API check found that unpublished drafts cannot be retrieved through the published-tag endpoint; the CI uploader now resolves the authenticated release list by exact tag/draft state, with a regression test. No signing key was uploaded.
+
+A verified source bundle, APK, download package and local TEST-key recovery copy were saved under `D:\Taha-Private-Recovery\R3A-20261114-173259` with user/SYSTEM ACLs. Bundle clone/fsck passed. Existing recovery sets/build11 remain untouched; final source acceptance is additionally retained through Git/history and the private source tag. These local-drive copies are not a claim of independent off-device disaster recovery.
+
+Persistent download-preview startup was rejected by automatic approval review with only “blocked by policy”; no persistent preview is claimed. Temporary extracted-package HTTP verification passed. The owner can run the prepared server manually or upload the tested ZIP. Existing POS localhost1423/API3306 were not stopped by this attempted preview.
+
+No Hostinger deployment/public HTTPS URL, production database/storage acceptance or physical phone/Windows/printer acceptance occurred. **Production readiness: NO.** Local implementation and release packaging are ready for owner review and physical retest. Main/staging retain the earlier baseline until the R3A source PR is approved. Remote Actions status is distinct from local results; use the repository Actions/PR checks and the final chat handoff for the actual run conclusion.

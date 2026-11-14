@@ -4,7 +4,7 @@ Nothing in this document means hosting has been configured. Do not create a publ
 
 ## First: Android downloads only
 
-Use the generated **Taha-Staff-downloads-test-12.zip**, not a source ZIP and not the full POS staging ZIP. Its artifact path is recorded in the final R3A report.
+Use the generated **Taha-Staff-downloads-test-12.zip**, not a source ZIP and not the full POS staging ZIP. Its exact path is `artifacts/android-release-R3A/Taha-Staff-downloads-test-12.zip`; checksums and the private GitHub draft are recorded in the R3A report.
 
 1. hPanel → Websites → Create site/Web App → upload the download ZIP into an unused app/temporary domain.
 2. Select a supported Node22/24 runtime. Build command `npm run build`, start command `npm start`, entry `server.mjs`. Let Hostinger assign `PORT`; do not configure the LAN port.
@@ -28,7 +28,7 @@ Run guarded migrations/one-time owner initialization against a newly approved st
 
 ## GitHub and releases
 
-Private repository: `https://github.com/jasonyade10techies-web/taha-pos`. Main/staging are controlled release targets; feature branches use PRs. Review the actual CI run before merging. Required checks/branch protection depend on the account's verified plan and must not be assumed from workflow files.
+Private repository: `https://github.com/jasonyade10techies-web/taha-pos`. Main/staging are controlled release targets; feature branches use PRs. Until the owner approves/merges the R3A PR, these branches retain the earlier verified baseline; use the tested ZIP or explicitly select `codex/r3a-release-system` for the new source build. Review the actual CI run before merging. Required checks/branch protection depend on the account's verified plan and must not be assumed from workflow files.
 
 Use Actions → Approve Android test release only after reviewing version, test results and release notes. Configure approved signing secrets in a restricted environment using GitHub's secure UI/CLI; do not send them in chat. No Hostinger token or automatic hosting deployment is configured. Check the final R3A report for actual protection/CI status and remaining access blockers.
 

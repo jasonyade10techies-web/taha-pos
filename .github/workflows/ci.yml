@@ -25,6 +25,7 @@ jobs:
           --health-cmd 'pg_isready -U taha_phase5c -d postgres'
           --health-interval 5s --health-timeout 5s --health-retries 12
     env:
+      TZ: Asia/Karachi
       TAHA_TEST_POSTGRES_URL: postgresql://taha_phase5c@127.0.0.1:55459/postgres
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
