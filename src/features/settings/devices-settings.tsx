@@ -1,3 +1,4 @@
+import {AndroidDownloads} from "../../components/devices/android-downloads";
 import {useShopConfiguration} from "../../hooks/use-shop-configuration";
 import {CompanionEnrollmentSettings} from './companion-enrollment-settings';
 import { useState } from "react";
@@ -44,6 +45,7 @@ export function DevicesSettings() {
   const pair = () => window.dispatchEvent(new Event("taha-pair-phone"));
   const refresh = async () => { await deviceBridgeService.devices(terminalId); };
   return <div className="devices-settings device-bridge-settings">
+    <AndroidDownloads />
     <CompanionEnrollmentSettings />
     <section className="staff-phones-section" aria-labelledby="staff-phones-heading">
       <div className="staff-devices-heading"><div><h3 id="staff-phones-heading">{ownerOnly?"Connected Phones":"Staff Phones"}</h3><p>Receive photo requests from {terminalName} on a paired staff phone.</p></div>{devices.length > 0 && <Button variant="primary" onClick={pair}><Link2 size={16}/>{ownerOnly?"Pair My Phone":"Pair Staff Phone"}</Button>}</div>

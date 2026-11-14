@@ -1,3 +1,5 @@
+import {useCartStore} from "../../stores/cart-store";
+import {AppUpdatesPage} from "./app-updates-page";
 import { useEffect, useState, useRef, type ReactNode } from "react";
 import { Logo } from "../../components/ui/logo";
 import { Button } from "../../components/ui/button";
@@ -44,6 +46,7 @@ export function ConnectionPage() {
           STAFF APP · {mobileTestBuild ? "TEST" : "SECURE CONNECTION"}
         </span>
         <h1>Connect to Shop</h1>
+        {bundledMobile && <a href="#/mobile/updates">App Updates</a>}
         <NearbyCounters/>
         <p>
           The app runs on your phone. This address connects it to the Taha shop
@@ -199,6 +202,8 @@ export function DiagnosticsPage({ onBack }: { onBack?: () => void }) {
     [testError, setTestError] = useState("");
   const testJob = useCameraStore((s) => s.jobs.find((j) => j.id === testId));
   const state = useShopConnectionStore();
+  const cartBusy=useCartStore(s=>s.items.length>0),checkoutBusy=useSessionStore(s=>s.checkoutOpen);
+  useEffect(()=>{window.TahaNative?.setUpdateBusy?.(cartBusy||checkoutBusy);},[cartBusy,checkoutBusy]);
   const signedIn = useSessionStore((s) => s.authStatus === "authenticated");
   const info = nativeInfo();
   let host = "—",
@@ -301,6 +306,8 @@ export function DiagnosticsPage({ onBack }: { onBack?: () => void }) {
 }
 export function MobileRoot({ children }: { children: ReactNode }) {
   const state = useShopConnectionStore();
+  const cartBusy=useCartStore(s=>s.items.length>0),checkoutBusy=useSessionStore(s=>s.checkoutOpen);
+  useEffect(()=>{window.TahaNative?.setUpdateBusy?.(cartBusy||checkoutBusy);},[cartBusy,checkoutBusy]);
   const [route, setRoute] = useState(location.hash.slice(1).split("?")[0]);
   const savedAddress = useRef(state.baseUrl);
   useEffect(() => {
@@ -364,6 +371,8 @@ export function MobileRoot({ children }: { children: ReactNode }) {
   }, []);
   const content = !bundledMobile ? (
     children
+  ) : route === "/mobile/updates" ? (
+    <AppUpdatesPage />
   ) : route === "/diagnostics" ? (
     <DiagnosticsPage />
   ) : (!state.accepted && !state.baseUrl) || route === "/shop-connection" ? (

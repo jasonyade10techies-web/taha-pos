@@ -186,3 +186,15 @@ Repair deposits/parts job settlement and full expense accounting are incomplete.
 5. Hosted shared-data/private-media/restore acceptance, physical apps/hardware, then controlled pilot.
 
 Owner inputs still needed: approved domain, external PostgreSQL/object storage/backup choice, physical printer and device access, later Windows prerequisite installation authorization. The browser Unlimited plan was selected; its usable Node limits and connector/account alignment still require verification. No secrets should be pasted into the planning chat.
+
+
+## R3A — source/release foundation (14 November2026)
+
+- Private source baseline is retained at jasonyade10techies-web/taha-pos; owner elected manual hosting.
+- Downloads-only server, manifests/verified APK packaging, native update policy/UI, source-root POS build and CI workflows implemented. See R3A report and owner setup for exact acceptance/artifacts.
+- Full fresh frontend197 passes/1 intentional skip; backend284 passes. Local/native automated checks are separate from physical/cloud acceptance.
+- GitHub private branch/reviewer enforcement is blocked by the current account plan. No signing secrets uploaded; CI publication fails closed. Do not make source public or buy an upgrade automatically. Use a controlled local signing/manual release until the owner chooses an enforceable CI policy.
+- Owner: manually host the approved download ZIP, verify HTTPS/hash and install test build12 over build11. Physically test a subsequent higher approved update, retained sessions/pairing/photos, camera/scanner deferral, cancellation/restart and offline behavior.
+- Full POS: verify actual Hostinger slot/runtime and approved PostgreSQL/private object storage, guarded fresh staging migrations, shared browser access, readiness, persistence and recovery. Nothing was hosted by R3A.
+- Keep native Windows MSVC/SDK build/offline acceptance, real printer/HID/second monitor, stable signing and repair-job parts/deposit/settlement accounting as explicit production gates.
+- Claude Design handoff is proposal/audit only; local AST graph is incomplete for SQL. No new redesign has been approved or performed.

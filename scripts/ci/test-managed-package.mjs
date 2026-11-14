@@ -1,0 +1,12 @@
+import {readdirSync,statSync,mkdirSync,copyFileSync,existsSync} from 'node:fs';
+import {execFileSync} from 'node:child_process';
+import path from 'node:path';
+const candidates=readdirSync('artifacts/managed').filter(name=>/^Taha-POS-staging-R3A-/.test(name)&&statSync(path.join('artifacts/managed',name)).isDirectory());
+if(candidates.length!==1)throw Error('Run packaged CI acceptance in a clean checkout with exactly one generated R3A package.');
+const release=path.resolve('artifacts/managed',candidates[0]),dependencies=path.resolve('.test-postgres/r2b-20261111/clean-runtime-dependencies');
+if(existsSync(path.join(dependencies,'node_modules')))throw Error('CI production-dependency directory must start empty.');
+mkdirSync(dependencies,{recursive:true});for(const file of ['package.json','package-lock.json'])copyFileSync(path.join(release,file),path.join(dependencies,file));
+const npm=process.env.npm_execpath;if(!npm||!existsSync(npm))throw Error('Run with npm run ci:package.');
+execFileSync(process.execPath,[npm,'ci','--omit=dev','--no-audit','--no-fund'],{cwd:dependencies,stdio:'inherit'});
+const python=process.env.TAHA_PDF_PYTHON||execFileSync('python',['-c','import sys; print(sys.executable)'],{encoding:'utf8'}).trim();
+execFileSync(process.execPath,['scripts/test-r2c-clean-shop.mjs'],{stdio:'inherit',env:{...process.env,TAHA_R2C_PACKAGE_ROOT:release,TAHA_R2B_DEPENDENCIES:dependencies,TAHA_PDF_PYTHON:python}});

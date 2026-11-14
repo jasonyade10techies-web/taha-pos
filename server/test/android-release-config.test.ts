@@ -1,0 +1,7 @@
+import {test} from 'node:test';
+import assert from 'node:assert/strict';
+import {randomBytes} from 'node:crypto';
+import {configuration} from '../src/config';
+function configured(origin:string){const before={...process.env};try{for(const key of Object.keys(process.env))if(/^(?:VERCEL|TAHA_|DATABASE_|STORAGE_|S3_|FRONTEND_|PUBLIC_API|JWT_|NODE_ENV|ANDROID_DOWNLOAD_ORIGIN)/.test(key))delete process.env[key];Object.assign(process.env,{DATABASE_URL:'postgresql://runtime@localhost/isolated',JWT_SECRET:randomBytes(32).toString('hex'),NODE_ENV:'test',TAHA_RUNTIME:'local',ANDROID_DOWNLOAD_ORIGIN:origin});return configuration();}finally{for(const key of Object.keys(process.env))if(!(key in before))delete process.env[key];Object.assign(process.env,before);}}
+test('separate public APK website is explicitly allowed without changing shop authentication origins',()=>{const config=configured('https://downloads.example.com');assert.equal(config.androidDownloadOrigin,'https://downloads.example.com');assert(!config.origins.includes('https://downloads.example.com'));assert.equal(configured('').androidDownloadOrigin,'');});
+test('download CSP configuration rejects credentials, insecure schemes, private hosts and extra URL components',()=>{for(const origin of ['http://downloads.example.com','https://user:password@downloads.example.com','https://downloads.example.com/path','https://downloads.example.com?key=value','https://127.0.0.1','https://downloads.example.com/#fragment'])assert.throws(()=>configured(origin),/ANDROID_DOWNLOAD_ORIGIN/);});

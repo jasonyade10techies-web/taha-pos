@@ -1,3 +1,4 @@
+import {AndroidDownloads} from "../../components/devices/android-downloads";
 import {dashboardDestination} from "../../lib/dashboard-actions";
 import "./dashboard-actions.css";
 import { useQuery } from "@tanstack/react-query";
@@ -73,6 +74,7 @@ export function DashboardPage() {
         ))}
       </div>
       <CashExceptionsNotice/>
+      <AndroidDownloads compact/>
       <div className="dashboard-grid">
         <SalesChart data={data.chart} period={range.label}/>
         <RecentActivity data={data.activity} />

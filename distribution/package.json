@@ -1,0 +1,8 @@
+{
+  "name": "taha-staff-download-source",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {"node": ">=22.13 <23 || >=24 <25"},
+  "scripts": {"start": "node server.mjs", "build": "node --check server.mjs"}
+}

@@ -42,11 +42,13 @@ export function configuration() {
   let api:URL;try{api=new URL(publicUrl);}catch{throw new Error('PUBLIC_API_URL must be a valid API origin.');}
   if(production&&api.protocol!=='https:')throw new Error('Production PUBLIC_API_URL must use HTTPS.');
   if(api.username||api.password||api.search||api.hash||api.pathname!=='/'||!['https:','http:'].includes(api.protocol))throw new Error('PUBLIC_API_URL must be an HTTP(S) origin without credentials or a path.');
+  const androidDownloadOrigin=process.env.ANDROID_DOWNLOAD_ORIGIN?.trim()||'';
+  if(androidDownloadOrigin)cloudOrigin(androidDownloadOrigin,'ANDROID_DOWNLOAD_ORIGIN');
   const serveFrontend=process.env.TAHA_SERVE_FRONTEND==='true';
   if(serveFrontend&&!origins.includes(api.origin))throw new Error('The bundled browser frontend and PUBLIC_API_URL must share an allowed origin.');
   const bindHost=process.env.TAHA_BIND_HOST??'0.0.0.0';
   if(!['0.0.0.0','127.0.0.1','::'].includes(bindHost))throw new Error('TAHA_BIND_HOST must be a supported listener address.');
-  return {databaseUrl,secret,production,cloud,deploymentEnv,databasePoolMax,origins,port,bindHost,serveFrontend,
+  return {androidDownloadOrigin,databaseUrl,secret,production,cloud,deploymentEnv,databasePoolMax,origins,port,bindHost,serveFrontend,
     frontendRoot:path.resolve(process.env.TAHA_FRONTEND_ROOT??path.join(__dirname,'../public')),
     trustedProxy:cloud&&proxy?(proxy==='loopback'?'loopback':proxy.split(',').map(value=>value.trim())):false,
     publicUrl:api.origin,

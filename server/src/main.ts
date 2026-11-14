@@ -26,7 +26,7 @@ export async function createApp(){
  const app=await NestFactory.create<NestExpressApplication>(AppModule.register(),{logger:process.env.NODE_ENV==='production'?['error','warn']:['error','warn','log']});const config=app.get<Configuration>(CONFIG);
  app.set('trust proxy',config.trustedProxy||false);
  const storageOrigin=config.s3Endpoint?new URL(config.s3Endpoint).origin:config.storageDriver==='s3'?`https://${config.s3Bucket}.s3.${config.s3Region}.amazonaws.com`:null;
- app.setGlobalPrefix('api/v1');app.use(helmet(config.serveFrontend?{contentSecurityPolicy:{directives:{scriptSrc:["'self'"],styleSrc:["'self'","'unsafe-inline'"],imgSrc:["'self'",'data:','blob:'],fontSrc:["'self'"],connectSrc:["'self'",...(storageOrigin?[storageOrigin]:[])],frameSrc:["'self'",'blob:'],objectSrc:["'none'"]}}}:undefined));app.use(cookieParser());app.useGlobalFilters(new SafeErrors());
+ app.setGlobalPrefix('api/v1');app.use(helmet(config.serveFrontend?{contentSecurityPolicy:{directives:{scriptSrc:["'self'"],styleSrc:["'self'","'unsafe-inline'"],imgSrc:["'self'",'data:','blob:'],fontSrc:["'self'"],connectSrc:["'self'",...(storageOrigin?[storageOrigin]:[]),...(config.androidDownloadOrigin?[config.androidDownloadOrigin]:[])],frameSrc:["'self'",'blob:'],objectSrc:["'none'"]}}}:undefined));app.use(cookieParser());app.useGlobalFilters(new SafeErrors());
  app.use((_req:unknown,res:{setHeader:(key:string,value:string)=>void},next:()=>void)=>{res.setHeader('Cache-Control','private, no-store, max-age=0');res.setHeader('X-Robots-Tag','noindex, nofollow, noarchive');next();});
  app.enableCors({origin:config.origins,credentials:true,allowedHeaders:['Content-Type','Authorization','X-Counter-Session']});
  await installFrontend(app,config);

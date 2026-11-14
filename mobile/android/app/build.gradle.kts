@@ -1,4 +1,6 @@
+import java.util.Properties
 plugins { id("com.android.application") }
+val releaseVersion = Properties().apply { rootProject.file("release.properties").inputStream().use { load(it) } }
 android {
     namespace = "com.tahamobiles.staff"
     compileSdk = 35
@@ -6,14 +8,20 @@ android {
         applicationId = "com.tahamobiles.staff"
         minSdk = 26
         targetSdk = 35
-        versionCode = 11
-        versionName = "0.5R.3"
+        versionCode = releaseVersion.getProperty("versionCode").toInt()
+        versionName = releaseVersion.getProperty("versionName")
     }
     buildFeatures { buildConfig = true }
     sourceSets.getByName("main").assets.srcDir("../../../dist-mobile")
     compileOptions { sourceCompatibility = JavaVersion.VERSION_17; targetCompatibility = JavaVersion.VERSION_17 }
+    signingConfigs {
+        if (System.getenv("TAHA_ANDROID_KEYSTORE") != null) create("approved") {
+            storeFile = file(System.getenv("TAHA_ANDROID_KEYSTORE")); storePassword = System.getenv("TAHA_ANDROID_STORE_PASSWORD")
+            keyAlias = System.getenv("TAHA_ANDROID_KEY_ALIAS"); keyPassword = System.getenv("TAHA_ANDROID_KEY_PASSWORD")
+        }
+    }
     buildTypes {
-        debug { applicationIdSuffix = ".debug"; versionNameSuffix = "-test" }
+        debug { applicationIdSuffix = ".debug"; versionNameSuffix = "-test"; if (signingConfigs.findByName("approved") != null) signingConfig = signingConfigs.getByName("approved") }
         release { isMinifyEnabled = false }
     }
     lint { abortOnError = true }

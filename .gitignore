@@ -70,3 +70,7 @@ docs/screenshots/
 
 # Local Neon project context (no application environment overrides)
 /.neon
+
+# Copied standalone release handler; original source is distribution/
+server/distribution/
+server/android-releases/

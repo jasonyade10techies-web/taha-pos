@@ -1,0 +1,13 @@
+import {readFileSync,writeFileSync} from 'node:fs';
+import {execFileSync} from 'node:child_process';
+import {assertReleaseContext,parseReleaseProperties,assertIncreasingVersion,assertSigningEnvironment} from './release-policy.mjs';
+const repo=JSON.parse(execFileSync('gh',['api',`repos/${process.env.GITHUB_REPOSITORY}`],{encoding:'utf8'}));
+assertReleaseContext({eventName:process.env.GITHUB_EVENT_NAME,repository:repo.full_name,private:repo.private,ref:process.env.GITHUB_REF});
+const environment=JSON.parse(execFileSync('gh',['api',`repos/${repo.full_name}/environments/android-test-release`],{encoding:'utf8'}));
+const branches=JSON.parse(execFileSync('gh',['api',`repos/${repo.full_name}/environments/android-test-release/deployment-branch-policies`],{encoding:'utf8'}));
+assertSigningEnvironment(environment,branches,process.env.GITHUB_REF_NAME);
+const releases=JSON.parse(execFileSync('gh',['api',`repos/${repo.full_name}/releases?per_page=100`],{encoding:'utf8'}));
+if(releases.length===100)throw Error('Paginate release history before approving further versions.');
+const version=parseReleaseProperties(readFileSync('mobile/android/release.properties','utf8'));assertIncreasingVersion(version.versionCode,releases);
+writeFileSync(process.env.RUNNER_TEMP+'/taha-release-context.json',JSON.stringify({repository:repo.full_name,...version}));
+console.log('Private repository, approved branch and monotonic version verified.');

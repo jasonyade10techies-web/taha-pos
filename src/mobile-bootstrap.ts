@@ -7,7 +7,7 @@ function startupFailed(){
   const root=document.getElementById("root");if(!root)return;
   root.innerHTML='<main style="padding:32px;font-family:system-ui;color:#202020;background:#f3f3f3;min-height:100vh"><strong style="color:#c62828">TAHA MOBILES</strong><h1>Something went wrong</h1><p>The local app could not start. Your shop address can be changed without reinstalling.</p><button id="boot-reload">Reload App</button> <button id="boot-diagnostics">Diagnostics</button> <button id="boot-reset">Reset Shop Connection</button><p id="boot-details"></p></main>';
   document.getElementById("boot-reload")!.onclick=()=>location.reload();
-  document.getElementById("boot-diagnostics")!.onclick=()=>{document.getElementById("boot-details")!.textContent="Local UI startup failed. Build: "+(import.meta.env.VITE_BUNDLED_MOBILE==="true"?"Android 0.4E.0-test":"Browser")+". No credentials are included.";};
+  document.getElementById("boot-diagnostics")!.onclick=()=>{document.getElementById("boot-details")!.textContent="Local UI startup failed. Build: "+(import.meta.env.VITE_BUNDLED_MOBILE==="true"?"Android "+(import.meta.env.VITE_MOBILE_VERSION||"unknown"):"Browser")+". No credentials are included.";};
   document.getElementById("boot-reset")!.onclick=()=>{localStorage.removeItem("taha-shop-connection");location.hash="/shop-connection";location.reload();};
   window.__tahaUiReady=true;
 }

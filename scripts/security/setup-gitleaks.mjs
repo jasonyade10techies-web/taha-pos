@@ -1,0 +1,14 @@
+import {mkdir,writeFile,readFile} from 'node:fs/promises';
+import {createHash} from 'node:crypto';
+import {execFileSync} from 'node:child_process';
+import {unzipSync} from 'fflate';
+import path from 'node:path';
+const platform=process.platform==='win32'?'windows':'linux';
+const name=`gitleaks_8.30.1_${platform}_x64.${platform==='windows'?'zip':'tar.gz'}`;
+const expected=platform==='windows'?'d29144deff3a68aa93ced33dddf84b7fdc26070add4aa0f4513094c8332afc4e':'551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb';
+const response=await fetch('https://github.com/gitleaks/gitleaks/releases/download/v8.30.1/'+name);if(!response.ok)throw Error('Cannot obtain official scanner.');const bytes=new Uint8Array(await response.arrayBuffer());
+if(createHash('sha256').update(bytes).digest('hex')!==expected)throw Error('Official scanner checksum mismatch.');
+const directory=path.resolve('.tools/security');await mkdir(directory,{recursive:true});const archive=path.join(directory,name);await writeFile(archive,bytes);
+if(platform==='windows'){const files=unzipSync(bytes);if(!files['gitleaks.exe'])throw Error('Scanner missing.');await writeFile(path.join(directory,'gitleaks.exe'),files['gitleaks.exe']);}else execFileSync('tar',['-xzf',archive,'-C',directory,'gitleaks']);
+if(!(await readFile(path.join(directory,platform==='windows'?'gitleaks.exe':'gitleaks'))).length)throw Error('Empty scanner.');
+console.log('Verified official Gitleaks 8.30.1 installed in ignored tooling directory.');

@@ -75,6 +75,7 @@ export default defineConfig(({ mode }) => {
         ],
       },
       proxy: {
+        "/downloads/taha-staff": process.env.TAHA_DEV_API_TARGET || "http://127.0.0.1:3001",
         "/api": process.env.TAHA_DEV_API_TARGET || "http://127.0.0.1:3001",
         "/socket.io": {
           target: process.env.TAHA_DEV_API_TARGET || "http://127.0.0.1:3001",
