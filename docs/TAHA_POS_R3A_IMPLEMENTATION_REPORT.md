@@ -116,4 +116,12 @@ Remote run https://github.com/jasonyade10techies-web/taha-pos/actions/runs/43599
 
 The earlier complete local result remains197 passed/1 intentional skip, plus4 updated-screen cases; these are separate local runs. The actual updated198-pass complete browser run above is fresh remote evidence, not a sum of targeted local reruns.
 
+### Subsequent CI navigation investigation
+
+Run43605115593 at5f16a77 passed Android and backend284, but its local browser profile ended192 passed/1 failed/1 intentional skip; reconciliation did not run. The failed390px dark route sweep reported `ERR_ABORTED` navigating to `/audit-log`. Three unchanged local repetitions passed, so an exact abort reproduction is not claimed. Investigation found a definite readiness false positive: `index.html` exposes a startup h1, and the sweep accepted any h1 before React had mounted. A controlled blocked-bootstrap regression failed against the old readiness check (`ready` while startup was blocked). The shared readiness condition now requires a real heading inside `#main-content`; both themes retain denial/loading/error checks. This strengthens test coverage without changing packaged application code or adding retry suppression. Retained evidence: `readiness-red.log`, `readiness-red-artifacts/`, `navigation-repro.log` and `readiness-green.log`.
+
+CI now also retains failed synthetic local-browser error contexts/traces in private artifacts to support any further investigation. This does not include saved-shop or real customer data. Final complete rerun remains a gate; earlier full-suite passes must not conceal this subsequent failure.
+
+The corrected blocked-bootstrap regression and complete390px light/dark route sweep each passed twice (**4/4**,2.7minutes), with fresh TypeScript/lint and workflow YAML validation passed. The old readiness regression's failure was retained before correction. No automatic retries were added. APK13 was additionally inspected directly: bundled index,38 JavaScript assets, the corrected hash navigation and native updater class are present (`build13-bundled-assets.json`).
+
 The Dashboard contains compact **Download App** access; **Install QR** is in Settings → Devices. Without a configured hosted release origin, the UI truthfully reports that the download site is not configured. No public HTTPS APK URL or Hostinger deployment exists. Physical Android upgrade/camera/scanner/pairing acceptance, enforceable release-review protections and daily-shop production acceptance remain open.

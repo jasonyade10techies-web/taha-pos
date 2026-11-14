@@ -833,6 +833,39 @@ test("negative stock setting explicitly permits a sale beyond available units", 
   ).toContainText("-1");
 });
 
+async function managementPageReady(page: Page) {
+  // index.html deliberately has a visible startup h1 before React has mounted.
+  // Waiting for that heading can race the next navigation and miss dark-page UI.
+  await expect(page.locator("#main-content").getByRole("heading", { level: 1 })).toBeVisible();
+  await expect(page.getByRole("heading", {name:"Access Denied",exact:true})).toHaveCount(0);
+  await expect(page.locator(".loading-skeleton")).toHaveCount(0);
+  await expect(page.getByRole("heading", {name:"Unable to load this page",exact:true})).toHaveCount(0);
+}
+
+test("management readiness waits for the workspace instead of accepting the startup heading", async ({page}) => {
+  let release!: () => void;
+  let requested!: () => void;
+  const blocked = new Promise<void>(resolve => {release=resolve;});
+  const seen = new Promise<void>(resolve => {requested=resolve;});
+  await page.route("**/src/bootstrap.ts", async route => {requested();await blocked;await route.continue();});
+  const navigation = page.goto("/reports", {waitUntil:"domcontentloaded"});
+  try {
+    await seen;
+    await expect(page.getByRole("heading", {name:"Opening your workspace…",exact:true})).toBeVisible();
+    const readiness = managementPageReady(page);
+    const result = await Promise.race([readiness.then(()=>"ready"),new Promise<string>(resolve=>setTimeout(()=>resolve("blocked"),150))]);
+    expect(result,"A startup heading must never count as a rendered management screen").toBe("blocked");
+    release();
+    await navigation;
+    await readiness;
+    await expect(page.getByRole("heading", {name:"Reports",exact:true})).toBeVisible();
+  } finally {
+    release();
+    await navigation.catch(()=>undefined);
+    await page.unrouteAll({behavior:"wait"});
+  }
+});
+
 for (const viewport of [
   { width: 1366, height: 768 },
   { width: 1440, height: 900 },
@@ -853,17 +886,7 @@ for (const viewport of [
     mkdirSync("docs/screenshots/phase2", { recursive: true });
     for (const route of routes) {
       await page.goto(route);
-      await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
-      await expect(
-        page.getByRole("heading", { name: "Access Denied", exact: true }),
-      ).toHaveCount(0);
-      await expect(page.locator(".loading-skeleton")).toHaveCount(0);
-      await expect(
-        page.getByRole("heading", {
-          name: "Unable to load this page",
-          exact: true,
-        }),
-      ).toHaveCount(0);
+      await managementPageReady(page);
       await page.waitForTimeout(120);
       expect(
         await page.evaluate(
@@ -888,7 +911,7 @@ for (const viewport of [
     await page.getByRole("menuitem", { name: "Dark", exact: true }).click();
     for (const route of routes) {
       await page.goto(route);
-      await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+      await managementPageReady(page);
       expect(
         await page.evaluate(
           () => document.documentElement.scrollWidth <= innerWidth,

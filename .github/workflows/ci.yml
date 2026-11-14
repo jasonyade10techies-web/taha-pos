@@ -68,6 +68,8 @@ jobs:
             .test-postgres/release-checks/**/results.json
             .test-postgres/release-checks/**/*.log
             .test-postgres/r2c-20261113/*/results.json
+            .test-postgres/phase5c1-20261015/local-browser-results/**/error-context.md
+            .test-postgres/phase5c1-20261015/local-browser-results/**/trace.zip
           retention-days: 14
           include-hidden-files: true
   android-validation:

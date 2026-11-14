@@ -53,3 +53,10 @@ Remaining: finish full browser run, exact final builds/artifacts/packaged accept
 
 - Actions43599209459 completed: Android validation green, backend284/284, full browser193+5=198 passes/1 intentional skip, SQLite/SQL/concurrency all green. Overall job failed afterward at the credential-boundary scan: `dist/assets` did not yet exist in the clean checkout. Downloaded logs/results retain this exact failure.
 - Minimal correction: run frontend-build immediately before client-secrets-boundary. Both privileged credential rejection and output byte scanning remain unchanged; no test or assertion excluded. No packaged application/financial source changed. Rerun the complete remote gate before claiming overall CI success.
+
+## Intermittent route-sweep investigation
+
+- Subsequent43605115593 passed Android/backend284; browser192 passed/1 failed/1 skipped, stopping before reconciliation.390px dark navigation to/audit-log aborted. Three unchanged local repetitions passed; exact abort not reproduced locally.
+- A deterministic blocked-bootstrap regression proved that the generic h1 readiness check incorrectly accepted the startup shell. Recorded RED (`ready` instead of`blocked`), then changed readiness to an actual#main-content heading, retaining access/error/loading assertions in both themes. Test-harness change only; no APK/package/financial source change.
+- Private CI artifacts now retain failed synthetic route traces/context for future diagnosis. Final complete rerun is still required; do not report an earlier full pass as the latest failed run.
+- Corrected deterministic fixture and390px complete light/dark sweep each pass twice:4/4 in2.7minutes, fresh types/lint/YAML valid. APK13 direct ZIP inspection confirms bundled index/38JS assets, corrected hash navigation and native updater; bytes unchanged. Submit full remote rerun without retries or weakened assertions.
