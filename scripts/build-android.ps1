@@ -28,15 +28,15 @@ try {
   if ($LASTEXITCODE -ne 0) { throw 'Android build or validation failed.' }
   $taskOutput = Join-Path $taskRoot 'artifacts\android'
   New-Item -ItemType Directory -Force $taskOutput | Out-Null
-  Copy-Item -LiteralPath 'app\build\outputs\apk\debug\app-debug.apk' -Destination (Join-Path $taskOutput 'Taha-Staff-test-5D2.apk') -Force
-  $taskApk = Join-Path $taskOutput 'Taha-Staff-test-5D2.apk'
+  $taskApk = Join-Path $taskOutput 'Taha-Staff-test-R3-build11.apk'
+  Copy-Item -LiteralPath 'app\build\outputs\apk\debug\app-debug.apk' -Destination $taskApk -Force
   $taskSigner = Join-Path $env:ANDROID_HOME 'build-tools\35.0.0\apksigner.bat'
   & $taskSigner verify --verbose $taskApk
   if ($LASTEXITCODE -ne 0) { throw 'APK signature verification failed.' }
   $taskStream = [IO.File]::OpenRead($taskApk)
   $taskHasher = [Security.Cryptography.SHA256]::Create()
   try { $taskHash = [BitConverter]::ToString($taskHasher.ComputeHash($taskStream)).Replace('-', '').ToLowerInvariant() } finally { $taskStream.Dispose(); $taskHasher.Dispose() }
-  Set-Content -LiteralPath "$taskApk.sha256" -Value "$taskHash  Taha-Staff-test-5D2.apk" -Encoding ascii
+  Set-Content -LiteralPath "$taskApk.sha256" -Value "$taskHash  $([IO.Path]::GetFileName($taskApk))" -Encoding ascii
   Write-Output $taskApk
 } finally { Pop-Location }
 

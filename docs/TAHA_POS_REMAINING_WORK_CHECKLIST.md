@@ -1,6 +1,26 @@
 # Taha POS remaining work checklist
 
-Evidence updated: **13 November 2026** (earlier sections retain their historical dates). Root: `D:\Inventory system POS`. This checklist records the original audit and subsequent authorized R1/R2A implementation. Historical results are labelled; only the current completion section controls the next work. See `TAHA_POS_COMPLETE_HANDOFF_2026-11-11.md` for architecture, test boundaries and history.
+Evidence updated: **14 November 2026** (earlier sections retain their historical dates). Root: `D:\Inventory system POS`. This checklist records the original audit and subsequent authorized R1/R2A implementation. Historical results are labelled; only the current completion section controls the next work. See `TAHA_POS_COMPLETE_HANDOFF_2026-11-11.md` for architecture, test boundaries and history.
+
+## Current local release hardening — 14 November 2026
+
+The owner has **paused hosting/account/deployment activity**. Continue local completion and verification; do not contact hosting accounts, deploy, buy services or change DNS. Earlier R2C hosting instructions below are historical and do not override this scope.
+
+Branch: `codex/release-readiness`, based on `8851ac9be012387a9def620aaf661de7789640b0`.
+
+- [x] Isolate corrupt Android queue records; healthy photos remain available. New binary saves carry SHA256/length metadata and an interrupted-commit journal. Identical retries cannot overwrite another capture or fail merely because the queue is full.
+- [x] Preserve native camera originals in app-private durable storage across Activity/WebView recreation; offer explicit gallery copy/discard instead of guessing a request assignment. Partial/empty originals remain reviewable. Actual OS-kill/camera acceptance is still required.
+- [x] Add damaged-record warnings and recovery diagnostics; preserve ambiguous bytes rather than delete them. Older records without checksums cannot acquire historical integrity proof retroactively.
+- [x] Correct browser cookie-operation coordination across tabs and navigation, using Web Locks, keepalive refresh and a nonsecret bounded in-flight marker. Strict server replay revocation is retained. A truly lost response may still require sign-in; no replay grace was introduced.
+- [x] Make `npm test` run both isolated frontend and API-reconciliation profiles. Add a guarded `verify:release` command, refusing the saved shop cluster and remote database targets.
+- [ ] Finish current exact-source package rehearsal and record its final paths/counts in `TAHA_POS_LOCAL_RELEASE_READINESS_2026-11-14.md`.
+- [ ] Physical Android camera/gallery/scanner/pairing/lock-resume and process-death acceptance; production signing remains separate.
+- [ ] Windows native build and acceptance: Rust/Cargo/WebView2 exist; MSVC/Windows SDK are missing. No installer is claimed.
+- [ ] Repair-job material consumption, deposits/settlement/refunds and expense-adjusted net profit require a separate financial implementation and persisted-state acceptance. Smart-service POS accounting is a different, tested workflow.
+- [ ] Printer/HID scanner/second monitor/native offline acceptance; historical missing-image recovery; off-machine restore/operations acceptance.
+- [ ] Cloud environment and public cross-device acceptance remain deferred by owner instruction. Local package success is not deployment or production certification.
+
+See the dated local readiness report for fresh results and limitations. No saved shop data or historical recovery archives were changed.
 
 ## Phase R2C — current preparation status (13 November 2026)
 

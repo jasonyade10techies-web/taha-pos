@@ -26,6 +26,7 @@ async function until(fn,timeout=120000){const end=Date.now()+timeout;let last;wh
 async function check(label,fn){const start=Date.now();await fn();outcomes.push({label,status:'pass',durationMs:Date.now()-start});writeFileSync(path.join(evidence,'results.json'),JSON.stringify({startedAt,completed:false,outcomes},null,2));console.log('PASS '+label);}
 async function stop(){if(child&&child.exitCode===null){const owned=child;await new Promise(resolve=>{owned.once('exit',resolve);owned.kill();});}child=undefined;}
 const startedAt=new Date().toISOString();
+let refreshDelay=0,onRefresh=()=>{};const refreshStatuses=[];
 try{
  await admin.connect();assert.match((await admin.query("select current_setting('data_directory') directory")).rows[0].directory.replaceAll('\\','/'),/\/\.test-postgres\/phase5c-20261014\/pgdata$/);
  await admin.query('create database '+name);source.pathname='/'+name;const runtime=new URL(source);runtime.username=role;runtime.password=randomBytes(24).toString('hex');
@@ -39,11 +40,12 @@ try{
  const run=async(storageRoot=env.STORAGE_ROOT)=>{const log=openSync(path.join(evidence,'application.log'),'a');child=spawn(process.execPath,['server.cjs'],{cwd:runtimeRoot,env:{...Object.fromEntries(Object.entries(env).filter(([key])=>!['MIGRATION_DATABASE_URL','PROVISION_EMAIL','PROVISION_NAME','PROVISION_PASSWORD','INITIALIZE_SHOP_APPROVED','TAHA_STAGING_DATABASE_APPROVED'].includes(key))),STORAGE_ROOT:storageRoot},windowsHide:true,stdio:['ignore',log,log]});closeSync(log);await until(async()=>{assert.equal(child.exitCode,null,'Packaged application exited.');const response=await fetch(apiBase+'/api/v1/health/live',{signal:AbortSignal.timeout(2000)});assert.equal(response.status,200);});};
  await check('production entry starts on assigned port with no Vite',()=>run());
  const certRoot=path.join(evidence,'loopback-certificate');assert(process.env.TAHA_PDF_PYTHON,'Set the existing bundled Python executable.');execFileSync(process.env.TAHA_PDF_PYTHON,['-X','utf8',path.join(root,'scripts','r2b-test-certificate.py'),certRoot],{windowsHide:true});
- proxy=httpsServer({cert:readFileSync(path.join(certRoot,'cert.pem')),key:readFileSync(path.join(certRoot,'key.pem'))},(req,res)=>{const upstream=http.request(apiBase+req.url,{method:req.method,headers:{...req.headers,'x-forwarded-proto':'https'}},reply=>{res.writeHead(reply.statusCode,reply.headers);reply.pipe(res);});upstream.on('error',()=>{res.writeHead(503).end('Shop temporarily unavailable.');});req.pipe(upstream);});await new Promise(resolve=>proxy.listen(httpsPort,'127.0.0.1',resolve));
+ proxy=httpsServer({cert:readFileSync(path.join(certRoot,'cert.pem')),key:readFileSync(path.join(certRoot,'key.pem'))},(req,res)=>{const upstream=http.request(apiBase+req.url,{method:req.method,headers:{...req.headers,'x-forwarded-proto':'https'}},reply=>{if(refreshDelay&&req.url==='/api/v1/auth/refresh'){const parts=[];reply.on('data',part=>parts.push(part));reply.on('end',()=>{refreshStatuses.push(reply.statusCode);onRefresh();setTimeout(()=>{if(!res.destroyed){res.writeHead(reply.statusCode,reply.headers);res.end(Buffer.concat(parts));}},refreshDelay);});}else{res.writeHead(reply.statusCode,reply.headers);reply.pipe(res);}});upstream.on('error',()=>{if(!res.headersSent)res.writeHead(503);res.end('Shop temporarily unavailable.');});req.pipe(upstream);});await new Promise(resolve=>proxy.listen(httpsPort,'127.0.0.1',resolve));
  async function request(route,body,method=body===undefined?'GET':'POST',bearer=token){const response=await fetch(apiBase+'/api/v1'+route,{method,headers:{Origin:origin,...(bearer?{Authorization:'Bearer '+bearer}:{}),...(body===undefined?{}:{'Content-Type':'application/json'})},body:body===undefined?undefined:JSON.stringify(body),signal:AbortSignal.timeout(30000)});const text=await response.text();let value;try{value=JSON.parse(text);}catch{value=text;}assert(response.ok,route+' '+response.status+' '+JSON.stringify(value));return value;}
  token=(await request('/auth/login',{email,password})).accessToken;const api=(route,body,method)=>request('/stores/'+store+route,body,method);
  await check('real authentication and complete deep readiness through the packaged API',async()=>{assert.equal((await request('/health/ready?refresh=1')).status,'ready');assert.equal((await request('/auth/session')).profile.id,manifest.owner);});
  browser=await chromium.launch();const desktop=await browser.newContext({ignoreHTTPSErrors:true,viewport:{width:1440,height:900}}),mobile=await browser.newContext({ignoreHTTPSErrors:true,viewport:{width:390,height:844},isMobile:true,hasTouch:true});
+ desktop.setDefaultTimeout(30000);mobile.setDefaultTimeout(30000);
  const page=await desktop.newPage(),phone=await mobile.newPage();for(const view of [page,phone]){view.on('pageerror',error=>errors.push(error.message));view.on('response',response=>{if(response.status()>=400)console.log('HTTP '+response.status()+' '+new URL(response.url()).pathname);});}
  const login=async(view)=>{await view.goto(origin+'/login');await view.getByLabel('Email',{exact:true}).fill(email);await view.getByLabel('Password',{exact:true}).fill(password);await view.getByRole('button',{name:'Sign In',exact:true}).click();await expect(view.getByRole('heading',{name:'Set up Taha Mobiles',exact:true})).toBeVisible({timeout:30000});};
  await check('fresh owner on desktop and mobile enters setup with no sample business activity',async()=>{
@@ -52,16 +54,22 @@ try{
  });
  await check('owner completes the existing six-stage wizard, tax review and empty Dashboard',async()=>{
   await page.getByLabel('Shop name',{exact:true}).fill('Taha R2C Acceptance');await page.getByLabel('Branch',{exact:true}).fill('Empty Shop Branch');
-  let settingsReads=0,holdReads=false,blocked=false,releaseRead;const resumed=new Promise(resolve=>releaseRead=resolve);
+  let settingsReads=0,holdReads=false,blocked=false,releaseRead;const resumed=new Promise(resolve=>releaseRead=resolve),routeErrors=[];
   // Delay an actual settings readback to exercise the period after the next
   // stage is visible but cache invalidation is still completing. No fake data.
-  const holdSettings=async route=>{const response=await route.fetch();if(holdReads&&route.request().method()==='GET'&&++settingsReads===2){blocked=true;await resumed;}await route.fulfill({response});};
+  // Poll invalidation may cancel/refetch a read while its response is held.
+  // Hold every replacement read as well; observe cancellations without letting
+  // a detached route promise crash the process and bypass fixture cleanup.
+  const holdSettings=async route=>{try{const response=await route.fetch();if(holdReads&&route.request().method()==='GET'){settingsReads++;if(!route.request().failure()&&await page.getByRole('heading',{name:'Payments and receipts',exact:true}).isVisible()){blocked=true;await resumed;}}if(!route.request().failure())await route.fulfill({response});}catch(error){routeErrors.push({request:route.request(),error});}};
   await page.route('**/api/v1/stores/*/settings',holdSettings);
   try{
-   for(let i=0;i<4;i++){if(i===3)holdReads=true;await page.getByRole('button',{name:'Save & Continue',exact:true}).click();}
+   const next=page.getByRole('button',{name:'Save & Continue',exact:true});
+   for(let i=0;i<4;i++){await expect(next).toBeEnabled({timeout:30000});if(i===3)holdReads=true;await next.click();}
    await expect(page.getByRole('heading',{name:'Payments and receipts',exact:true})).toBeVisible();await until(async()=>assert.equal(blocked,true),10000);
    await expect(page.getByRole('link',{name:'Review tax settings',exact:true})).toBeDisabled();
   }finally{releaseRead();await page.unrouteAll({behavior:'wait'});}
+  for(const entry of routeErrors)if(!entry.request.failure())throw entry.error;
+  writeFileSync(path.join(evidence,'setup-readback-fixture.json'),JSON.stringify({settingsReads,cancelledReads:routeErrors.filter(entry=>entry.request.failure()).length,held:true},null,2));
   await expect(page.getByRole('link',{name:'Review tax settings',exact:true})).toBeEnabled();
   await page.getByRole('button',{name:'Receipt printing',exact:true}).click();await page.getByRole('menuitem',{name:'Never Auto Print',exact:true}).click();
   await page.getByRole('link',{name:'Review tax settings',exact:true}).click();await expect(page.getByRole('heading',{name:'Tax settings',exact:true})).toBeVisible();await expect(page.getByRole('button',{name:'Default profile',exact:true})).toContainText('No tax (0%)');await page.getByRole('link',{name:'Return to Shop Setup',exact:true}).click();await expect(page.getByRole('heading',{name:'Payments and receipts',exact:true})).toBeVisible();
@@ -69,6 +77,19 @@ try{
   const settings=await api('/settings');assert.equal(settings.storeName,'Taha R2C Acceptance');assert.equal(settings.shopConfiguration.setupCompleted,true);await api('/settings',{...settings,returnApproval:false},'PUT');
   for(const table of ['products','customers','sales','stock_movements','locations'])assert.equal((await db.query('select count(*)::int n from public.'+table)).rows[0].n,0,table);
   await expect(phone.getByRole('heading',{name:'Set up Taha Mobiles',exact:true})).toHaveCount(0,{timeout:30000});await page.screenshot({path:path.join(evidence,'empty-dashboard.png')});
+ });
+ await check('secure-cookie restoration survives two tabs and an interrupted reload; replay still revokes',async()=>{
+  const tabs=await browser.newContext({ignoreHTTPSErrors:true}),interrupted=await browser.newContext({ignoreHTTPSErrors:true});
+  const signIn=async context=>assert.equal((await context.request.post(origin+'/api/v1/auth/login',{headers:{Origin:origin},data:{email,password}})).status(),201);
+  const auditBefore=Number((await db.query("select count(*) n from public.audit_logs where action='auth.refresh_replayed'")).rows[0].n);
+  refreshDelay=1000;refreshStatuses.length=0;
+  try{
+   await signIn(tabs);const views=await Promise.all([tabs.newPage(),tabs.newPage()]);await Promise.all(views.map(view=>view.goto(origin+'/dashboard')));for(const view of views)await expect(view.getByRole('heading',{name:'Dashboard',exact:true})).toBeVisible({timeout:25000});assert.deepEqual(refreshStatuses,[201,201]);
+   await signIn(interrupted);const view=await interrupted.newPage();let committed;const acknowledgement=new Promise(resolve=>committed=resolve);onRefresh=()=>committed();await view.goto(origin+'/dashboard');await acknowledgement;onRefresh=()=>{};await view.reload();await expect(view.getByRole('heading',{name:'Dashboard',exact:true})).toBeVisible({timeout:25000});assert.deepEqual(refreshStatuses,[201,201,201,201]);
+   assert.equal(Number((await db.query("select count(*) n from public.audit_logs where action='auth.refresh_replayed'")).rows[0].n),auditBefore);
+   const old=(await interrupted.cookies()).find(cookie=>cookie.name==='taha_refresh');assert(old);refreshDelay=0;const rotated=await interrupted.request.post(origin+'/api/v1/auth/refresh',{headers:{Origin:origin}});assert.equal(rotated.status(),201);const body=await rotated.json();
+   assert.equal((await fetch(apiBase+'/api/v1/auth/refresh',{method:'POST',headers:{Origin:origin,Cookie:'taha_refresh='+old.value}})).status,401);assert.equal((await fetch(apiBase+'/api/v1/auth/session',{headers:{Authorization:'Bearer '+body.accessToken}})).status,401);
+  }finally{refreshDelay=0;onRefresh=()=>{};await tabs.close();await interrupted.close();}
  });
  await check('first storage hierarchy and supplier persist through the real API',async()=>{
   manifest.rack=randomUUID();manifest.shelf=randomUUID();manifest.box=randomUUID();manifest.damage=randomUUID();manifest.supplier=randomUUID();

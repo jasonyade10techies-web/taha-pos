@@ -3,6 +3,7 @@ package com.tahamobiles.staff;
 import android.app.Activity;
 import android.net.ConnectivityManager;
 import android.net.NetworkCapabilities;
+import android.provider.MediaStore;
 import android.util.Base64;
 import android.webkit.CookieManager;
 import android.webkit.JavascriptInterface;
@@ -27,12 +28,13 @@ final class ShopBridge {
     private long sessionEpoch;
     private volatile boolean closed;
     private final PendingPhotos photos;
+    private final OriginalCaptures originals;
     private final DeviceIdentity deviceIdentity;
     private final CompanionSecurity companion;
     private CounterDiscovery discovery;
     @JavascriptInterface public void discoverCounters(){activity.runOnUiThread(()->{if(discovery==null)discovery=new CounterDiscovery(activity,web);discovery.start();});}
     @JavascriptInterface public void stopDiscovery(){activity.runOnUiThread(()->{if(discovery!=null)discovery.stop();});}
-    ShopBridge(Activity activity,WebView web){this.activity=activity;this.web=web;photos=new PendingPhotos(activity.getFilesDir());deviceIdentity=new DeviceIdentity(activity.getFilesDir());companion=new CompanionSecurity(activity);}
+    ShopBridge(Activity activity,WebView web){this.activity=activity;this.web=web;photos=new PendingPhotos(activity.getFilesDir());originals=new OriginalCaptures(activity.getFilesDir());deviceIdentity=new DeviceIdentity(activity.getFilesDir());companion=new CompanionSecurity(activity);}
     @JavascriptInterface public synchronized String beginEnrollment(String qr){try{JSONObject pending=companion.begin(qr,deviceIdentity.getId(),DeviceIdentity.deviceName(android.os.Build.MANUFACTURER,android.os.Build.MODEL));if(!configure(pending.getString("shop")))throw new SecurityException();return pending.toString();}catch(Exception error){return "{}";}}
     @JavascriptInterface public String completeEnrollment(String id,String challenge){try{return companion.complete(id,challenge).toString();}catch(Exception error){return "{}";}}
     @JavascriptInterface public boolean companionSession(){return companion.active();}
@@ -40,8 +42,26 @@ final class ShopBridge {
     @JavascriptInterface public void openSettings(){activity.runOnUiThread(()->activity.startActivity(new android.content.Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS,android.net.Uri.parse("package:"+BuildConfig.APPLICATION_ID))));}
     @JavascriptInterface public boolean saveCapture(String record){return record.length()<12*1024*1024&&shop!=null&&photos.save(record,shop);}
     @JavascriptInterface public String readCaptures(){return shop==null?"[]":photos.read(shop);}
-    @JavascriptInterface public void removeCapture(String id){photos.remove(id);activity.runOnUiThread(()->((MainActivity)activity).clearCaptureOriginal());}
-    @JavascriptInterface public void clearPendingPhotos(){photos.clear();}
+    @JavascriptInterface public void removeCapture(String id){photos.remove(id);}
+    @JavascriptInterface public void clearPendingPhotos(){photos.clear();originals.clear();}
+    java.io.File beginCameraOriginal()throws java.io.IOException{return originals.begin(shop);}
+    void acknowledgeOriginal(java.io.File file){if(file!=null)originals.remove(file.getName().replace(".jpg",""),shop);}
+    @JavascriptInterface public String readCameraOriginals(){return shop==null?"[]":originals.read(shop);}
+    @JavascriptInterface public int photoRecoveryIssues(){return shop==null?0:photos.issues(shop);}
+    @JavascriptInterface public void discardCameraOriginal(String id){if(shop!=null)originals.remove(id,shop);}
+    /** An explicit user action, with origin validation and no original deletion. */
+    @JavascriptInterface public boolean exportCameraOriginal(String id){
+        if(shop==null)return false;java.io.File file=originals.find(id,shop);if(file==null)return false;
+        android.graphics.BitmapFactory.Options bounds=new android.graphics.BitmapFactory.Options();bounds.inJustDecodeBounds=true;android.graphics.BitmapFactory.decodeFile(file.getAbsolutePath(),bounds);
+        if(bounds.outWidth<1||bounds.outHeight<1||!"image/jpeg".equals(bounds.outMimeType))return false;
+        android.net.Uri destination=null;try{
+            android.content.ContentValues values=new android.content.ContentValues();values.put(MediaStore.Images.Media.DISPLAY_NAME,"Taha-Recovered-"+System.currentTimeMillis()+".jpg");values.put(MediaStore.Images.Media.MIME_TYPE,"image/jpeg");
+            if(android.os.Build.VERSION.SDK_INT>=29){values.put(MediaStore.Images.Media.RELATIVE_PATH,"Pictures/Taha Mobiles");values.put(MediaStore.Images.Media.IS_PENDING,1);}else return false;
+            destination=activity.getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,values);if(destination==null)return false;
+            try(java.io.InputStream input=new java.io.FileInputStream(file);java.io.OutputStream output=activity.getContentResolver().openOutputStream(destination)){if(output==null)throw new java.io.IOException();byte[] buffer=new byte[8192];int read;while((read=input.read(buffer))!=-1)output.write(buffer,0,read);}
+            values.clear();values.put(MediaStore.Images.Media.IS_PENDING,0);activity.getContentResolver().update(destination,values,null,null);return true;
+        }catch(Exception failure){if(destination!=null)activity.getContentResolver().delete(destination,null,null);return false;}
+    }
     @JavascriptInterface public void haptic(){try{android.os.Vibrator vibrator=(android.os.Vibrator)activity.getSystemService(android.content.Context.VIBRATOR_SERVICE);if(vibrator!=null&&vibrator.hasVibrator())vibrator.vibrate(android.os.VibrationEffect.createOneShot(35,android.os.VibrationEffect.DEFAULT_AMPLITUDE));}catch(Exception ignored){}}
     @JavascriptInterface public void clearPhotoOriginal(){activity.runOnUiThread(()->((MainActivity)activity).clearCaptureOriginal());}
     /** Only PDF bytes generated by the bundled receipt screen; never accepts a filesystem path or remote URL. */
@@ -86,11 +106,12 @@ final class ShopBridge {
         if(!parsed.equals(previous)){++sessionEpoch;CookieManager.getInstance().removeAllCookies(null);CookieManager.getInstance().flush();}
         activity.getPreferences(Activity.MODE_PRIVATE).edit().putString("cookie-origin",parsed).apply();shop=parsed;return true;
     }
-    @JavascriptInterface public synchronized void clearSession(){++sessionEpoch;photos.clear();companion.clear();CookieManager.getInstance().removeAllCookies(null);CookieManager.getInstance().flush();}
+    @JavascriptInterface public synchronized void clearSession(){++sessionEpoch;photos.clear();originals.clear();companion.clear();CookieManager.getInstance().removeAllCookies(null);CookieManager.getInstance().flush();}
     @JavascriptInterface public String info(){
         JSONObject result=new JSONObject();try{
             result.put("version",BuildConfig.VERSION_NAME);result.put("buildNumber",String.valueOf(BuildConfig.VERSION_CODE));result.put("build",BuildConfig.DEBUG?"TEST":"PRODUCTION");
             result.put("deviceId",deviceIdentity.getId());result.put("deviceName",DeviceIdentity.deviceName(android.os.Build.MANUFACTURER,android.os.Build.MODEL));
+            result.put("photoRecoveryIssues",String.valueOf(photoRecoveryIssues()));result.put("cameraOriginals",String.valueOf(new org.json.JSONArray(readCameraOriginals()).length()));
             result.put("cameraPermission",activity.checkSelfPermission(android.Manifest.permission.CAMERA)==android.content.pm.PackageManager.PERMISSION_GRANTED?"Granted":"Not granted · requested when needed");
             ConnectivityManager manager=(ConnectivityManager)activity.getSystemService(Activity.CONNECTIVITY_SERVICE);
             NetworkCapabilities capabilities=manager.getNetworkCapabilities(manager.getActiveNetwork());

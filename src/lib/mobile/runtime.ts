@@ -1,6 +1,6 @@
 export const bundledMobile = import.meta.env.VITE_BUNDLED_MOBILE === "true";
 export const mobileTestBuild = import.meta.env.VITE_MOBILE_TEST === "true";
-export const mobileVersion = "0.5D.2";
+export const mobileVersion = "0.5R.3";
 export interface NativeShop {
   info(): string;
   configure(address: string): boolean;
@@ -15,6 +15,10 @@ export interface NativeShop {
   openSettings?(): void;
   saveCapture?(capture: string): boolean;
   readCaptures?(): string;
+  readCameraOriginals?(): string;
+  exportCameraOriginal?(id:string): boolean;
+  discardCameraOriginal?(id:string): void;
+  photoRecoveryIssues?(): number;
   removeCapture?(id: string): void;
   clearPhotoOriginal?(): void;
   clearPendingPhotos?(): void;

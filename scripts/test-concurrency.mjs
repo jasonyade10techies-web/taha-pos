@@ -2,12 +2,12 @@ import assert from 'node:assert/strict';
 import pg from 'pg';
 import {testDatabase} from './check-migrations.mjs';
 import {seedTransactions,prepareCatalog,setActor,call,saleInput,id,store} from './test-transactions.mjs';
+import {isolatedPostgres,isolatedIdentity} from './release-checks.mjs';
 // Separate PostgreSQL server connections, not PGlite's single queued connection.
 // This runner creates a fresh isolated test database and never modifies an existing business database.
-const adminUrl=process.env.TAHA_TEST_POSTGRES_URL ?? 'postgresql://taha_test@127.0.0.1:55439/postgres';
-const parsed=new URL(adminUrl);
-if (!['127.0.0.1','localhost'].includes(parsed.hostname) || parsed.pathname!=='/postgres') throw new Error('Use a local PostgreSQL test administrator connection to /postgres.');
+const adminUrl=isolatedPostgres(process.env.TAHA_TEST_POSTGRES_URL);
 const admin=new pg.Client({connectionString:adminUrl});await admin.connect();
+try{const identity=(await admin.query("select current_setting('data_directory') directory,current_user role")).rows[0];isolatedIdentity(identity.directory,identity.role);}catch(error){await admin.end();throw error;}
 const database='taha_test_3b_'+Date.now();await admin.query(`CREATE DATABASE ${database}`);
 const url=new URL(adminUrl);url.pathname='/'+database;
 const connection=async()=>{const c=new pg.Client({connectionString:url.toString()});await c.connect();return c;};

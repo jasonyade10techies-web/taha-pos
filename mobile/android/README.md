@@ -1,3 +1,33 @@
+# Taha Staff — local readiness test build (14 November 2026)
+
+Current artifact: **0.5R.3-test / build 11**, `com.tahamobiles.staff.debug`.
+
+`D:\Inventory system POS\artifacts\android\Taha-Staff-test-R3-build11.apk`
+
+This is a debug-signed TEST APK with a bundled mobile interface. It preserves existing build-10 artifacts. It is **ready for physical retest**, not physically accepted or production-signed. See the sibling `.sha256` and `.validation.json` for artifact evidence.
+
+Changes: damaged queue entries cannot hide healthy photos; immutable capture IDs, binary hashes and journal recovery; Activity recreation retains camera originals; Requests offers explicit copy/discard and corruption warnings. Originals are never automatically assigned to another request. Signing out/switching employee still clears private photos, as stated in the existing confirmation.
+
+Recovery gallery export requires Android 10/API29+. On older supported Android releases an unsuccessful export is reported honestly and the original remains private. Corrupt/unattributed historical bytes are retained for owner-assisted recovery, not automatically uploaded. Existing legacy `cache/captures` files are no longer age-deleted; unknown legacy photos are not associated with a new shop.
+
+## Physical retest
+
+1. Install build11 over the existing TEST app without uninstalling or clearing storage.
+2. Use a verified LAN/HTTPS **backend** address in Shop Connection. Port1423 is the counter interface. This phase's isolated API3306 binds loopback and is not advertised as phone-reachable.
+3. Sign in/pair using the existing counter flow, then send a test photo request before editing a product.
+4. Capture and choose an existing photo; verify upload, correct desktop insertion and persistence after reload.
+5. Disable the network during upload; restore it and verify the same capture uploads once.
+6. With the native camera open, recreate/kill the app through Android developer tools, finish capture, reopen Requests and verify Retained Camera Photos. Save a copy and intentionally select the correct/new request. Test empty/cancelled capture discard too.
+7. Lock/resume, retry scanning/pairing, and check Diagnostics version/build. Export unsent photos before confirming sign-out or switching employee.
+
+No phone, thermal printer, HID scanner or production-cloud pass is claimed. Build locally with `npm run build:apk`; it runs typecheck, bundled UI build, JVM tests, Android lint, assembly and signature verification.
+
+---
+
+## Historical Phase5D.2 guide (October 2026)
+
+The addresses/version below are historical and must not be treated as the current PC address or current APK.
+
 # Taha Staff — Phase 5D.2 physical retest
 
 This is a TEST package, not a production release or a claim that a physical phone passed.
