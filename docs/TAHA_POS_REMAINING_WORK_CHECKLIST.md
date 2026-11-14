@@ -13,7 +13,7 @@ Branch: `codex/release-readiness`, based on `8851ac9be012387a9def620aaf661de7789
 - [x] Add damaged-record warnings and recovery diagnostics; preserve ambiguous bytes rather than delete them. Older records without checksums cannot acquire historical integrity proof retroactively.
 - [x] Correct browser cookie-operation coordination across tabs and navigation, using Web Locks, keepalive refresh and a nonsecret bounded in-flight marker. Strict server replay revocation is retained. A truly lost response may still require sign-in; no replay grace was introduced.
 - [x] Make `npm test` run both isolated frontend and API-reconciliation profiles. Add a guarded `verify:release` command, refusing the saved shop cluster and remote database targets.
-- [ ] Finish current exact-source package rehearsal and record its final paths/counts in `TAHA_POS_LOCAL_RELEASE_READINESS_2026-11-14.md`.
+- [x] Exact clean-commit package `0.5.0-r2c.5`, source `5c1af83f3441482e4882bf95802fee24648b6665`, passes26/26 compiled-app cases and345 ZIP/payload hashes. Full frontend189 passed/1 intentional skip plus5 reconciliation; full backend280 plus2 startup checks; Android35. See the dated local readiness report for exact artifact hashes and evidence.
 - [ ] Physical Android camera/gallery/scanner/pairing/lock-resume and process-death acceptance; production signing remains separate.
 - [ ] Windows native build and acceptance: Rust/Cargo/WebView2 exist; MSVC/Windows SDK are missing. No installer is claimed.
 - [ ] Repair-job material consumption, deposits/settlement/refunds and expense-adjusted net profit require a separate financial implementation and persisted-state acceptance. Smart-service POS accounting is a different, tested workflow.

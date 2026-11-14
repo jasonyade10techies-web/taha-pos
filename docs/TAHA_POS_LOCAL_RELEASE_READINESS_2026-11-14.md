@@ -4,7 +4,7 @@
 
 The owner paused hosting and asked for remaining local work and hosting preparation. No hosting account was accessed, no cloud resource was changed, and nothing was deployed in this phase. No DNS, paid service, saved shop database or historical recovery archive was modified.
 
-Work is on `codex/release-readiness`, based on `8851ac9be012387a9def620aaf661de7789640b0`. **Verification is in progress. The final evidence and immutable release reference will be recorded here before completion.** Local preparation is not daily-shop production certification.
+Work is on `codex/release-readiness`, based on `8851ac9be012387a9def620aaf661de7789640b0`. **Local hardening and the verified staging package are complete. Nothing is deployed.** Application/package commit: `5c1af83f3441482e4882bf95802fee24648b6665`; later acceptance-documentation commits do not change the packaged application. Local preparation is not daily-shop production certification.
 
 The approved desktop/mobile designs, custom NestJS backend, PostgreSQL financial engine, recovered MediaService, IndexedDB demo mode, SQLite/Tauri foundation, LAN bridge and existing private provider configuration are preserved. This phase does not implement repair-job financial settlement or install Windows system software.
 
@@ -32,7 +32,7 @@ No access token, refresh token, password or PIN is stored in this marker. Postgr
 
 `OriginalCaptures.java`, `MainActivity.java`, `ShopBridge.java` and the restricted FileProvider path preserve external camera originals in **app-private files**, not an automatically age-deleted cache. Activity/WebView destruction cannot resurrect a file-input callback; the replacement UI therefore offers explicit copy/discard rather than assigning the image to an arbitrary/new request. Empty/cancelled originals can also be reviewed/discarded. A successfully retained processed capture acknowledges its specific original; an unrelated upload acknowledgement no longer deletes the latest camera original.
 
-`src/features/mobile/saved-photo-recovery.tsx` shows retained camera originals and damaged-queue warnings. Copy keeps the private original. Discard requires confirmation. Gallery export decodes image bounds before exporting and requires Android10/API29+. On older supported Android versions export failure is reported and bytes remain retained. Ambiguous legacy cache photos are no longer age-deleted, but are not automatically associated with a shop/request. Confirmed logout or employee change still clears private photos under the existing warning/privacy policy.
+`src/features/mobile/saved-photo-recovery.tsx` shows retained camera originals and damaged-queue warnings. Copy keeps the private original. Discard requires confirmation. Gallery export decodes image bounds before exporting and requires Android10/API29+. On older supported Android versions export failure is reported and bytes remain retained. Ambiguous legacy cache photos are no longer age-deleted, but are not automatically associated with a shop/request. Confirmed logout or employee change clears managed queues and new originals under the existing warning/privacy policy. Unattributed legacy cache files remain app-private for owner-assisted recovery; they are not automatically reassigned or presented to another shop.
 
 Physical Android process-kill, permission, gallery/camera, pairing and reconnect acceptance remains required. JVM filesystem tests are not OS lifecycle or physical phone tests.
 
@@ -51,12 +51,12 @@ Evidence root: `.test-postgres/release-readiness-20261114/` (private/ignored, no
 
 | Check | Current result / boundary |
 |---|---|
-| Frontend complete suite | Final rerun pending. First run:188 passed, one intentional skip, one environment failure: default Python lacked pypdf. Tests/assertions preserved; preflight corrected. |
-| API reconciliation | Included after the full local suite by `npm test`; final result pending. |
+| Frontend complete suite | Final complete rerun:189 passed /1 intentional API-only skip /0 failures. Initial run:188 passed /1 skip /1 environment failure because default Python lacked pypdf. The unchanged PDF assertions pass after preflight correction. |
+| API reconciliation | 5/5 passed after the full local suite in the same successful `npm test` invocation. Frontend total:194 passed /1 intentional skip. |
 | Backend | Final full280/280 passed (0 failed/skipped); two newly added startup timing/privacy regressions also pass in their targeted run. |
 | Frontend/backend TypeScript and lint | Passed during this phase; final checks retained in the evidence root. |
 | Backend production compilation | Passed; current compiled entry and migration tools exist. |
-| Real browser auth | Three cases passed twice after the fix; no replay grace. Secure production-package rehearsal is pending. |
+| Real browser auth | Three real-API cases passed twice after the fix; the secure-cookie case also passed in the exact production-style package. No replay grace. |
 | Android |35 JVM tests, debug assembly, Android lint and v2 signature verification passed. No physical phone pass. |
 | SQLite |7/7 schema/transaction/outbox/reopen tests passed using a fresh temporary database; no Tauri hardware acceptance. |
 | SQL security/inventory/finance |20 +14 +25 checks passed with isolated PGlite fixtures. |
@@ -64,7 +64,7 @@ Evidence root: `.test-postgres/release-readiness-20261114/` (private/ignored, no
 | Release-runner isolation |4/4 guards passed. Default browser selection is190 tests in34 files. |
 | Frontend credential boundary | Passed: privileged client credentials rejected before bundling without printing their values. |
 | Runtime dependency advisories | Fresh `npm audit --omit=dev --json`:frontend0, backend0 reported. This is not a claim of zero application-security risk. No dependency upgrades were required. |
-| Production-style package | Current candidate generated and scanned; complete26-case rehearsal is running. Final immutable clean-commit package pending. |
+| Production-style package | Final clean-commit archive:345 CRC/payload hashes and private-file scans pass. Complete26/26 production-style cases pass, including actual PostgreSQL financial/media assertions, secure-cookie reload and isolated backup/restore. |
 | Tauri |CLI configuration/schema/icons validated. `tauri info` confirms missing MSVC/Windows SDK. No native build/installer pass. |
 
 Initial failures were retained rather than hidden. The standalone concurrency command initially attempted its legacy default port55439 and received connection-refused before any DDL; it did not start or modify the saved server. The implicit default was then removed, isolation guards added, and the real concurrency cases rerun successfully on55459. Auth red runs exposed both cross-tab replay and interrupted-navigation races before the final fixes. Intermediate TypeScript inference and PDF-runtime failures were corrected without disabling checks.
@@ -87,7 +87,7 @@ Recovered `server/src/media/media.service.ts` is unchanged: Windows working-copy
 
 ## Remaining gates and next bounded work
 
-1. Finish exact-source package rehearsal and final local regression baseline; record commit/artifact/evidence below.
+1. Local release preparation is complete; preserve the accepted archive and evidence below. Hosting/account actions remain paused.
 2. Physically retest build11: native camera/gallery, interrupted Activity/process, retained-copy/discard, offline upload retry, QR/barcode, pairing, lock/resume and cloud/LAN transitions. Production signing remains separate.
 3. Windows: install separately authorized Visual Studio Build Tools with MSVC x64/x86 and Windows SDK, then compile/accept Tauri EXE/installer, native secure sessions, SQLite cash/outbox/reconnect/conflict behavior and customer display. Rust/Cargo/WebView2 already exist; nothing was installed in this phase.
 4. Controlled repair accounting: job parts usage, deposits, settlement, refunds/reversals and ledger/profit integration. Do not treat job status changes as financial posting. Smart combined POS services are a separate tested transaction workflow. Expense-adjusted net profit remains separate from current gross profit.
@@ -95,3 +95,31 @@ Recovered `server/src/media/media.service.ts` is unchanged: Windows working-copy
 6. Hosting/public browser/provider acceptance stays paused. The local ZIP prepares the existing React/NestJS/PostgreSQL/private-storage architecture; it is not a deployed shop or a production certification. Resume account/deployment actions only when the owner requests them.
 
 See `TAHA_POS_REMAINING_WORK_CHECKLIST.md`, `mobile/android/README.md`, existing R2C reports and `TAHA_POS_HOSTINGER_STAGING_RUNBOOK.md` for historical architecture and subsequent operational gates. Earlier hosting instructions do not override the owner's current pause.
+
+
+## Accepted immutable archive and reproducibility
+
+- Package: `artifacts/managed/Taha-POS-staging-R2C-0.5.0-r2c.5-20261114T091907.zip`.
+- SHA256: `6fa73bfdaf0073245403863e15d4ab0556e2f17d4660d8b82e74786ba6fa60dd`.
+- Source: `5c1af83f3441482e4882bf95802fee24648b6665`, clean working tree when packaged. Checkpoint wording did not claim acceptance before the long tests finished. This final document records their completed results.
+- Compiled package rehearsal: `.test-postgres/r2c-20261113/taha_r2c_clean_1794648147370/results.json`,26/26 accepted. The dated parent folder is historical naming; the result timestamps are14 November.
+- Final frontend/reconciliation: `.test-postgres/release-readiness-20261114/frontend-full-final.log`.
+- Final full backend: `.test-postgres/release-readiness-20261114/backend-tests-final.log`; two additional managed-startup tests: `startup-logging-green.log`.
+- Android: `android-release-candidate.log`, APK sibling validation/hash files, and `apk-update-identity.json`. Same signing certificate as historical build10 is verified; an actual in-place phone install is not.
+- Runtime audits: `frontend-audit.json` and `backend-audit.json`, zero reported runtime advisories.
+- Source/archive/health: `final-archive-inspection.json`, `apk-download.json`, and the final acceptance manifest in the evidence root.
+
+The initial packaged rehearsal exposed a test-fixture race: fixed-number settings reads could hold a previous step or the explicit authoritative readback, leaving the wizard waiting. The harness now waits for the prior save, delays a real read only while the dependent Payments stage is visible, holds replacement reads too, records client cancellations, and bounds standalone browser actions. Unknown routing errors still fail; no busy-link or financial assertion was removed. The final exact archive passes this check.
+
+Initial uninstrumented candidate startup on this loaded Windows machine took106.529 seconds. This did not prove its cause. The final instrumented process became ready in **6.18 seconds** on the warmed machine; the first recorded module-import stage took5.750 seconds. Other measured process-ready timings (milliseconds): `[6180, 6380, 6380, 6570]`. These are local observations, not Hostinger cold-start acceptance or a promise that every cold start is fixed. Safe stage timing now makes future import/init/listen delays distinguishable without exposing configuration.
+
+The local rehearsal restores a complete PostgreSQL custom-format dump to a separate disposable target and exactly compares10 critical schema/financial/media tables plus validated constraints. Media bytes are hash-checked across restart. This is not a cloud storage/redeployment or off-machine recovery certification. Expected HTTP503/500 entries during deliberately injected restart/database/storage outages are retained in logs; the readiness and recovery assertions pass.
+
+From the project root, after starting the existing isolated PostgreSQL55459 cluster:
+
+```powershell
+$env:TAHA_TEST_POSTGRES_URL='postgresql://taha_phase5c@127.0.0.1:55459/postgres'
+npm run verify:release -- --android
+```
+
+This command owns the local browser fixtures, preflights PDF tooling, logs each verification stage and stops on failure. It does not deploy or initialize/reset the saved shop cluster. To repeat the real browser auth interruption test against an independently launched isolated API, set `TAHA_LOCAL_ACCEPTANCE_STATUS` to that launcher's `processes.json`, then run `npm run test:auth:local`. Packaged rehearsal additionally requires the exact release root, existing production dependency directory, isolated PostgreSQL URL and bundled Python as shown in the retained command/test logs. Do not substitute a real shop database or cloud connection.
