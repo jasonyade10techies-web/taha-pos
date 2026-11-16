@@ -29,6 +29,16 @@ against `.8`. Hostinger's internal loader source is unavailable: interception is
 compatibility hypothesis supported by this reproduction, not a proven account of
 its private runtime. Actual hosting acceptance remains required.
 
+After the Hostinger connection was reauthenticated, read-only inspection of the
+actual site's `.htaccess` established `PassengerStartupFile dist/main.js`, despite
+build settings specifying root `main.js` and output `.`. That actual entry loaded
+the compiled exports whose guarded standalone launch is skipped when Passenger
+requires the file. The `.8` package now preserves those compiled exports as
+`dist/api.js` and supplies the same unguarded listener bootstrap at both root
+`main.js` and Passenger's `dist/main.js`, with relative imports adjusted. A fresh
+regression requires the actual nested entry and expects startup; it failed before
+this layout correction. No generated hosting configuration was edited.
+
 A regression fixture requires the entry as another module, delays initialization
 by four seconds, simulates a delayed socket bind and requires imports to wait for
 that bind, requires an initial POST to return 503 within 1.5 seconds, then

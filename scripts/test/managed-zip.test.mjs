@@ -19,7 +19,8 @@ test('compiled Hostinger ZIP entry and build verifier work with production-only 
    'package.json':JSON.stringify(pkg),
    'package-lock.json':JSON.stringify(lock),
    'release-lock.json':JSON.stringify(lock),
-   'dist/main.js':`const server=new(require('node:events').EventEmitter)();exports.createApp=async()=>({get:()=>({port:41234,bindHost:'0.0.0.0',cloud:true,trustedProxy:false}),getHttpServer:()=>server,listen:async(port,host)=>{if(port!==41234||host!=='0.0.0.0'||process.env.NODE_ENV!=='production')throw Error('Invalid startup');server.emit('request',{socket:{remoteAddress:'127.0.0.1'},headers:{'x-forwarded-proto':'https',cookie:'DO_NOT_LOG_THIS_FIXTURE'},url:'/?private=DO_NOT_LOG_THIS_FIXTURE'});}});exports.startLanTls=async()=>{};`,
+   'dist/main.js':(await readFile('scripts/managed-release/main.js','utf8')).replaceAll("'./dist/","'./"),
+   'dist/api.js':`const server=new(require('node:events').EventEmitter)();exports.createApp=async()=>({get:()=>({port:41234,bindHost:'0.0.0.0',cloud:true,trustedProxy:false}),getHttpServer:()=>server,listen:async(port,host)=>{if(port!==41234||host!=='0.0.0.0'||process.env.NODE_ENV!=='production')throw Error('Invalid startup');server.emit('request',{socket:{remoteAddress:'127.0.0.1'},headers:{'x-forwarded-proto':'https',cookie:'DO_NOT_LOG_THIS_FIXTURE'},url:'/?private=DO_NOT_LOG_THIS_FIXTURE'});}});exports.startLanTls=async()=>{};`,
    'dist/config.js':`exports.CONFIG=Symbol('configuration');`,
    'dist-tools/scripts/migrate-staging.js':'// isolated contract fixture',
    'dist-tools/scripts/initialize-staging.js':'// isolated contract fixture',
@@ -36,6 +37,7 @@ test('compiled Hostinger ZIP entry and build verifier work with production-only 
   await writeFile(path.join(root,'package-lock.json'),JSON.stringify(lock,null,4)+'\n');
   const normalized=spawnSync(process.execPath,['verify-release.cjs'],{cwd:root,env,encoding:'utf8',timeout:10000});assert.equal(normalized.status,0,normalized.stderr);
   const start=spawnSync(process.execPath,['main.js'],{cwd:root,env,encoding:'utf8',timeout:10000});assert.equal(start.status,0,start.stderr);assert.match(start.stdout,/"stage":"ready"/);assert.match(start.stdout,/"peerAddress":"127.0.0.1"/);assert(!start.stdout.includes('DO_NOT_LOG_THIS_FIXTURE'));
+  const nestStart=spawnSync(process.execPath,['-e',"require('./dist/main.js')"],{cwd:root,env,encoding:'utf8',timeout:10000});assert.equal(nestStart.status,0,nestStart.stderr);assert.match(nestStart.stdout,/"stage":"ready"/,'Hostinger Passenger starts dist/main.js, which must start the API when required');
   await writeFile(path.join(root,'public/index.html'),'corrupt');const invalid=spawnSync(process.execPath,['verify-release.cjs'],{cwd:root,env,encoding:'utf8',timeout:10000});assert.notEqual(invalid.status,0);assert.match(invalid.stderr,/Release verification failed/);
  }finally{await rm(root,{recursive:true,force:true});}
 });

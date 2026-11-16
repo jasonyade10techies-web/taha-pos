@@ -28,6 +28,9 @@ success during initialization. After initialization the same listener serves Nes
 The root entry uses synchronous CommonJS require and literal require('http') so
 managed loaders can observe listener registration. Do not replace this path with
 dynamic import, node:http or process.getBuiltinModule: those can bypass loader hooks.
+The NestJS preset currently writes PassengerStartupFile dist/main.js on the
+verified hosting account. Both root main.js and dist/main.js contain compatible
+bootstraps; the unchanged compiled NestJS exports live in dist/api.js.
 Inject the blank-template variables through private hosting environment controls.
 Native dependencies must install successfully on the actual Linux runtime.
 For an unconfirmed hosting proxy, do not guess a CIDR or trust all. The first

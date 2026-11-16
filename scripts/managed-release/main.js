@@ -26,7 +26,7 @@ if(process.env.TAHA_RUNTIME==='cloud'){
  });
  for(const signal of ['SIGTERM','SIGINT'])process.once(signal,()=>{stopping=true;handler=null;listener.close();});
 }
-listenerReady.then(()=>Promise.all([import('./dist/main.js'),import('./dist/config.js')])).then(async([{createApp,startLanTls},{CONFIG}])=>{startup('modules-loaded');app=await createApp();if(listenerFailed||stopping)throw Error('Listener is no longer available.');const config=app.get(CONFIG);startup('application-created');
+listenerReady.then(()=>Promise.all([import('./dist/api.js'),import('./dist/config.js')])).then(async([{createApp,startLanTls},{CONFIG}])=>{startup('modules-loaded');app=await createApp();if(listenerFailed||stopping)throw Error('Listener is no longer available.');const config=app.get(CONFIG);startup('application-created');
 if(config.cloud)(listener||app.getHttpServer()).once('request',request=>{
  // Private runtime diagnostics: raw socket peer cannot be supplied through an
  // HTTP header. Observe it; never automatically trust an address or hop count.

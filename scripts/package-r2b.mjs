@@ -31,6 +31,10 @@ execFileSync(process.execPath,[npm,'install','--package-lock-only','--omit=dev',
 const normalizedLock=JSON.parse(readFileSync(path.join(stage,'package-lock.json'),'utf8'));verifyLock(normalizedLock,lock,pkg);
 writeFileSync(path.join(stage,'release-lock.json'),JSON.stringify(normalizedLock,null,2)+'\n');
 for(const name of readdirSync(path.join(root,'scripts','managed-release')))cpSync(path.join(root,'scripts','managed-release',name),path.join(stage,name));
+// Hostinger's actual Passenger configuration uses dist/main.js for the Nest
+// preset even when the build settings name the root entry. Support both paths.
+cpSync(path.join(stage,'dist','main.js'),path.join(stage,'dist','api.js'));
+writeFileSync(path.join(stage,'dist','main.js'),readFileSync(path.join(stage,'main.js'),'utf8').replaceAll("'./dist/","'./"));
 writeFileSync(path.join(stage,'public','deployment.json'),JSON.stringify({version,sourceCommit,sourceWorktree:dirty?'uncommitted':'clean',dataProvider:'api',mockAuthentication:false,apiBase:'/api/v1'},null,2));
 const files=[];
 function walk(directory){for(const item of readdirSync(directory,{withFileTypes:true})){const target=path.join(directory,item.name),relative=path.relative(stage,target).replaceAll('\\','/');if(item.isSymbolicLink())throw Error('Release cannot contain links.');if(item.isDirectory())walk(target);else{if(/(^|\/)(?:\.env(?:\.|$)|node_modules|data|recovery|private)(\/|$)|\.(?:apk|aab|keystore|jks|pem|key|dump|backup|sqlite3?|db|log|map)$/i.test(relative))throw Error('Private/generated file rejected: '+relative);const bytes=readFileSync(target);if(/(?:postgres(?:ql)?:\/\/[^\s"']+:[^\s"']+@|-----BEGIN (?:RSA |EC )?PRIVATE KEY)/.test(bytes.toString('utf8')))throw Error('Credential-like material rejected: '+relative);files.push({path:relative,size:statSync(target).size,sha256:createHash('sha256').update(bytes).digest('hex')});}}}
