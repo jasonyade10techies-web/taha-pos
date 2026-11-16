@@ -18,9 +18,13 @@ Build command: npm run build (verifies the precompiled release).
 The installer may normalize package-lock.json metadata. Its runtime package
 versions, sources and integrity pins must still match the immutable, checksummed
 release-lock.json. All application files remain verified byte-for-byte.
-Static output/publish directory: leave blank. Keep the whole server package;
+Output directory for the NestJS preset: . (a single dot). Keep the whole server package;
 do not publish only public/ or dist/. PORT comes from the platform.
 TypeScript/Vite are not required or executed on Hostinger for this package.
+The cloud entry opens one listener before loading NestJS to meet Hostinger's
+three-second listen deadline. Until the real API finishes initialization, all
+requests return HTTP 503 with STARTING and Retry-After: 1. Readiness never reports
+success during initialization. After initialization the same listener serves NestJS.
 Inject the blank-template variables through private hosting environment controls.
 Native dependencies must install successfully on the actual Linux runtime.
 For an unconfirmed hosting proxy, do not guess a CIDR or trust all. The first

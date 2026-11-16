@@ -30,7 +30,7 @@ test('compiled Hostinger ZIP entry and build verifier work with production-only 
   const files=[];for(const [name,value]of Object.entries(payload)){const bytes=Buffer.from(value);await mkdir(path.dirname(path.join(root,name)),{recursive:true});await writeFile(path.join(root,name),bytes);files.push({path:name,size:bytes.length,sha256:createHash('sha256').update(bytes).digest('hex')});}
   files.find(file=>file.path==='package-lock.json').verification='npm-runtime-pins-v1';
   await writeFile(path.join(root,'release-manifest.json'),JSON.stringify({version:'fixture',sourceCommit:'a'.repeat(40),files}));
-  const env={...process.env,NODE_ENV:'production',NODE_PATH:'',PATH:'',MIGRATE_ON_START:'false'};
+  const env={...process.env,NODE_ENV:'production',TAHA_RUNTIME:'local',NODE_PATH:'',PATH:'',MIGRATE_ON_START:'false'};
   const build=spawnSync(process.execPath,['verify-release.cjs'],{cwd:root,env,encoding:'utf8',timeout:10000});assert.equal(build.status,0,build.stderr);
   delete lock.packages[''].private;delete lock.packages[''].scripts;
   await writeFile(path.join(root,'package-lock.json'),JSON.stringify(lock,null,4)+'\n');
