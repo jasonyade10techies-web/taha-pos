@@ -1,0 +1,3 @@
+# Applied migrations use historical byte checksums. Preserve their exact bytes
+# on Linux and Windows; do not let core.autocrlf rewrite the SQL at checkout.
+server/migrations/** -text whitespace=cr-at-eol

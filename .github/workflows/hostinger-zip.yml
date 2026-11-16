@@ -54,7 +54,7 @@ jobs:
           echo 'TAHA_TEST_POSTGRES_BIN=/usr/lib/postgresql/17/bin' >> "$GITHUB_ENV"
       - run: npx playwright install --with-deps chromium
       - run: npm run test:release-system
-      - run: node scripts/package-r2b.mjs --phase R3A --version 0.5.0-r3a.3
+      - run: node scripts/package-r2b.mjs --phase R3A --version 0.5.0-r3a.4
       - name: Production-only install, build verifier, real API and fresh shop
         run: npm run ci:package
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
