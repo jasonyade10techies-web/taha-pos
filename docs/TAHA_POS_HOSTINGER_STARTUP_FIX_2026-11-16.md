@@ -55,3 +55,37 @@ Evidence is retained under `.test-postgres/hostinger-zip-20261116/`.
 Actual Hostinger startup, authenticated readiness and proxy trust still require
 verification after the owner uploads the new ZIP. Native/hardware acceptance is
 not implied by package tests.
+
+## Delivered staging candidate and fresh verification
+
+The delivered Linux-built `.8` ZIP is from application commit
+`9b7a70ba9fe949687c18325654cbc9f5f5bda78d`, SHA256
+`22c508ec4417734bd3b815b521187a290f52fbbb9ec4e9b53d5624a3db69accf`.
+It contains 361 verified manifest files. It is copied to
+`C:/Users/hassa/Downloads/Taha-POS-Hostinger-0.5.0-r3a.8.zip` and
+`artifacts/hostinger/Taha-POS-Hostinger-0.5.0-r3a.8.zip`.
+
+- 32 release-system checks pass, including cached/entry-scoped HTTP interception,
+  delayed socket binding, slow initialization, and requiring the actual nested
+  Passenger entry.
+- A Windows local production-package rehearsal passed all 27 real API/browser/
+  financial/media/restart/backup-restore cases against disposable PostgreSQL.
+  Evidence: `.test-postgres/r2c-20261113/taha_r2c_clean_1794839787167/results.json`.
+- The actual nested-entry bootstrap passed eight checks against approved real
+  staging Neon PostgreSQL/private storage through a local process. The listener
+  opened in 61 ms; all 69 migrations and dependency readiness passed. Evidence:
+  `.test-postgres/hostinger-zip-20261116/cloud-passenger-entry-result.json`.
+- Linux `npm install` and release verification pass. The full Linux run is **not
+  green**: after passing financial/media/synchronization cases, it failed because
+  the local-runtime API did not exit within 15 seconds during the restart case.
+  Evidence: GitHub Actions run `43887423501` and
+  `.test-postgres/hostinger-zip-20261116/linux-r3a8-third-failure.log`.
+  This local/LAN-mode Linux shutdown behavior remains to investigate; it must not
+  be reported as a fully passing Linux regression baseline or production acceptance.
+
+The preceding Linux run also exposed a Playwright fixture teardown race
+(`Route is already handled`). Commit `87b2293` fixes handler draining without
+removing readback assertions or changing application code. The Windows full run
+uses the corrected fixture. No existing business database was reset or seeded.
+The owner is performing the actual Hostinger upload; no successful `.8` cloud
+deployment or production readiness is claimed here.
