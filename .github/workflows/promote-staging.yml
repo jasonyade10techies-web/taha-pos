@@ -1,0 +1,41 @@
+name: Approve Hostinger staging source
+on:
+  workflow_dispatch:
+    inputs:
+      approve_staging:
+        description: Advance the Hostinger-connected staging branch only after all checks pass
+        type: boolean
+        required: true
+        default: false
+      approved_commit:
+        description: Exact reviewed source commit selected for this run
+        type: string
+        required: true
+permissions:
+  contents: read
+concurrency:
+  group: hostinger-staging-promotion
+  cancel-in-progress: false
+jobs:
+  regression:
+    if: inputs.approve_staging == true && github.actor == 'jasonyade10techies-web' && inputs.approved_commit == github.sha
+    uses: ./.github/workflows/ci.yml
+  promote:
+    needs: regression
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: '22'
+      - run: node scripts/ci/promote-staging.mjs
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAHA_APPROVED_COMMIT: ${{ inputs.approved_commit }}
+      # This does not create a hosting account, purchase resources, apply schema
+      # changes, change DNS, or promote real shop data. Hostinger must already
+      # be connected to this dedicated staging branch by the owner.

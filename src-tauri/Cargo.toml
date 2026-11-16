@@ -1,6 +1,6 @@
 [package]
 name = "taha-pos"
-version = "0.5.1"
+version = "0.5.2"
 description = "TAHA MOBILES retail workspace"
 authors = ["TAHA MOBILES"]
 edition = "2021"

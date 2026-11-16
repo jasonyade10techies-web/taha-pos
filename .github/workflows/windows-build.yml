@@ -2,6 +2,7 @@ name: Windows native staging build
 on:
   push:
     branches: [codex/cloud-native-release]
+    paths: ['src-tauri/**', 'src/**', 'scripts/build-desktop.mjs', '.github/workflows/windows-build.yml']
   pull_request:
     paths:
       - 'src-tauri/**'
@@ -9,6 +10,7 @@ on:
       - 'scripts/build-desktop.mjs'
       - '.github/workflows/windows-build.yml'
   workflow_dispatch:
+  workflow_call:
 permissions:
   contents: read
 concurrency:
@@ -55,6 +57,16 @@ jobs:
           rustc --version
           cargo --version
       - run: npm ci; if($LASTEXITCODE -ne 0){exit $LASTEXITCODE}; npm ci --prefix server
+      - name: Remove only regenerated installer output restored from build cache
+        shell: pwsh
+        run: |
+          $workspace=(Resolve-Path -LiteralPath $env:GITHUB_WORKSPACE).Path
+          $bundles=Join-Path $workspace 'src-tauri/target/release/bundle'
+          if(Test-Path -LiteralPath $bundles){
+            $resolved=(Resolve-Path -LiteralPath $bundles).Path
+            if(-not $resolved.StartsWith($workspace+[IO.Path]::DirectorySeparatorChar,[StringComparison]::OrdinalIgnoreCase)){throw 'Unsafe generated-output path'}
+            Remove-Item -LiteralPath $resolved -Recurse -Force
+          }
       - name: Validate and compile native application
         run: |
           npm run typecheck
@@ -68,7 +80,8 @@ jobs:
       - name: Inspect installer provenance
         run: |
           $installers=Get-ChildItem src-tauri/target/release/bundle -Recurse -File | Where-Object Extension -in '.exe','.msi'
-          if($installers.Count -lt 2){throw 'Both NSIS and MSI installers are required'}
+          $version=(Get-Content src-tauri/tauri.conf.json -Raw | ConvertFrom-Json).version
+          if($installers.Count -ne 2 -or ($installers | Where-Object Name -notlike "*_${version}_*")){throw 'Exactly the current NSIS and MSI installers are required'}
           $installers | ForEach-Object { [pscustomobject]@{file=$_.Name;size=$_.Length;sha256=(Get-FileHash -LiteralPath $_.FullName -Algorithm SHA256).Hash;authenticode=(Get-AuthenticodeSignature -LiteralPath $_.FullName).Status.ToString()} } | ConvertTo-Json | Set-Content windows-build-evidence.json
           Get-Content windows-build-evidence.json
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9

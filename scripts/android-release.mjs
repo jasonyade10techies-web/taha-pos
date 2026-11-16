@@ -9,6 +9,7 @@ import {validateRelease} from '../distribution/manifest.mjs';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const arg=(flag,fallback)=>{const i=process.argv.indexOf(flag);if(i<0)return fallback;if(!process.argv[i+1])throw Error('Missing '+flag);return process.argv[i+1];};
 const hash=bytes=>createHash('sha256').update(bytes).digest('hex');
+const runtimeModules=['manifest.mjs','handler.mjs','server.mjs','release-store.mjs','windows-manifest.mjs','software-handler.mjs'];
 export function inspectApk(file){
  const sdk=process.env.ANDROID_HOME||path.join(root,'.tools/android/sdk'),tools=path.join(sdk,'build-tools/35.0.0');
  const java=process.env.JAVA_HOME?path.join(process.env.JAVA_HOME,'bin',process.platform==='win32'?'java.exe':'java'):'java';
@@ -22,11 +23,11 @@ export function inspectApk(file){
 export async function packageDownloads(output,channel,versionCode){
  const entries={};async function walk(directory,relative=''){for(const entry of await readdir(directory,{withFileTypes:true})){if(entry.isSymbolicLink())throw Error('Links are not deployable.');const name=relative+entry.name;if(entry.isDirectory()){if(!/^(?:releases|apks(?:\/(?:test|stable)(?:\/[1-9][0-9]*)?)?)$/.test(name))throw Error('Unexpected directory in download package.');await walk(path.join(directory,entry.name),name+'/');}else {
   if(['artifact-manifest.json','release.json','sha256.txt'].includes(name)||/^Taha-Staff-downloads-(test|stable)-[0-9]+\.zip$/.test(name)||/^Taha-Staff-(test|stable)-build[0-9]+\.apk$/.test(name))continue;
-  if(!['manifest.mjs','handler.mjs','server.mjs','package.json'].includes(name)&&!/^releases\/(?:test|stable)(?:-[1-9][0-9]*)?\.json$/.test(name)&&!/^apks\/(?:test|stable)\/[1-9][0-9]*\/[A-Za-z0-9][A-Za-z0-9._-]{0,139}\.apk$/.test(name))throw Error('Unexpected/private file in download package.');
+  if(![...runtimeModules,'package.json'].includes(name)&&!/^releases\/(?:test|stable)(?:-[1-9][0-9]*)?\.json$/.test(name)&&!/^apks\/(?:test|stable)\/[1-9][0-9]*\/[A-Za-z0-9][A-Za-z0-9._-]{0,139}\.apk$/.test(name))throw Error('Unexpected/private file in download package.');
   const bytes=await readFile(path.join(directory,entry.name));if(name.startsWith('releases/')){const release=validateRelease(JSON.parse(bytes.toString('utf8'))),apk=await readFile(path.join(output,release.apkUrl.slice('/downloads/taha-staff/'.length)));if(apk.length!==release.sizeBytes||hash(apk)!==release.sha256)throw Error('Unverified APK in download package.');}entries[name]=new Uint8Array(bytes);
  }}}
  // Only generated download runtime and approved release data enter the archive.
- for(const name of ['manifest.mjs','handler.mjs','server.mjs'])await cp(path.join(root,'distribution',name),path.join(output,name));
+ for(const name of runtimeModules)await cp(path.join(root,'distribution',name),path.join(output,name));
  await writeFile(path.join(output,'package.json'),JSON.stringify({name:'taha-staff-downloads',private:true,version:'1.0.0',type:'module',engines:{node:'>=22.13 <23 || >=24 <25'},scripts:{start:'node server.mjs',build:'node --check server.mjs'}})+'\n');
  await walk(output);const zip=zipSync(entries,{level:6}),name=`Taha-Staff-downloads-${channel}-${versionCode}.zip`,target=path.join(output,name);await writeFile(target,zip);
  const extracted=unzipSync(new Uint8Array(await readFile(target)));for(const [name,bytes] of Object.entries(entries))if(hash(bytes)!==hash(extracted[name]??new Uint8Array()))throw Error('ZIP verification failed.');return target;

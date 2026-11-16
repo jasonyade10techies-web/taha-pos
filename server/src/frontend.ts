@@ -4,10 +4,12 @@ import {createRequire} from 'node:module';
 import express from 'express';
 import type {NestExpressApplication} from '@nestjs/platform-express';
 import type {Configuration} from './config';
+import {downloadStorage,type ReleaseStore} from './download-storage';
 
 export async function installFrontend(app:NestExpressApplication,config:Configuration){
- const releaseModule=createRequire(__filename)(path.resolve(__dirname,'../distribution/handler.mjs')) as {createDownloadHandler:(root:string)=>(request:express.Request,response:express.Response)=>Promise<boolean>};
- const downloads=releaseModule.createDownloadHandler(process.env.TAHA_RELEASE_ROOT??path.resolve(__dirname,'../android-releases'));
+ const releaseModule=createRequire(__filename)(path.resolve(__dirname,'../distribution/software-handler.mjs')) as {createSoftwareHandler:(store:ReleaseStore,options:{publicOrigin:string})=>(request:express.Request,response:express.Response)=>Promise<boolean>};
+ const storage=downloadStorage(config),downloads=releaseModule.createSoftwareHandler(storage.store,{publicOrigin:config.publicUrl});
+ if(typeof app.getHttpServer==='function')app.getHttpServer().once('close',storage.close);
  app.use((request:express.Request,response:express.Response,next:express.NextFunction)=>{void downloads(request,response).then(handled=>{if(!handled)next();}).catch(()=>{if(!response.headersSent)response.status(503).json({message:'Downloads temporarily unavailable.'});else response.end();});});
  if(!config.serveFrontend)return;
  const root=config.frontendRoot,index=path.join(root,'index.html');await access(index);

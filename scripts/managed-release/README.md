@@ -9,11 +9,22 @@ private S3-compatible storage must be approved before deployment. This ZIP
 contains no database, owner password, media originals, signing material or real
 environment file. Do not put secrets in `public/` or `environment.example`.
 
-Use Node 22 or 24. Project root is this directory; start entry is `server.cjs`.
-Hostinger installs dependencies; build command is `npm run build` (verifies the
-precompiled release); start command is `npm start`. PORT comes from the platform.
+Use Node 22.x (minimum 22.13). Upload this compiled ZIP, not the GitHub main source
+ZIP. Package root contains package.json and main.js directly, without a parent
+repository folder. Choose NestJS (or Other with these explicit server settings).
+Root directory: . ; entry file: main.js ; start command: npm start.
+Install command, if exposed: npm ci --omit=dev.
+Build command: npm run build (verifies the precompiled release).
+Static output/publish directory: leave blank. Keep the whole server package;
+do not publish only public/ or dist/. PORT comes from the platform.
+TypeScript/Vite are not required or executed on Hostinger for this package.
 Inject the blank-template variables through private hosting environment controls.
 Native dependencies must install successfully on the actual Linux runtime.
+For an unconfirmed hosting proxy, do not guess a CIDR or trust all. The first
+request produces one private `taha.proxy-observation` runtime log containing the
+actual socket peer and protocol status, without URLs, cookies or credentials.
+Use that evidence with the hosting configuration to verify the trust boundary.
+The log never changes security configuration automatically.
 
 Migration is a separate, explicitly approved administration step:
 

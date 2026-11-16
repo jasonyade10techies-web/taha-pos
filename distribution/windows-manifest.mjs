@@ -31,7 +31,7 @@ export function validateWindowsRelease(value){
   fields(file,['type','url','sizeBytes','sha256','signature']);
   if(!['nsis','msi'].includes(file.type)||seen.has(file.type))fail('Duplicate or invalid Windows installer type.');seen.add(file.type);
   if(typeof file.url!=='string'||!file.url.startsWith(prefix)||!/^[A-Za-z0-9][A-Za-z0-9._-]{0,139}\.(exe|msi)$/.test(file.url.slice(prefix.length))||!file.url.endsWith(file.type==='nsis'?'.exe':'.msi'))fail('Invalid versioned Windows artifact path.');
-  if(!Number.isSafeInteger(file.sizeBytes)||file.sizeBytes<1||file.sizeBytes>512*1024*1024||typeof file.sha256!=='string'||!/^[0-9a-f]{64}$/.test(file.sha256))fail('Invalid Windows artifact size/hash.');
+  if(!Number.isSafeInteger(file.sizeBytes)||file.sizeBytes<1||file.sizeBytes>256*1024*1024||typeof file.sha256!=='string'||!/^[0-9a-f]{64}$/.test(file.sha256))fail('Invalid Windows artifact size/hash.');
   base64(file.signature);
  }
  return value;

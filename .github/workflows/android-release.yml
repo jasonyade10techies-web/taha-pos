@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
     inputs:
       approve_release:
-        description: Publish a verified TEST APK to this private repository (hosting stays manual)
+        description: Publish a verified TEST APK and promote its public download metadata
         required: true
         type: boolean
         default: false
@@ -64,6 +64,15 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: node scripts/ci/publish-android.mjs
+      - name: Promote verified APK and portal metadata to durable staging storage
+        run: node scripts/promote-software.mjs artifacts/android-release/release.json
+        env:
+          TAHA_SOFTWARE_PUBLISH_APPROVED: staging
+          S3_ENDPOINT: ${{ secrets.SOFTWARE_S3_ENDPOINT }}
+          S3_REGION: ${{ secrets.SOFTWARE_S3_REGION }}
+          S3_BUCKET: ${{ secrets.SOFTWARE_S3_BUCKET }}
+          S3_ACCESS_KEY_ID: ${{ secrets.SOFTWARE_S3_ACCESS_KEY_ID }}
+          S3_SECRET_ACCESS_KEY: ${{ secrets.SOFTWARE_S3_SECRET_ACCESS_KEY }}
       - name: Remove runner signing copy
         if: always()
         run: rm -f "$RUNNER_TEMP/taha-test.jks"

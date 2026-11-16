@@ -1,9 +1,9 @@
 import {createHash,randomUUID} from 'node:crypto';
-import {createReadStream} from 'node:fs';
-import {readFile,mkdir,rename,unlink,stat,realpath,open} from 'node:fs/promises';
+import {readFile,mkdir,rename,unlink,open} from 'node:fs/promises';
 import path from 'node:path';
 import {pipeline} from 'node:stream/promises';
 import {validateRelease} from './manifest.mjs';
+import {localReleaseStore,readJson,verifiedAsset} from './release-store.mjs';
 const prefix='/downloads/taha-staff';
 const digest=bytes=>createHash('sha256').update(bytes).digest('hex');
 const escape=value=>String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -24,15 +24,13 @@ export async function publishRelease(root,input,manifest){
   return file;
  }finally{await import('node:fs/promises').then(fs=>fs.rmdir(lock));}
 }
-async function safeFile(root,relative){const base=await realpath(root),file=await realpath(path.join(base,relative));if(!file.startsWith(base+path.sep))throw Error('Unsafe file.');const info=await stat(file);if(!info.isFile())throw Error('Not a file.');return {file,info};}
+export async function androidAvailable(store,channel,verified=new Map()){
+ const release=validateRelease(await readJson(store,`releases/${channel}.json`));if(release.channel!==channel)throw Error('Wrong channel.');
+ await verifiedAsset(store,release.apkUrl.slice(prefix.length+1),release.sizeBytes,release.sha256,verified);return release;
+}
 export function createDownloadHandler(root){
- const verified=new Map();
- const available=async channel=>{
-  const {file,info}=await safeFile(root,`releases/${channel}.json`);if(info.size>32768)throw Error('Manifest too large.');const release=validateRelease(JSON.parse(await readFile(file,'utf8')));if(release.channel!==channel)throw Error('Wrong channel.');
-  const apk=await safeFile(root,release.apkUrl.slice(prefix.length+1));if(apk.info.size!==release.sizeBytes)throw Error('Missing release bytes.');
-  const key=apk.file+':'+apk.info.mtimeMs+':'+apk.info.size;if(verified.get(key)!==release.sha256){if(digest(await readFile(apk.file))!==release.sha256)throw Error('Bad release bytes.');verified.set(key,release.sha256);}
-  return release;
- };
+ const verified=new Map(),store=typeof root==='string'?localReleaseStore(root):root;
+ const available=channel=>androidAvailable(store,channel,verified);
  return async function handle(request,response){
   let url;try{url=new URL(request.url,'http://local.invalid');}catch{return false;}
   if(url.pathname!==prefix&&!url.pathname.startsWith(prefix+'/'))return false;
@@ -55,10 +53,10 @@ export function createDownloadHandler(root){
    }
    const match=/^\/downloads\/taha-staff\/apks\/(test|stable)\/([1-9][0-9]*)\/([A-Za-z0-9][A-Za-z0-9._-]{0,139}\.apk)$/.exec(url.pathname);
    if(match){
-    const historical=await safeFile(root,`releases/${match[1]}-${match[2]}.json`);if(historical.info.size>32768)throw Error('Invalid history.');const release=validateRelease(JSON.parse(await readFile(historical.file,'utf8')));if(release.apkUrl!==url.pathname)throw Error('Unknown APK.');
-    const apk=await safeFile(root,url.pathname.slice(prefix.length+1));if(apk.info.size!==release.sizeBytes)throw Error('Incomplete APK.');const key=apk.file+':'+apk.info.mtimeMs+':'+apk.info.size;if(verified.get(key)!==release.sha256){if(digest(await readFile(apk.file))!==release.sha256)throw Error('Corrupt APK.');verified.set(key,release.sha256);}
+    const release=validateRelease(await readJson(store,`releases/${match[1]}-${match[2]}.json`));if(release.apkUrl!==url.pathname)throw Error('Unknown APK.');
+    const key=url.pathname.slice(prefix.length+1),apk=await verifiedAsset(store,key,release.sizeBytes,release.sha256,verified);
     response.writeHead(200,{'Content-Type':'application/vnd.android.package-archive','Content-Length':release.sizeBytes,'Content-Disposition':`attachment; filename="${match[3]}"`,'Cache-Control':'public, max-age=31536000, immutable','X-Content-Type-Options':'nosniff'});
-    if(request.method==='HEAD')response.end();else await pipeline(createReadStream(apk.file),response);return true;
+    if(request.method==='HEAD')response.end();else await pipeline(await store.stream(key,apk),response);return true;
    }
   }catch{if(response.headersSent){response.destroy();return true;}}
   send(404,'{"message":"This verified release is not available."}');return true;

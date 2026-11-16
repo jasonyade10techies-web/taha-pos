@@ -1,0 +1,83 @@
+name: Approve Windows staging release
+on:
+  workflow_dispatch:
+    inputs:
+      approve_release:
+        description: Publish and promote the verified Windows STAGING release
+        required: true
+        type: boolean
+        default: false
+      approved_commit:
+        description: Exact reviewed 40-character source commit
+        required: true
+        type: string
+permissions:
+  contents: read
+concurrency:
+  group: windows-staging-release
+  cancel-in-progress: false
+jobs:
+  approval:
+    if: inputs.approve_release == true
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: '22'
+      - run: node scripts/ci/check-windows-release.mjs
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAHA_APPROVED_COMMIT: ${{ inputs.approved_commit }}
+  regression:
+    needs: approval
+    uses: ./.github/workflows/ci.yml
+  native:
+    needs: approval
+    uses: ./.github/workflows/windows-build.yml
+  publish:
+    needs: [regression, native]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    environment: windows-staging-release
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: '22'
+      - uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53
+        with:
+          name: windows-native-staging-unsigned
+          path: artifacts/windows-native
+      - run: npm ci && npm ci --prefix server
+      - run: node scripts/ci/sign-windows.mjs
+        env:
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_STAGING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_STAGING_PRIVATE_KEY_PASSWORD }}
+      - run: node scripts/package-windows.mjs artifacts/windows-native artifacts/windows-release
+      - run: node scripts/ci/publish-windows.mjs
+        env:
+          GH_TOKEN: ${{ github.token }}
+      - name: Promote verified files and current portal metadata last
+        run: node scripts/promote-software.mjs artifacts/windows-release/release.json
+        env:
+          TAHA_SOFTWARE_PUBLISH_APPROVED: staging
+          S3_ENDPOINT: ${{ secrets.SOFTWARE_S3_ENDPOINT }}
+          S3_REGION: ${{ secrets.SOFTWARE_S3_REGION }}
+          S3_BUCKET: ${{ secrets.SOFTWARE_S3_BUCKET }}
+          S3_ACCESS_KEY_ID: ${{ secrets.SOFTWARE_S3_ACCESS_KEY_ID }}
+          S3_SECRET_ACCESS_KEY: ${{ secrets.SOFTWARE_S3_SECRET_ACCESS_KEY }}
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: windows-staging-signed-release
+          path: artifacts/windows-release
+          if-no-files-found: error
+          retention-days: 30
+      # No release is created on ordinary pushes. Versioned storage is public
+      # only through the allowlisted HTTPS software routes, never GitHub tokens.

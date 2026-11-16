@@ -19,7 +19,7 @@ const filter=file=>!file.endsWith('.map');
 for(const name of ['dist','dist-tools','migrations','distribution'])cpSync(path.join(server,name),path.join(stage,name),{recursive:true,filter});
 cpSync(path.join(root,'dist-staging'),path.join(stage,'public'),{recursive:true,filter});
 const source=JSON.parse(readFileSync(path.join(server,'package.json'),'utf8'));
-const pkg={name:'taha-pos-staging',version,private:true,engines:{node:'>=22.13 <23 || >=24 <25'},scripts:{build:'node verify-release.cjs',start:'node server.cjs','migrate:staging':'node dist-tools/scripts/migrate-staging.js','initialize:staging':'node dist-tools/scripts/initialize-staging.js','seed:staging':'node dist-tools/scripts/seed-staging.js',smoke:'node smoke.mjs'},dependencies:source.dependencies,overrides:source.overrides};
+const pkg={name:'taha-pos-staging',version,private:true,main:'main.js',engines:{node:'>=22.13 <23 || >=24 <25'},scripts:{build:'node verify-release.cjs',start:'node main.js','migrate:staging':'node dist-tools/scripts/migrate-staging.js','initialize:staging':'node dist-tools/scripts/initialize-staging.js','seed:staging':'node dist-tools/scripts/seed-staging.js',smoke:'node smoke.mjs'},dependencies:source.dependencies,overrides:source.overrides};
 writeFileSync(path.join(stage,'package.json'),JSON.stringify(pkg,null,2)+'\n');
 const lock=JSON.parse(readFileSync(path.join(server,'package-lock.json'),'utf8'));lock.name=pkg.name;lock.version=version;lock.packages['']={...lock.packages[''],...pkg};delete lock.packages[''].devDependencies;
 writeFileSync(path.join(stage,'package-lock.json'),JSON.stringify(lock,null,2)+'\n');
