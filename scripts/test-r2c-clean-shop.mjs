@@ -58,20 +58,24 @@ try{
  });
  await check('owner completes the existing six-stage wizard, tax review and empty Dashboard',async()=>{
   await page.getByLabel('Shop name',{exact:true}).fill('Taha R2C Acceptance');await page.getByLabel('Branch',{exact:true}).fill('Empty Shop Branch');
-  let settingsReads=0,holdReads=false,blocked=false,releaseRead;const resumed=new Promise(resolve=>releaseRead=resolve),routeErrors=[];
+  let settingsReads=0,holdReads=false,blocked=false,releaseRead,activeRoutes=0;const resumed=new Promise(resolve=>releaseRead=resolve),routeErrors=[];
   // Delay an actual settings readback to exercise the period after the next
   // stage is visible but cache invalidation is still completing. No fake data.
   // Poll invalidation may cancel/refetch a read while its response is held.
   // Hold every replacement read as well; observe cancellations without letting
   // a detached route promise crash the process and bypass fixture cleanup.
-  const holdSettings=async route=>{let deadline;try{const response=await route.fetch({timeout:10000});if(holdReads&&route.request().method()==='GET'){settingsReads++;if(!route.request().failure()&&await page.getByRole('heading',{name:'Payments and receipts',exact:true}).isVisible()){blocked=true;await Promise.race([resumed,new Promise((_,reject)=>{deadline=setTimeout(()=>reject(Error('Held setup readback was not released in 15 seconds.')),15000);})]);}}if(!route.request().failure())await route.fulfill({response});}catch(error){routeErrors.push({request:route.request(),error});try{await route.abort();}catch{/* The page may already have cancelled this read. */}}finally{clearTimeout(deadline);}};
+  const holdSettings=async route=>{let deadline;activeRoutes++;try{const response=await route.fetch({timeout:10000});if(holdReads&&route.request().method()==='GET'){settingsReads++;if(!route.request().failure()&&await page.getByRole('heading',{name:'Payments and receipts',exact:true}).isVisible()){blocked=true;await Promise.race([resumed,new Promise((_,reject)=>{deadline=setTimeout(()=>reject(Error('Held setup readback was not released in 15 seconds.')),15000);})]);}}if(!route.request().failure())await route.fulfill({response});}catch(error){routeErrors.push({request:route.request(),error});try{await route.abort();}catch{/* The page may already have cancelled this read. */}}finally{clearTimeout(deadline);activeRoutes--;}};
   await page.route('**/api/v1/stores/*/settings',holdSettings);
   try{
    const next=page.getByRole('button',{name:'Save & Continue',exact:true});
    for(let i=0;i<4;i++){console.log('SETUP stage '+i);await expect(next).toBeEnabled({timeout:30000});if(i===3)holdReads=true;await next.click();console.log('SETUP saved '+i);}
    await expect(page.getByRole('heading',{name:'Payments and receipts',exact:true})).toBeVisible();await until(async()=>assert.equal(blocked,true),10000);
    await expect(page.getByRole('link',{name:'Review tax settings',exact:true})).toBeDisabled();
-  }finally{console.log('SETUP release held reads');releaseRead();await page.unrouteAll({behavior:'wait'});console.log('SETUP routes released');}
+  }finally{console.log('SETUP release held reads');releaseRead();
+   // Playwright's global wait can deadlock after a polling request is cancelled.
+   // Track and await our own handlers instead; every captured error is checked
+   // below, and the disabled/enabled UI/readback assertions remain unchanged.
+   await page.unrouteAll({behavior:'ignoreErrors'});await expect.poll(()=>activeRoutes,{timeout:15000}).toBe(0);console.log('SETUP routes released');}
   for(const entry of routeErrors)if(!entry.request.failure())throw entry.error;
   writeFileSync(path.join(evidence,'setup-readback-fixture.json'),JSON.stringify({settingsReads,cancelledReads:routeErrors.filter(entry=>entry.request.failure()).length,held:true},null,2));
   await expect(page.getByRole('link',{name:'Review tax settings',exact:true})).toBeEnabled();
