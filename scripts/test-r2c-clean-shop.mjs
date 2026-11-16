@@ -71,11 +71,12 @@ try{
    for(let i=0;i<4;i++){console.log('SETUP stage '+i);await expect(next).toBeEnabled({timeout:30000});if(i===3)holdReads=true;await next.click();console.log('SETUP saved '+i);}
    await expect(page.getByRole('heading',{name:'Payments and receipts',exact:true})).toBeVisible();await until(async()=>assert.equal(blocked,true),10000);
    await expect(page.getByRole('link',{name:'Review tax settings',exact:true})).toBeDisabled();
-  }finally{console.log('SETUP release held reads');releaseRead();
-   // Playwright's global wait can deadlock after a polling request is cancelled.
-   // Track and await our own handlers instead; every captured error is checked
-   // below, and the disabled/enabled UI/readback assertions remain unchanged.
-   await page.unrouteAll({behavior:'ignoreErrors'});await expect.poll(()=>activeRoutes,{timeout:15000}).toBe(0);console.log('SETUP routes released');}
+  }finally{console.log('SETUP release held reads');holdReads=false;releaseRead();
+   // Let held responses finish before unregistering. ignoreErrors can mark an
+   // in-flight route handled before fulfill(), racing the fixture's readback.
+   // Preserve every error and bound both our handler drain and Playwright wait.
+   await expect.poll(()=>activeRoutes,{timeout:15000}).toBe(0);
+   let timer;try{await Promise.race([page.unrouteAll({behavior:'wait'}),new Promise((_,reject)=>{timer=setTimeout(()=>reject(Error('Setup route cleanup did not finish in 15 seconds.')),15000);})]);}finally{clearTimeout(timer);}console.log('SETUP routes released');}
   for(const entry of routeErrors)if(!entry.request.failure())throw entry.error;
   writeFileSync(path.join(evidence,'setup-readback-fixture.json'),JSON.stringify({settingsReads,cancelledReads:routeErrors.filter(entry=>entry.request.failure()).length,held:true},null,2));
   await expect(page.getByRole('link',{name:'Review tax settings',exact:true})).toBeEnabled();
