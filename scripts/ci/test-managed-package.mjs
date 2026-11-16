@@ -7,7 +7,8 @@ const release=path.resolve('artifacts/managed',candidates[0]),dependencies=path.
 if(existsSync(path.join(dependencies,'node_modules')))throw Error('CI production-dependency directory must start empty.');
 mkdirSync(dependencies,{recursive:true});cpSync(release,dependencies,{recursive:true});
 const npm=process.env.npm_execpath;if(!npm||!existsSync(npm))throw Error('Run with npm run ci:package.');
-execFileSync(process.execPath,[npm,'ci','--omit=dev','--no-audit','--no-fund'],{cwd:dependencies,stdio:'inherit'});
+// Hostinger runs npm install, which can normalize lockfile metadata after extraction.
+execFileSync(process.execPath,[npm,'install','--omit=dev','--no-audit','--no-fund'],{cwd:dependencies,stdio:'inherit',env:{...process.env,NODE_ENV:'production'}});
 execFileSync(process.execPath,[npm,'run','build'],{cwd:dependencies,stdio:'inherit',env:{...process.env,NODE_ENV:'production'}});
 const python=process.env.TAHA_PDF_PYTHON||execFileSync('python',['-c','import sys; print(sys.executable)'],{encoding:'utf8'}).trim();
 execFileSync(process.execPath,['scripts/test-r2c-clean-shop.mjs'],{stdio:'inherit',env:{...process.env,TAHA_R2C_PACKAGE_ROOT:release,TAHA_R2B_DEPENDENCIES:dependencies,TAHA_PDF_PYTHON:python}});

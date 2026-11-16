@@ -3,6 +3,8 @@ import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {execFileSync} from 'node:child_process';
 import {createHash} from 'node:crypto';
+import {createRequire} from 'node:module';
+const {verifyLock}=createRequire(import.meta.url)('./managed-release/verify-lock.cjs');
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..'),server=path.join(root,'server');
 const argument=(flag,fallback)=>{const index=process.argv.indexOf(flag);if(index<0)return fallback;if(!process.argv[index+1])throw Error('Missing '+flag);return process.argv[index+1];};
 const phase=argument('--phase','R2B');if(!['R2B','R2C','R3A'].includes(phase))throw Error('Unknown staging release phase.');
@@ -23,11 +25,17 @@ const pkg={name:'taha-pos-staging',version,private:true,main:'main.js',engines:{
 writeFileSync(path.join(stage,'package.json'),JSON.stringify(pkg,null,2)+'\n');
 const lock=JSON.parse(readFileSync(path.join(server,'package-lock.json'),'utf8'));lock.name=pkg.name;lock.version=version;lock.packages['']={...lock.packages[''],...pkg};delete lock.packages[''].devDependencies;
 writeFileSync(path.join(stage,'package-lock.json'),JSON.stringify(lock,null,2)+'\n');
+const npmCandidates=[process.env.npm_execpath,path.join(path.dirname(process.execPath),'node_modules/npm/bin/npm-cli.js'),path.resolve(path.dirname(process.execPath),'../lib/node_modules/npm/bin/npm-cli.js')];
+const npm=npmCandidates.find(candidate=>candidate&&existsSync(candidate));if(!npm)throw Error('An existing npm CLI is required to normalize the release lockfile.');
+execFileSync(process.execPath,[npm,'install','--package-lock-only','--omit=dev','--ignore-scripts','--no-audit','--no-fund'],{cwd:stage,env:{...process.env,NODE_ENV:'production'},stdio:'inherit'});
+const normalizedLock=JSON.parse(readFileSync(path.join(stage,'package-lock.json'),'utf8'));verifyLock(normalizedLock,lock,pkg);
+writeFileSync(path.join(stage,'release-lock.json'),JSON.stringify(normalizedLock,null,2)+'\n');
 for(const name of readdirSync(path.join(root,'scripts','managed-release')))cpSync(path.join(root,'scripts','managed-release',name),path.join(stage,name));
 writeFileSync(path.join(stage,'public','deployment.json'),JSON.stringify({version,sourceCommit,sourceWorktree:dirty?'uncommitted':'clean',dataProvider:'api',mockAuthentication:false,apiBase:'/api/v1'},null,2));
 const files=[];
 function walk(directory){for(const item of readdirSync(directory,{withFileTypes:true})){const target=path.join(directory,item.name),relative=path.relative(stage,target).replaceAll('\\','/');if(item.isSymbolicLink())throw Error('Release cannot contain links.');if(item.isDirectory())walk(target);else{if(/(^|\/)(?:\.env(?:\.|$)|node_modules|data|recovery|private)(\/|$)|\.(?:apk|aab|keystore|jks|pem|key|dump|backup|sqlite3?|db|log|map)$/i.test(relative))throw Error('Private/generated file rejected: '+relative);const bytes=readFileSync(target);if(/(?:postgres(?:ql)?:\/\/[^\s"']+:[^\s"']+@|-----BEGIN (?:RSA |EC )?PRIVATE KEY)/.test(bytes.toString('utf8')))throw Error('Credential-like material rejected: '+relative);files.push({path:relative,size:statSync(target).size,sha256:createHash('sha256').update(bytes).digest('hex')});}}}
 walk(stage);files.sort((a,b)=>a.path.localeCompare(b.path));
+files.find(file=>file.path==='package-lock.json').verification='npm-runtime-pins-v1';
 writeFileSync(path.join(stage,'release-manifest.json'),JSON.stringify({version,createdAt:new Date().toISOString(),sourceCommit,sourceWorktree:dirty?'uncommitted':'clean',files},null,2));
 execFileSync(process.execPath,['verify-release.cjs'],{cwd:stage,stdio:'inherit'});
 if(process.platform==='win32')execFileSync('powershell.exe',['-NoProfile','-Command',`Add-Type -AssemblyName System.IO.Compression.FileSystem; [System.IO.Compression.ZipFile]::CreateFromDirectory('${stage.replaceAll("'","''")}','${zip.replaceAll("'","''")}',[System.IO.Compression.CompressionLevel]::Optimal,$false)`],{stdio:'inherit',windowsHide:true});

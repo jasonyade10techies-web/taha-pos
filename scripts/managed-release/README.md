@@ -13,8 +13,11 @@ Use Node 22.x (minimum 22.13). Upload this compiled ZIP, not the GitHub main sou
 ZIP. Package root contains package.json and main.js directly, without a parent
 repository folder. Choose NestJS (or Other with these explicit server settings).
 Root directory: . ; entry file: main.js ; start command: npm start.
-Install command, if exposed: npm ci --omit=dev.
+Install command, if exposed: npm install --omit=dev.
 Build command: npm run build (verifies the precompiled release).
+The installer may normalize package-lock.json metadata. Its runtime package
+versions, sources and integrity pins must still match the immutable, checksummed
+release-lock.json. All application files remain verified byte-for-byte.
 Static output/publish directory: leave blank. Keep the whole server package;
 do not publish only public/ or dist/. PORT comes from the platform.
 TypeScript/Vite are not required or executed on Hostinger for this package.
