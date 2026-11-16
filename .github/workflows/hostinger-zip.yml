@@ -45,13 +45,21 @@ jobs:
       - run: python -m pip install pypdf==6.21.4 cryptography==50.0.2
       - name: Matching PostgreSQL client for disposable backup/restore
         run: |
-          sudo install -d /usr/share/postgresql-common/pgdg
-          sudo curl --fail --location https://www.postgresql.org/media/keys/ACCC4CF8.asc -o /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc
-          test "$(gpg --show-keys --with-colons /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc | awk -F: '$1=="fpr" {print $10;exit}')" = B97B0AFCAA1A47F044F244A07FCC7D46ACCC4CF8
-          echo 'deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] https://apt.postgresql.org/pub/repos/apt noble-pgdg main' | sudo tee /etc/apt/sources.list.d/taha-pgdg.list
-          sudo apt-get update
-          sudo apt-get install -y postgresql-client-17
-          echo 'TAHA_TEST_POSTGRES_BIN=/usr/lib/postgresql/17/bin' >> "$GITHUB_ENV"
+          # Reuse the already-pulled PostgreSQL 17 service image. No external
+          # package-repository/key download is needed for matching client tools.
+          mkdir -p .test-postgres/ci-pg-bin
+          for tool in pg_dump pg_restore; do
+            cat > ".test-postgres/ci-pg-bin/$tool" <<'SH'
+          #!/usr/bin/env bash
+          set -euo pipefail
+          exec docker run --rm --network host --env-file <(env | sed -n '/^PG[A-Z_]*=/p') \
+            --volume "$GITHUB_WORKSPACE:$GITHUB_WORKSPACE" --workdir "$GITHUB_WORKSPACE" \
+            --user "$(id -u):$(id -g)" postgres:17-bookworm "$(basename "$0")" "$@"
+          SH
+            chmod +x ".test-postgres/ci-pg-bin/$tool"
+          done
+          .test-postgres/ci-pg-bin/pg_dump --version
+          echo "TAHA_TEST_POSTGRES_BIN=$GITHUB_WORKSPACE/.test-postgres/ci-pg-bin" >> "$GITHUB_ENV"
       - run: npx playwright install --with-deps chromium
       - run: npm run test:release-system
       - run: node scripts/package-r2b.mjs --phase R3A --version 0.5.0-r3a.8

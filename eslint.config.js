@@ -9,7 +9,7 @@ export default tseslint.config(
   js.configs.recommended,
   ...tseslint.configs.recommended,
   { languageOptions: { globals: { ...globals.browser, ...globals.node } } },
-  { files: ['scripts/managed-release/main.js','scripts/managed-release/server.cjs'],languageOptions:{sourceType:'commonjs'},rules:{'@typescript-eslint/no-require-imports':['error',{allow:['^http$','^\\./server\\.cjs$']}] } },
+  { files: ['scripts/managed-release/main.js','scripts/managed-release/server.cjs'],languageOptions:{sourceType:'commonjs'},rules:{'@typescript-eslint/no-require-imports':['error',{allow:['^http$','^\\./main\\.js$']}] } },
   { files: ['public/sw.js'], languageOptions: { globals: globals.serviceworker } },
   {
     files: ['src/**/*.{ts,tsx}'],

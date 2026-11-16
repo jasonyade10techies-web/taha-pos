@@ -19,11 +19,12 @@ was changed.
 
 The owner subsequently supplied a verified `.7` build that still failed on
 Hostinger with the generic post-build failure and the same listener message.
-The `.8` correction replaces the root dynamic import with synchronous CommonJS
-require and replaces getBuiltinModule with literal require('http'). Node documents
+The `.8` correction places the complete synchronous CommonJS listener bootstrap
+directly in root main.js and replaces getBuiltinModule with literal require('http').
+server.cjs remains only a compatibility alias. Node documents
 that getBuiltinModule and node:-prefixed require bypass replaced require-cache
-entries. A separate controlled HTTP-module shim now verifies that the listener is
-captured before requiring the root entry returns. It fails against `.7` and passes
+entries. Controlled cached-module and entry-scoped HTTP shims now verify that the
+listener is captured before evaluating the root entry returns. They fail against `.7` and pass
 against `.8`. Hostinger's internal loader source is unavailable: interception is a
 compatibility hypothesis supported by this reproduction, not a proven account of
 its private runtime. Actual hosting acceptance remains required.
