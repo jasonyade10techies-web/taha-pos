@@ -6,7 +6,7 @@ loaded the complete NestJS application before calling listen. Previous local
 cloud rehearsals took approximately 2.3–3.0 seconds and did not establish that
 slower managed-hosting cold starts would meet Hostinger's deadline.
 
-Release `0.5.0-r3a.7` opens the assigned HTTP listener and waits for its listening
+Release `0.5.0-r3a.8` opens the assigned HTTP listener and waits for its listening
 callback before importing NestJS in cloud mode. This also prevents heavy module
 loading from delaying the socket's actual bind callback. It returns
 503 / STARTING / Retry-After: 1 until `app.init()` finishes,
@@ -16,6 +16,17 @@ health or financial operation during initialization. Startup failure closes the
 listener. SIGTERM/SIGINT close it as well. Local runtime retains the existing
 NestJS listener and LAN integration. No shop data, credentials or financial logic
 was changed.
+
+The owner subsequently supplied a verified `.7` build that still failed on
+Hostinger with the generic post-build failure and the same listener message.
+The `.8` correction replaces the root dynamic import with synchronous CommonJS
+require and replaces getBuiltinModule with literal require('http'). Node documents
+that getBuiltinModule and node:-prefixed require bypass replaced require-cache
+entries. A separate controlled HTTP-module shim now verifies that the listener is
+captured before requiring the root entry returns. It fails against `.7` and passes
+against `.8`. Hostinger's internal loader source is unavailable: interception is a
+compatibility hypothesis supported by this reproduction, not a proven account of
+its private runtime. Actual hosting acceptance remains required.
 
 A regression fixture requires the entry as another module, delays initialization
 by four seconds, simulates a delayed socket bind and requires imports to wait for

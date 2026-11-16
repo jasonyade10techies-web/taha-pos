@@ -25,6 +25,9 @@ The cloud entry opens one listener before loading NestJS to meet Hostinger's
 three-second listen deadline. Until the real API finishes initialization, all
 requests return HTTP 503 with STARTING and Retry-After: 1. Readiness never reports
 success during initialization. After initialization the same listener serves NestJS.
+The root entry uses synchronous CommonJS require and literal require('http') so
+managed loaders can observe listener registration. Do not replace this path with
+dynamic import, node:http or process.getBuiltinModule: those can bypass loader hooks.
 Inject the blank-template variables through private hosting environment controls.
 Native dependencies must install successfully on the actual Linux runtime.
 For an unconfirmed hosting proxy, do not guess a CIDR or trust all. The first

@@ -14,7 +14,8 @@ if(process.env.TAHA_RUNTIME==='cloud'){
  if(!Number.isInteger(port)||port<1||port>65535||!['0.0.0.0','127.0.0.1','::'].includes(host))throw Error('Invalid platform listener configuration.');
  // Hostinger requires listen() within three seconds, before loading NestJS.
  // The same listener serves the initialized API; no second port or fake health.
- listener=process.getBuiltinModule('http').createServer((request,response)=>{
+ // Literal CommonJS http preserves managed-loader/require-cache interception.
+ listener=require('http').createServer((request,response)=>{
   if(handler)return handler(request,response);
   response.writeHead(503,{'Content-Type':'application/json','Cache-Control':'no-store','Retry-After':'1','X-Robots-Tag':'noindex'});
   response.end(JSON.stringify({statusCode:503,code:'STARTING',message:'Taha POS is starting. Retry shortly.'}));
