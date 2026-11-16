@@ -10,13 +10,16 @@ import { Button } from "../../components/ui/button";
 import { MobileProductGallery } from "./mobile-product-gallery";
 import {MobileProductEditor} from './mobile-product-editor';
 import {searchProducts} from '../../lib/product-search';
+import {MobileProductCreate,AddProductButton} from './mobile-product-create';
 export function MobileProductsPage() {
   const [params, setParams] = useSearchParams(),
     [search, setSearch] = useState(params.get("code") || ""),
-    [id, setId] = useState(params.get("id") || "");
+    [id, setId] = useState(params.get("id") || ""),
+    [creating,setCreating]=useState(params.get('new')==='1');
   useEffect(() => {
     setSearch(params.get("code") || "");
     setId(params.get("id") || "");
+    if(params.get('new')==='1')setCreating(true);
   }, [params]);
   const query = useQuery({
     queryKey: ["staff-products"],
@@ -32,7 +35,9 @@ export function MobileProductsPage() {
         <span className="eyebrow">QUICK LOOKUP</span>
         <h1>Products</h1>
         <p>Find stock and product details.</p>
+        {staffService.allow('products.create')&&<AddProductButton onClick={()=>setCreating(true)}/>}
       </div>
+      {creating&&<MobileProductCreate onClose={()=>{setCreating(false);const next=new URLSearchParams(params);next.delete('new');setParams(next,{replace:true});}} onCreated={productId=>{setCreating(false);setId(productId);setParams({id:productId},{replace:true});}}/>}
       <label className="staff-search">
         <Search size={20} />
         <input
@@ -91,8 +96,8 @@ export function MobileProductsPage() {
       {!rows.length && !query.isPending && !query.isError && (
         <div className="staff-empty">
           <Package />
-          <h2>Product not found</h2>
-          <p>Try a name, phone model or internal code.</p>
+          <h2>{products.length?'Product not found':'No products yet'}</h2>
+          <p>{products.length?'Try a name, phone model or internal code.':'Add your first product and take its photos from this phone.'}</p>
         </div>
       )}
       <Dialog

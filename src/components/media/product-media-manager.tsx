@@ -1,4 +1,4 @@
-import { useRef, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import {
   Camera,
   Upload,
@@ -48,12 +48,14 @@ export function ProductMediaManager({
   phoneAction,
   onBusyChange,
   useDeviceCamera = false,
+  onIssuesChange,
 }: {
   images: ImageRecord[];
   onChange: (images: ImageRecord[]) => void;
   phoneAction?: ReactNode;
   useDeviceCamera?: boolean;
   onBusyChange?: (busy: boolean) => void;
+  onIssuesChange?: (failed:number)=>void;
 }) {
   const deviceCamera = useRef<HTMLInputElement>(null),
     browse = useRef<HTMLInputElement>(null),
@@ -68,6 +70,7 @@ export function ProductMediaManager({
     [viewer, setViewer] = useState<number | null>(null),
     [crop, setCrop] = useState<number | null>(null),
     [zoom, setZoom] = useState(1);
+  useEffect(()=>{onIssuesChange?.(jobs.filter(job=>job.status==='Failed').length);},[jobs,onIssuesChange]);
   const change = (next: ImageRecord[]) => {
     latest.current = next;
     onChange(next);

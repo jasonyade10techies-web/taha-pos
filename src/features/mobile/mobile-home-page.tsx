@@ -7,6 +7,7 @@ import {
   Monitor,
   ArrowUpRight,
   Activity,
+  PackagePlus,
 } from "lucide-react";
 import { staffService, mobileRead } from "../../lib/mobile/staff-service";
 import { useSessionStore } from "../../stores/session-store";
@@ -163,6 +164,7 @@ export function MobileHomePage() {
       <section className="staff-section">
         <h2>Quick actions</h2>
         <div className="staff-action-grid">
+          {staffService.allow('products.create')&&<Link className="panel" to="/mobile/products?new=1"><PackagePlus/><span>Add Product</span><small>Details, camera & gallery</small></Link>}
           <button
             className="panel"
             onClick={() => window.dispatchEvent(new Event("taha-scan-open"))}

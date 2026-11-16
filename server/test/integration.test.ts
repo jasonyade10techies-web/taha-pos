@@ -71,6 +71,34 @@ test('origin guard, protected routes, branch and cost/profit permissions are enf
  const financial=await api(`/stores/${store}/profit`,'GET',undefined,employeeAuth.accessToken);assert.equal(financial.status,403);assert(!JSON.stringify(financial.data).includes('purchase_cost'));
  assert.equal((await api(`/stores/${randomUUID()}/products/pos`,'GET',undefined,employeeAuth.accessToken)).status,403);
 });
+test('phone catalog creation commits staged photos with no stock or cost mutation and rejects duplicate creation',async()=>{
+ const id=randomUUID(),media=[];
+ for(const background of ['#edc04b','#9e3450']){
+  const image=await sharp({create:{width:640,height:480,channels:3,background}}).png().toBuffer();
+  const form=new FormData();form.set('kind','product');form.set('entityId',id);form.set('staged','true');form.set('file',new Blob([image],{type:'image/png'}),'phone.png');
+  const upload=await fetch(url+`/api/v1/stores/${store}/media`,{method:'POST',headers:{Origin:'http://localhost',Authorization:'Bearer '+phoneAuth.accessToken},body:form});
+  assert.equal(upload.status,201);media.push(await upload.json() as {id:string;path:string});
+ }
+ const input={id,name:'Phone uploaded battery',category:'Parts',brand:'Apple',compatible_model:'iPhone 13',quality_grade:'Grade A',color_variant:'Black',selling_price:3600,minimum_selling_price:3000,aliases:['phone battery'],notes:'Synthetic mobile acceptance',low_stock_level:5,variant:'',unit:'Piece',default_location_id:null};
+ const payload={...input,media_paths:media.map(image=>image.path),primary_image_url:media[0].path};
+ const saved=await api(`/stores/${store}/products`,'POST',payload,phoneAuth.accessToken);assert.equal(saved.status,201,JSON.stringify(saved.data));
+ const row=(await api(`/stores/${store}/products/${id}`,'GET',undefined,ownerAuth.accessToken)).data;
+ assert.equal(row.selling_price,'3600.00');assert.equal(row.minimum_selling_price,'3000.00');
+ for(const key of Object.keys(input) as (keyof typeof input)[])assert.deepEqual(key==='selling_price'||key==='minimum_selling_price'?Number(row[key]):row[key],input[key],`Readback field ${key}`);
+ assert.equal(row.primary_image_url,media[0].path);assert.equal(row.purchase_cost,undefined);
+ const gallery=await api(`/stores/${store}/media?entityType=product&entityId=${id}`,'GET',undefined,ownerAuth.accessToken);assert.deepEqual(gallery.data.map((image:{path:string})=>image.path),payload.media_paths);
+ const pos=(await api(`/stores/${store}/products/pos`,'GET',undefined,ownerAuth.accessToken)).data.find((product:{id:string})=>product.id===id);assert.equal(Number(pos.quantity),0);
+ assert.equal((await db.query('select count(*)::int n from public.stock_movements where product_id=$1',[id])).rows[0].n,0);
+ const urls=(await api(`/stores/${store}/media/urls`,'POST',{paths:payload.media_paths},ownerAuth.accessToken)).data;
+ for(const image of media){
+  const signed=new URL(urls[image.path]);for(const suffix of ['','&thumbnail=1','&original=1']){const response=await fetch(url+signed.pathname+signed.search+suffix);assert.equal(response.status,200);assert((await sharp(Buffer.from(await response.arrayBuffer())).metadata()).width);}
+  assert.equal((await fetch(url+`/api/v1/media/${image.id}`)).status,403);
+ }
+ assert.equal((await api(`/stores/${store}/products`,'POST',payload,phoneAuth.accessToken)).status,409);
+ assert.equal((await db.query('select count(*)::int n from public.products where id=$1',[id])).rows[0].n,1);
+ assert.equal((await api(`/stores/${store}/products`,'POST',{...input,id:randomUUID()},employeeAuth.accessToken)).status,403);
+});
+
 test('atomic custom service invoice keeps snapshot, negotiation discount, no stock and idempotency',async()=>{
  const methods=await api(`/stores/${store}/payment-methods`,'GET',undefined,ownerAuth.accessToken);const cash=methods.data.find((x:any)=>x.kind==='Cash').id;
  const input={idempotencyKey:randomUUID(),cartId:randomUUID(),lines:[{productId:'custom:'+randomUUID(),customService:{name:'Charging port cleaning',description:'Customer requested cleaning',sellingPrice:800,minimumSellingPrice:500},quantity:1,unitPrice:700,reason:'Customer bargaining'}],payments:[{methodId:cash,amount:700}],cashReceived:1000};
